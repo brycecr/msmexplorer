@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.stanford.folding.msmexplorer.io;
 
 import java.awt.Component;
@@ -9,6 +5,7 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
 
 import prefuse.data.Graph;
 import prefuse.data.io.DataIOException;
@@ -20,8 +17,10 @@ import prefuse.util.io.IOLib;
 import prefuse.util.io.SimpleFileFilter;
 
 /**
+ * MSMExplorer I/O basic functions, including open and save
+ * operations.
  *
- * @author gestalt
+ * @author brycecr
  */
 public class MSMIOLib {
 
@@ -63,7 +62,7 @@ public class MSMIOLib {
 			return null;
 
 		File f = jfc.getSelectedFile();
-		ff = jfc.getFileFilter();
+		ff = (SimpleFileFilter)(FileFilter)jfc.getFileFilter();
 		GraphReader gr = (GraphReader)ff.getUserData();
 
 		try {
@@ -84,6 +83,13 @@ public class MSMIOLib {
 		return saveGML(g, DEFAULT_DIRECTORY, c);
 	}
 
+	/**
+	 * Saves the current graph as a GraphML file
+	 *
+	 * @param g graph to save
+	 * @param path location to save file
+	 * @param c swing component to display notifications to
+	 */
 	public static String saveGML (Graph g, String path, Component c) {
 		JFileChooser jfc = new JFileChooser(path);
 		jfc.setDialogType(JFileChooser.SAVE_DIALOG);

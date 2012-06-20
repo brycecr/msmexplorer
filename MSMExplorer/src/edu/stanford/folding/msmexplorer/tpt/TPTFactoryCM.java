@@ -1,12 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.stanford.folding.msmexplorer.tpt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+
+import javax.swing.JOptionPane;
 
 import prefuse.data.Graph;
 import prefuse.data.Edge;
@@ -279,7 +277,11 @@ public class TPTFactoryCM {
         return fFluxes;
     }
 
-
+    /**
+     * Suck the hightest flux paths out of a TPT matrix (the one associated
+     * with this class). 
+     *
+     */
     private ArrayList<Edge> GetHighFluxPath() {
 
         OpenMapRealMatrix fluxes = new OpenMapRealMatrix(m_fFluxes);
@@ -343,6 +345,7 @@ public class TPTFactoryCM {
         return edgeList;
     }
 
+    //Recursive Backtracking version
     private ArrayList<Edge> getHighFluxPathV1() {
         OpenMapRealMatrix fluxes = new OpenMapRealMatrix(this.m_fFluxes.copy());
 
@@ -354,7 +357,19 @@ public class TPTFactoryCM {
         int index = getIndicies(m_source).get(0).intValue();
         double[] arr = fluxes.getRowVector(index).getData().clone();
 
-        boolean hasPath = decompose( index, iList, fluxList, indicies, fluxes );
+        boolean hasPath = false;
+        try {
+            /*
+             * This recursion is dangerous because it can easily cause stack overflows
+             * truthfully, this should be rewritten iteratively
+             *
+             */
+            hasPath = decompose( index, iList, fluxList, indicies, fluxes );
+        } catch (StackOverflowError soe) {
+            final JOptionPane jop = new JOptionPane(
+                "TPT Calculation Caused a Stack Overflow. Increase stack space, or MSMExplorer may be unable to handle a graph this large at the moment",
+                JOptionPane.ERROR_MESSAGE);
+        }
         if ( hasPath == false )
             return new ArrayList();
 
