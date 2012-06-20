@@ -63,7 +63,7 @@ public class MSMIOLib {
 			return null;
 
 		File f = jfc.getSelectedFile();
-		ff = (SimpleFileFilter)jfc.getFileFilter();
+		ff = jfc.getFileFilter();
 		GraphReader gr = (GraphReader)ff.getUserData();
 
 		try {
