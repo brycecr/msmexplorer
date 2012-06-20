@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/msmexplorer/!svn/ver/62/currentVersion/MSMExplorer/build/classes/edu/stanford/folding/msmexplorer/io
+END
+MSMIOLib.class
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/msmexplorer/!svn/ver/62/currentVersion/MSMExplorer/build/classes/edu/stanford/folding/msmexplorer/io/MSMIOLib.class
+END
+DatGraphReader.class
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/svn/msmexplorer/!svn/ver/62/currentVersion/MSMExplorer/build/classes/edu/stanford/folding/msmexplorer/io/DatGraphReader.class
+END
+MtxGraphReader.class
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/svn/msmexplorer/!svn/ver/62/currentVersion/MSMExplorer/build/classes/edu/stanford/folding/msmexplorer/io/MtxGraphReader.class
+END
+AbstractMSMReader.class
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/svn/msmexplorer/!svn/ver/62/currentVersion/MSMExplorer/build/classes/edu/stanford/folding/msmexplorer/io/AbstractMSMReader.class
+END
