@@ -19,6 +19,7 @@ import org.apache.commons.math.linear.ArrayRealVector;
 import org.apache.commons.math.linear.RealVector;
 import org.apache.commons.math.linear.DecompositionSolver;
 import org.apache.commons.math.linear.LUDecompositionImpl;
+import org.apache.commons.math.linear.DefaultRealMatrixPreservingVisitor;
 
 
 /**
@@ -28,471 +29,519 @@ import org.apache.commons.math.linear.LUDecompositionImpl;
  */
 public class TPTFactoryCM {
 
-    private static final int kSTROKE_INCREMENT = 2;
-
-    private final Graph m_graph;               //graph
-    private final TupleSet m_source;           //source node(s)
-    private final TupleSet m_target;           //target node(s)
-    private final OpenMapRealMatrix m_tProb;
-    // private static TupleSet m_intermediate;     //intermediate nodes
-    //private final int kNumIStates;              //number intermediate states
-    private final int kNumKStates;              //number target states;
-    private final int kMatSize;
-    private OpenMapRealMatrix m_fFluxes;
-    private OpenMapRealMatrix m_old_fFluxes;
-
-    /**
-     * Constructor for TPTFacotry. Sets graph to use
-     * for this TPTFactory instance as well as source
-     * and target nodes/groups thereof.
-     *
-     * @param g, Graph to analyze
-     * @param source, Group of source Nodes
-     * @param target, Group of Target Nodes
-     */
-    public TPTFactoryCM(Graph g, TupleSet source, TupleSet target) {
-
-        this.m_graph = g;
-        this.m_source = source;
-        this.m_target = target;
-        this.kMatSize = m_graph.getNodeCount();
-
-	System.out.println("Factory established");
-        this.m_tProb = transitionMatrix();
-	System.out.println("tProb reconstructed");
-
-
-        this.kNumKStates = target.getTupleCount();
-
-        double[] forwardCommittors = getForwardCommittors();
-	System.out.println("q+ obtained");
-        double[] backwardCommittors = getBackwardCommittors(forwardCommittors);
-	System.out.println("q- obtained");
-        double[] eqProbs = getEqProbs();
-	eqProbs = normalize(eqProbs);
-	System.out.println("eqProbs reconstructed");
-        
-        this.m_old_fFluxes = getFluxes(forwardCommittors, backwardCommittors, eqProbs);
-	System.out.println("fluxes obtained");
-        this.m_fFluxes = deepCopy(m_old_fFluxes);
-	System.out.println("fluxes copied");
-
-    }
-
-    
-    public ArrayList<Edge> getNextEdge() {
-
-//        return GetHighFluxPath();
-      return getHighFluxPathV1();
-    }
-
-
-    public void reset() {
-        this.m_fFluxes = deepCopy(m_old_fFluxes);
-        
-    }
-
-    private double[] normalize(double[] arr) {
-
-	    double sum = 0.0;
-
-	    for (int i = 0; i < arr.length; ++i)
-		    sum += arr[i];
-
-	    for (int i = 0; i < arr.length; ++i)
-		    arr[i] /= sum;
-
-	    return arr;
-    }
-
-    /**
-     * Simply returns a TupleSet containing only the
-     * intermediate states.
-     *
-     * Obsolete.
-     *
-     * @return
-     */
-    private TupleSet getIntermediateStates() {
-
-        TupleSet inters = m_graph.getNodes();
-        Iterator sItr = m_source.tuples();
-        Iterator tItr = m_target.tuples();
-
-        for (Tuple t = (Tuple) sItr.next(); sItr.hasNext(); t = (Tuple) sItr.next()) {
-            inters.removeTuple(t);
-        }
-
-        for (Tuple t = (Tuple) tItr.next(); tItr.hasNext(); t = (Tuple) tItr.next()) {
-            inters.removeTuple(t);
-        }
-
-        return inters;
-    }
+     private static final int kSTROKE_INCREMENT = 2;
+
+     private boolean error;
+     private final Graph m_graph;               //graph
+     private final TupleSet m_source;           //source node(s)
+     private final TupleSet m_target;           //target node(s)
+     private final OpenMapRealMatrix m_tProb;
+     // private static TupleSet m_intermediate;     //intermediate nodes
+     //private final int kNumIStates;              //number intermediate states
+     private final int kNumKStates;              //number target states;
+     private final int kMatSize;
+     private OpenMapRealMatrix m_fFluxes;
+     private OpenMapRealMatrix m_old_fFluxes;
+
+     /**
+      * Constructor for TPTFacotry. Sets graph to use
+      * for this TPTFactory instance as well as source
+      * and target nodes/groups thereof.
+      *
+      * @param g, Graph to analyze
+      * @param source, Group of source Nodes
+      * @param target, Group of Target Nodes
+      */
+     public TPTFactoryCM(Graph g, TupleSet source, TupleSet target) {
+
+          this.m_graph = g;
+          this.m_source = source;
+          this.m_target = target;
+          this.kMatSize = m_graph.getNodeCount();
+
+          System.out.println("Factory established");
+          this.m_tProb = transitionMatrix();
+          System.out.println("tProb reconstructed");
+
+
+          this.kNumKStates = target.getTupleCount();
+
+          double[] forwardCommittors = getForwardCommittors();
+          System.out.println("q+ obtained");
+          double[] backwardCommittors = getBackwardCommittors(forwardCommittors);
+          System.out.println("q- obtained");
+          double[] eqProbs = getEqProbs();
+          eqProbs = normalize(eqProbs);
+          System.out.println("eqProbs reconstructed");
+
+          this.m_old_fFluxes = getFluxes(forwardCommittors, backwardCommittors, eqProbs);
+          System.out.println("fluxes obtained");
+          this.m_fFluxes = deepCopy(m_old_fFluxes);
+          System.out.println("fluxes copied");
+
+     }
+
+
+     public ArrayList<Edge> getNextEdge() {
+
+          //   return GetHighFluxPath();
+          return getHighFluxPathV1();
+     }
+
+
+     public void reset() {
+          this.m_fFluxes = deepCopy(m_old_fFluxes);
+
+     }
+
+     private double[] normalize(double[] arr) {
+
+          double sum = 0.0;
+
+          for (int i = 0; i < arr.length; ++i)
+               sum += arr[i];
+
+          for (int i = 0; i < arr.length; ++i)
+               arr[i] /= sum;
+
+          return arr;
+     }
+
+     /**
+      * Simply returns a TupleSet containing only the
+      * intermediate states.
+      *
+      * Obsolete.
+      *
+      * @return
+      */
+     private TupleSet getIntermediateStates() {
 
-    /**
-     * Creates a transitionMatrix from graph backing data.
-     * This should match the .dat file from which the graphml
-     * file was created (or equivalently, the corresponding
-     * tProb.dat for whatever input data was provided)
-     */
-    private OpenMapRealMatrix transitionMatrix() {
+          TupleSet inters = m_graph.getNodes();
+          Iterator sItr = m_source.tuples();
+          Iterator tItr = m_target.tuples();
 
-//        double[][] tProb = new double[kMatSize][kMatSize];
-	OpenMapRealMatrix tProb = new OpenMapRealMatrix(kMatSize, kMatSize);
+          for (Tuple t = (Tuple) sItr.next(); sItr.hasNext(); t = (Tuple) sItr.next()) {
+               inters.removeTuple(t);
+          }
 
-        for (int i = 0; i < m_graph.getEdgeCount(); ++i) {
-            Edge e = m_graph.getEdge(i);
-            int source = e.getSourceNode().getRow();
-            int target = e.getTargetNode().getRow();
+          for (Tuple t = (Tuple) tItr.next(); tItr.hasNext(); t = (Tuple) tItr.next()) {
+               inters.removeTuple(t);
+          }
 
-             Double prob = e.getDouble("probability");
-	     if (prob != 0.0)
-		     tProb.setEntry(source, target, prob);
-        }
+          return inters;
+     }
 
-        return tProb;
-    }
+     /**
+      * Creates a transitionMatrix from graph backing data.
+      * This should match the .dat file from which the graphml
+      * file was created (or equivalently, the corresponding
+      * tProb.dat for whatever input data was provided)
+      */
+     private OpenMapRealMatrix transitionMatrix() {
 
-    /**
-     * Calculates forward committors and returns them in an array. Index into
-     * array corresponds to graph Node id and tProb row (ith state, standardly)
-     */
-    private double[] getForwardCommittors() {
+          //        double[][] tProb = new double[kMatSize][kMatSize];
+          OpenMapRealMatrix tProb = new OpenMapRealMatrix(kMatSize, kMatSize);
 
-	System.out.println("fc start");
-        ArrayList<Integer> source = getIndicies(m_source);
-        ArrayList<Integer> target = getIndicies(m_target);
+          for (int i = 0; i < m_graph.getEdgeCount(); ++i) {
+               Edge e = m_graph.getEdge(i);
+               int source = e.getSourceNode().getRow();
+               int target = e.getTargetNode().getRow();
 
-        //Copy of tProb in RealMatrix form
-        OpenMapRealMatrix tProbRM = new OpenMapRealMatrix(m_tProb.copy());
+               Double prob = e.getDouble("probability");
+               if (prob != 0.0)
+                    tProb.setEntry(source, target, prob);
+          }
 
-        RealVector aug = new ArrayRealVector(kMatSize); //Holds "augmented" col
-	System.out.println("init done");
+          return tProb;
+     }
 
-	for (int i = 0; i < kMatSize; ++i)
-		tProbRM.addToEntry(i, i, -1);
-//        tProbRM.subtract(MatrixUtils.createRealIdentityMatrix(kMatSize));
+     /**
+      * Calculates forward committors and returns them in an array. Index into
+      * array corresponds to graph Node id and tProb row (ith state, standardly)
+      */
+     private double[] getForwardCommittors() {
 
-	System.out.println("enter loop");
-        for (int i = 0; i < kMatSize; ++i) {
+          System.out.println("fc start");
+          ArrayList<Integer> source = getIndicies(m_source);
+          ArrayList<Integer> target = getIndicies(m_target);
 
-            if ( target.contains(new Integer(i)) ) {
-                tProbRM.setColumn(i, new double[kMatSize]);
-                tProbRM.setRow(i, new double[kMatSize]);
-                tProbRM.setEntry(i, i, 1);
-                aug.setEntry(i, 1);
+          //Copy of tProb in RealMatrix form
+          OpenMapRealMatrix tProbRM = new OpenMapRealMatrix(m_tProb.copy());
 
-            } else if ( source.contains(new Integer(i)) ) {
-                tProbRM.setColumn(i, new double[kMatSize]);
-                tProbRM.setRow(i, new double[kMatSize]);
-                tProbRM.setEntry(i, i, 1); //Note that aug[i] is already 0.0
+          RealVector aug = new ArrayRealVector(kMatSize); //Holds "augmented" col
+          System.out.println("init done");
 
-            } else {
-                aug.setEntry(i, -sumOverTarget(i));
-            }
-        }
+          for (int i = 0; i < kMatSize; ++i)
+               tProbRM.addToEntry(i, i, -1);
+          //        tProbRM.subtract(MatrixUtils.createRealIdentityMatrix(kMatSize));
 
-	System.out.println("to make solver");
+          System.out.println("enter loop");
+          for (int i = 0; i < kMatSize; ++i) {
 
-//        System.out.println(Arrays.deepToString(tProbRM.getData()));
-//        System.out.println(Arrays.toString(aug.getData()));
+               if ( target.contains(new Integer(i)) ) {
+                    tProbRM.setColumn(i, new double[kMatSize]);
+                    tProbRM.setRow(i, new double[kMatSize]);
+                    tProbRM.setEntry(i, i, 1);
+                    aug.setEntry(i, 1);
 
-        DecompositionSolver solver = new LUDecompositionImpl(tProbRM).getSolver();
+               } else if ( source.contains(new Integer(i)) ) {
+                    tProbRM.setColumn(i, new double[kMatSize]);
+                    tProbRM.setRow(i, new double[kMatSize]);
+                    tProbRM.setEntry(i, i, 1); //Note that aug[i] is already 0.0
 
-	System.out.println("to solve");
-        return (solver.solve(aug)).getData();
-    }
+               } else {
+                    aug.setEntry(i, -sumOverTarget(i));
+               }
+          }
 
+          System.out.println("to make solver");
 
-    private double[] getBackwardCommittors(double[] fCommittors) {
+          //        System.out.println(Arrays.deepToString(tProbRM.getData()));
+          //        System.out.println(Arrays.toString(aug.getData()));
 
-        double[] bCommittors = new double[kMatSize];
+          DecompositionSolver solver = new LUDecompositionImpl(tProbRM).getSolver();
 
-        for ( int i = 0; i < kMatSize; ++i )
-            bCommittors[i] = 1.0d - fCommittors[i];
+          System.out.println("to solve");
+          return (solver.solve(aug)).getData();
+     }
 
-        return bCommittors;
-    }
 
+     private double[] getBackwardCommittors(double[] fCommittors) {
 
-    private ArrayList<Integer> getIndicies(TupleSet ts) {
-        
-        
-        ArrayList<Integer> indicies = new ArrayList<Integer>();
+          double[] bCommittors = new double[kMatSize];
 
-        Iterator tuples = ts.tuples();
-        while (tuples.hasNext()) 
-            indicies.add(new Integer(((Tuple)tuples.next()).getRow()));
-        
+          for ( int i = 0; i < kMatSize; ++i )
+               bCommittors[i] = 1.0d - fCommittors[i];
 
-        return indicies;
-    }
-    
+          return bCommittors;
+     }
 
-    private double sumOverTarget(int index) {
 
-        ArrayList<Integer> indicies = getIndicies(m_target);
+     private ArrayList<Integer> getIndicies(TupleSet ts) {
 
-        double sum = 0;
 
-        for (Integer i : indicies)
-            sum += m_tProb.getEntry(index, i);
+          ArrayList<Integer> indicies = new ArrayList<Integer>();
 
-        return sum;
-    }
+          Iterator tuples = ts.tuples();
+          while (tuples.hasNext()) 
+               indicies.add(new Integer(((Tuple)tuples.next()).getRow()));
 
 
-    private double[] getEqProbs() {
+          return indicies;
+     }
 
-        Column source = m_graph.getNodeTable().getColumn("eqProb");
-        
-        double[] eqProb = new double[kMatSize];
 
-        for ( int i = 0; i < kMatSize; ++i ) 
-            eqProb[i] = source.getDouble(i);
+     private double sumOverTarget(int index) {
 
-        return eqProb;
-    }
+          ArrayList<Integer> indicies = getIndicies(m_target);
 
+          double sum = 0;
 
-    private OpenMapRealMatrix getFluxes( double[] fCommittors, double[] bCommittors, double[] eqProbs ) {
+          for (Integer i : indicies)
+               sum += m_tProb.getEntry(index, i);
 
-        OpenMapRealMatrix fFluxes = new OpenMapRealMatrix(kMatSize,kMatSize);
+          return sum;
+     }
 
-        for ( int i = 0; i < kMatSize; ++i)
-            for (int j = 0; j < kMatSize; ++j)
-                if ( m_tProb.getEntry(i,j) != 0.0d && i != j )
-                    fFluxes.setEntry(i, j, eqProbs[i]*bCommittors[i]*m_tProb.getEntry(i,j)*fCommittors[j]);
 
-        for ( int i = 0; i < kMatSize; ++i )
-            for( int j = 0; j < kMatSize; ++j ) {
+     private double[] getEqProbs() {
+
+          Column source = m_graph.getNodeTable().getColumn("eqProb");
+
+          double[] eqProb = new double[kMatSize];
+
+          for ( int i = 0; i < kMatSize; ++i ) 
+               eqProb[i] = source.getDouble(i);
+
+          return eqProb;
+     }
+
+
+     private OpenMapRealMatrix getFluxes( double[] fCommittors, double[] bCommittors, double[] eqProbs ) {
+
+          OpenMapRealMatrix fFluxes = new OpenMapRealMatrix(kMatSize,kMatSize);
+
+          for ( int i = 0; i < kMatSize; ++i)
+               for (int j = 0; j < kMatSize; ++j)
+                    if ( m_tProb.getEntry(i,j) != 0.0d && i != j )
+                         fFluxes.setEntry(i, j, eqProbs[i]*bCommittors[i]*m_tProb.getEntry(i,j)*fCommittors[j]);
+
+          for ( int i = 0; i < kMatSize; ++i )
+               for( int j = 0; j < kMatSize; ++j ) {
                     double netFlux = fFluxes.getEntry(i, j) - fFluxes.getEntry(j, i);
-		    if (netFlux < 0.0)
-			    fFluxes.setEntry(i,j,0.0d);
-		    else 
-			    fFluxes.setEntry(i, j, netFlux);
-		}
+                    if (netFlux < 0.0)
+                         fFluxes.setEntry(i,j,0.0d);
+                    else 
+                         fFluxes.setEntry(i, j, netFlux);
+               }
 
-        return fFluxes;
-    }
+          return fFluxes;
+     }
 
-    /**
-     * Suck the hightest flux paths out of a TPT matrix (the one associated
-     * with this class). 
-     *
-     */
-    private ArrayList<Edge> GetHighFluxPath() {
+     /**
+      * Suck the hightest flux paths out of a TPT matrix (the one associated
+      * with this class). This is a version that was adapted from Kyle's
+      * TPT code; it does a highest-flux reverse walk from the native state.
+      *
+      */
+     private ArrayList<Edge> GetHighFluxPath() {
 
-        OpenMapRealMatrix fluxes = new OpenMapRealMatrix(m_fFluxes);
+          OpenMapRealMatrix fluxes = new OpenMapRealMatrix(m_fFluxes);
 
-        ArrayList<Integer> indicies = getIndicies(m_source);
+          ArrayList<Integer> indicies = getIndicies(m_source);
 
-        ArrayList<Integer> iList = new ArrayList<Integer>();
-        ArrayList<Double> fluxList = new ArrayList<Double>();
+          ArrayList<Integer> iList = new ArrayList<Integer>();
+          ArrayList<Double> fluxList = new ArrayList<Double>();
 
-        int index = getIndicies(m_target).get(0).intValue();
+          int index = getIndicies(m_target).get(0).intValue();
 
-        iList.add(index);
+          iList.add(index);
 
-       // int itr = 0;
-        final int maxItr = m_fFluxes.getRowDimension();
-        do {
+          // int itr = 0;
+          final int maxItr = m_fFluxes.getRowDimension();
+          do {
 
-            double[] arr = fluxes.getColumnVector(index).getData();
-            index = argmax(arr);
+               double[] arr = fluxes.getColumnVector(index).getData();
+               index = argmax(arr);
 
-            int numTimes = 0;
-            while (iList.contains(index)) {
-                arr[index] = -1.0d;
-                index = argmax(arr);
-                if (++numTimes >= maxItr)
-                    return new ArrayList();
-            }
+               int numTimes = 0;
+               while (iList.contains(index)) {
+                    arr[index] = -1.0d;
+                    index = argmax(arr);
+                    if (++numTimes >= maxItr)
+                         return new ArrayList();
+               }
 
-            iList.add(index);
-            fluxList.add(arr[index]);
-            //++itr;
+               iList.add(index);
+               fluxList.add(arr[index]);
+               //++itr;
 
-            //if ( itr > maxItr )
-              //  return new ArrayList();
+               //if ( itr > maxItr )
+               //  return new ArrayList();
 
-        } while ( (!(indicies.contains(index))) );
+          } while ( (!(indicies.contains(index))) );
 
-        double f = fluxList.get(argmin(fluxList)).doubleValue();
-	System.out.println(f);
+          double f = fluxList.get(argmin(fluxList)).doubleValue();
+          System.out.println(f);
 
-        ArrayList<Edge> edgeList = new ArrayList<Edge>();
+          ArrayList<Edge> edgeList = new ArrayList<Edge>();
 
-	 for ( int k = iList.size() - 1; k < 0; --k ) {
+          for ( int k = iList.size() - 1; k < 0; --k ) {
 
-            int i = iList.get(k);
-            int j = iList.get(k-1);
+               int i = iList.get(k);
+               int j = iList.get(k-1);
 
-            this.m_fFluxes.addToEntry(i, j, -f);
+               this.m_fFluxes.addToEntry(i, j, -f);
 
-            Node source = m_graph.getNode(i);
-            Node target = m_graph.getNode(j);
-            Edge e = m_graph.getEdge(source, target);
+               Node source = m_graph.getNode(i);
+               Node target = m_graph.getNode(j);
+               Edge e = m_graph.getEdge(source, target);
 
-            source.setDouble("flux", source.getDouble("flux") + f);
-            target.setDouble("flux", target.getDouble("flux") + f);
-            e.setDouble("flux", e.getDouble("flux") + f);
+               source.setDouble("flux", source.getDouble("flux") + f);
+               target.setDouble("flux", target.getDouble("flux") + f);
+               e.setDouble("flux", e.getDouble("flux") + f);
 
-            edgeList.add(e);
-        }
+               edgeList.add(e);
+          }
 
-        return edgeList;
-    }
+          return edgeList;
+     }
 
-    //Recursive Backtracking version
-    private ArrayList<Edge> getHighFluxPathV1() {
-        OpenMapRealMatrix fluxes = new OpenMapRealMatrix(this.m_fFluxes.copy());
+     /**
+      * Forward search exhaustive recursive backtracking version of the 
+      * algorithm to select highest flux paths. Suffers from tail recursion
+      * which causes hardcore stack explosions once the graphs get larger than
+      * small.
+      */
+     private ArrayList<Edge> getHighFluxPathV1() {
+          OpenMapRealMatrix fluxes = new OpenMapRealMatrix(this.m_fFluxes.copy());
 
-        ArrayList<Integer> indicies = getIndicies(m_target);
+          ArrayList<Integer> indicies = getIndicies(m_target);
 
-        ArrayList<Integer> iList = new ArrayList<Integer>();
-        ArrayList<Double> fluxList = new ArrayList<Double>();
+          ArrayList<Integer> iList = new ArrayList<Integer>();
+          ArrayList<Double> fluxList = new ArrayList<Double>();
 
-        int index = getIndicies(m_source).get(0).intValue();
-        double[] arr = fluxes.getRowVector(index).getData().clone();
+          int index = getIndicies(m_source).get(0).intValue();
 
-        boolean hasPath = false;
-        try {
-            /*
-             * This recursion is dangerous because it can easily cause stack overflows
-             * truthfully, this should be rewritten iteratively
-             *
-             */
-            hasPath = decompose( index, iList, fluxList, indicies, fluxes );
-        } catch (StackOverflowError soe) {
-            final JOptionPane jop = new JOptionPane(
-                "TPT Calculation Caused a Stack Overflow. Increase stack space, or MSMExplorer may be unable to handle a graph this large at the moment",
-                JOptionPane.ERROR_MESSAGE);
-        }
-        if ( hasPath == false )
-            return new ArrayList();
+          boolean hasPath = false;
+          try {
+               /*
+                * This recursion is dangerous because it can easily cause stack overflows
+                * truthfully, this should be rewritten iteratively
+                *
+                */
+               hasPath = decompose( index, iList, fluxList, indicies, fluxes );
+          } catch (StackOverflowError soe) {
+               if (!this.error) {
+                    JOptionPane.showMessageDialog( null,
+                              "TPT Calculation Caused a Stack Overflow. Increase stack space, or MSMExplorer may be unable to handle a graph this large at the moment",
+                              "TPT Overflow",
+                              JOptionPane.ERROR_MESSAGE);
+                    this.error = true;
+                    System.err.println ("Stack Overflow From TPT");
+               }
+          }
+          if ( hasPath == false )
+               return new ArrayList();
 
-        iList.add(index);
+          iList.add(index);
 
-        double f = fluxList.get(argmin(fluxList)).doubleValue();
-	System.out.print(f);
+          double f = fluxList.get(argmin(fluxList)).doubleValue();
+          System.out.print(f);
 
-        ArrayList<Edge> edgeList = new ArrayList<Edge>();
+          ArrayList<Edge> edgeList = new ArrayList<Edge>();
 
-        for ( int k = 0; k < iList.size()-1; ++k ) {
+          for ( int k = 0; k < iList.size()-1; ++k ) {
 
-            int j = iList.get(k);
-            int i = iList.get(k+1);
+               int j = iList.get(k);
+               int i = iList.get(k+1);
 
-            this.m_fFluxes.addToEntry(i, j, -f);
+               this.m_fFluxes.addToEntry(i, j, -f);
 
-            Node source = m_graph.getNode(i);
-            Node target = m_graph.getNode(j);
-            Edge e = m_graph.getEdge(source, target);
+               Node source = m_graph.getNode(i);
+               Node target = m_graph.getNode(j);
+               Edge e = m_graph.getEdge(source, target);
 
-            source.setDouble("flux", source.getDouble("flux") + f);
-            target.setDouble("flux", target.getDouble("flux") + f);
-            e.setDouble("flux", e.getDouble("flux") + f);
-            
-            edgeList.add(e);
-        }
+               source.setDouble("flux", source.getDouble("flux") + f);
+               target.setDouble("flux", target.getDouble("flux") + f);
+               e.setDouble("flux", e.getDouble("flux") + f);
 
-        return edgeList;
-    }
+               edgeList.add(e);
+          }
 
-    final private boolean decompose( int index, ArrayList<Integer> iList,
-            ArrayList<Double> fList, ArrayList<Integer> target, RealMatrix fluxes ) {
+          return edgeList;
+     }
 
-            if ( target.contains(index) )
-                return true;
+     final private boolean decompose( int index, ArrayList<Integer> iList,
+               ArrayList<Double> fList, ArrayList<Integer> target, RealMatrix fluxes ) {
 
-            double[] arr = fluxes.getRowVector(index).getData().clone();
+          if ( target.contains(index) )
+               return true;
 
-            while (hasNonZero(arr)) {
+          OpenMapRealMatrix arr = (OpenMapRealMatrix)fluxes.getRowMatrix(index);
 
-                index = argmax(arr);
+          while (true) {
 
-                if (decompose(index, iList, fList, target, fluxes)) {
-                   iList.add(index);
-                   fList.add(arr[index]);
-                   return true;
+               index = argmax(arr);
+               if (index < 0)
+                    break;
 
-                } else {
-                    arr[index] = 0.0d;
-                }
-            }
+               if (decompose(index, iList, fList, target, fluxes)) {
+                    iList.add(index);
+                    fList.add(arr.getEntry(0,index));
+                    return true;
 
-            return false;
-    }
+               } else {
+                    arr.setEntry (0, index, 0);
+               }
+          }
 
-    private boolean hasNonZero( double[] arr ) {
+          return false;
+     }
 
-        int length = arr.length;
+     private boolean hasNonZero( double[] arr ) {
 
-        for ( int i = 0; i < length; ++i ) {
-            if (arr[i] > 0.0d)
-                return true;
-        }
-        return false;
-    }
+          int length = arr.length;
+
+          for ( int i = 0; i < length; ++i ) {
+               if (arr[i] > 0.0d)
+                    return true;
+          }
+          return false;
+     }
+
+     private int argmax ( OpenMapRealMatrix row ) {
+          return (int)row.walkInOptimizedOrder( new ArgMaxRowVisitor() );
+     }
+
+     private int argmax( double[] arr ) {
+          int index = -1;
+          double max = arr[0];
+
+          for (int i = 1; i < arr.length; ++i)
+               if ( arr[i] > max ) {
+                    index = i;
+                    max = arr[i];
+               }
+
+          return index;
+     }
 
 
-    private int argmax( double[] arr ) {
-        int index = 0;
-        double max = arr[0];
+     private int argmin( double[] arr ) {
+          int index = 0;
+          double min = arr[0];
 
-        for (int i = 1; i < arr.length; ++i)
-            if ( arr[i] > max ) {
-                index = i;
-                max = arr[i];
-            }
-        
-        return index;
-    }
+          for (int i = 1; i < arr.length; ++i)
+               if ( arr[i] < min ) {
+                    index = i;
+                    min = arr[i];
+               }
 
-    
-    private int argmin( double[] arr ) {
-        int index = 0;
-        double min = arr[0];
-
-        for (int i = 1; i < arr.length; ++i)
-            if ( arr[i] < min ) {
-                index = i;
-                min = arr[i];
-            }
-        
-        return index;
-    }
+          return index;
+     }
 
 
      private int argmin( ArrayList<Double> arr ) {
 
-        Object[] bigD = arr.toArray();
-        double[] smallD = new double[bigD.length];
+          Object[] bigD = arr.toArray();
+          double[] smallD = new double[bigD.length];
 
-        for ( int i = 0; i < bigD.length; ++i )
-            smallD[i] = ((Double)bigD[i]).doubleValue();
+          for ( int i = 0; i < bigD.length; ++i )
+               smallD[i] = ((Double)bigD[i]).doubleValue();
+
+          return argmin( smallD );
+     }
+
+     public static double[][] deepCopy( double[][] source ) {
+          int length = source.length;
+
+          double[][] target = new double[length][source[0].length];
+
+          for ( int i = 0; i < length; ++i ) 
+               target[i] = source[i].clone();
+
+          return target;
+     }
+
+     public static OpenMapRealMatrix deepCopy( OpenMapRealMatrix source) {
+
+          OpenMapRealMatrix target = new OpenMapRealMatrix(source.copy());
+
+          return target;
+     }
+
+    /**
+     * A utility class that does the visiting for a walk over a RealMatrix
+     * to perform ArgMax.
+     * Here we assume we are walking over a row, so we return the index
+     * max.
+     * We extend the Default...Visitor so we don't have to implement start.
+     */
+     private static class ArgMaxRowVisitor extends DefaultRealMatrixPreservingVisitor {
         
-        return argmin( smallD );
-    }
+        private int index = -1; //-1 is sentinal for failure
+        private double max = 0.0d;  
+        
+        /**
+         * Implements interface function. Does the little bit of work for argmax.
+         */
+        public void visit (int row, int column, double value) {
+            if (value > max) {
+                index = column;
+                max = value;
+            }
+        }
 
-    public static double[][] deepCopy( double[][] source ) {
-        int length = source.length;
-
-        double[][] target = new double[length][source[0].length];
-
-        for ( int i = 0; i < length; ++i ) 
-            target[i] = source[i].clone();
-
-        return target;
-    }
-
-   public static OpenMapRealMatrix deepCopy( OpenMapRealMatrix source) {
-
-	OpenMapRealMatrix target = new OpenMapRealMatrix(source.copy());
-
-        return target;
-    }
-     
+        /**
+         * Implements interface function. the walk function has
+         * to return a double, so we need to perform the annoying
+         * cast. This is argmax, so we return the column index at which the
+         * max is found in the row.
+         */
+        public double end () {
+            return (double)index;
+        }
+     }
 }
