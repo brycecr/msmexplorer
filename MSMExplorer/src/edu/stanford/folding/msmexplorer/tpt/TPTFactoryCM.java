@@ -533,7 +533,7 @@ public class TPTFactoryCM {
 			
 			source.setDouble("flux", source.getDouble("flux") + f);
 			targ.setDouble("flux", targ.getDouble("flux") + f);
-			e.setDouble("flux", e.getDouble("flux") + f);
+			e.setDouble("flux", fList.pop() + f);
 			
 			edgeList.add(e);
 		}
