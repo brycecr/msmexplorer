@@ -81,7 +81,7 @@ import prefuse.visual.sort.ItemSorter;
  */
 public class TPTWindow extends JFrame {
 
-	private int numPaths = 5; //Number of initial top paths to retrieve
+	private int numPaths = 2; //Number of initial top paths to retrieve
 	private Visualization m_vis; 
 	private boolean isShowingPics; //Display is showing images
 
