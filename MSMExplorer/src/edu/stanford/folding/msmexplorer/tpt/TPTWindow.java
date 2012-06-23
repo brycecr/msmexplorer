@@ -278,7 +278,7 @@ public class TPTWindow extends JFrame {
 		altDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(255, 0, 0));
 		altDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(0, 0, 255));
 
-		final DataSizeAction edgeWeight = new DataSizeAction(edges, "flux", 10, Constants.LINEAR_SCALE);
+		final DataSizeAction edgeWeight = new DataSizeAction(edges, "flux", 1000, Constants.LOG_SCALE);
 		edgeWeight.setMinimumSize(1.0);
 		edgeWeight.setMaximumSize(200);
 

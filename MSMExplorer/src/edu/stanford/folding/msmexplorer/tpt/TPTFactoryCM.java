@@ -412,7 +412,7 @@ public class TPTFactoryCM {
 			source.setDouble("flux", source.getDouble("flux") + f);
 			target.setDouble("flux", target.getDouble("flux") + f);
 			System.out.println("flux: " + e.getDouble("flux"));
-			e.setDouble("flux", e.getDouble("flux") + f);
+			e.setDouble("flux", fluxList.get(k) + f);
 			
 			edgeList.add(e);
 		}
