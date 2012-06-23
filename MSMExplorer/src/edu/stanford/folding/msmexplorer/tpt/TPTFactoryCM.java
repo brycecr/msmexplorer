@@ -34,7 +34,7 @@ public class TPTFactoryCM {
 	private static final int kSTROKE_INCREMENT = 2;
 	
 	//getHighFluxPathV2 will give up after this many iterations
-	private static final int kMAX_ITERS = 10000;
+	private static final int kMAX_ITERS = 1000000;
 	
 	private boolean error;
 	private final Graph m_graph;               //graph
@@ -90,8 +90,8 @@ public class TPTFactoryCM {
 	public ArrayList<Edge> getNextEdge() {
 		
 		//   return GetHighFluxPath();
-		return getHighFluxPathV1();
-		//return getHighFluxPathV2();
+		//return getHighFluxPathV1();
+		return getHighFluxPathV2();
 	}
 	
 	
@@ -501,6 +501,13 @@ public class TPTFactoryCM {
 				fList.push(arr.getEntry(0, index));
 				arr = (OpenMapRealMatrix)fluxes.getRowMatrix(index);
 				iters++;
+			}
+			if (iters >= kMAX_ITERS) {
+				//TODO update this when preferences are available
+				JOptionPane.showMessageDialog( null,
+					"TPT calculation timed out; all the significant paths should be in the current graph. Change kMAX_ITERS in TPTFactoryCM.java to change timeout.",
+					"TPT Overflow",
+					JOptionPane.ERROR_MESSAGE);
 			}
 		}
 		if ( !pathFound ) {
