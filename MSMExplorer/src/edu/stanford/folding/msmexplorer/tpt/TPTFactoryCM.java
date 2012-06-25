@@ -25,28 +25,34 @@ import org.apache.commons.math.linear.DefaultRealMatrixPreservingVisitor;
 
 
 /**
- * Used to perform TPT calculations on a graph.
+ * Does the actual work of doing TPT calculations.
+ * Uses the Apache Commons Math package.
  *
- * @author gestalt
+ * We store matricies as OpenMapRealMatrix objects because that's
+ * the only instantiation of the SparseRealMatrix interface in the
+ * commons math library currently. 
+ *
+ * I make no claim to the correctness or good performance of this
+ * implementation, but it does seem to provide reasonable results.
+ *
+ * @author brycecr
  */
 public class TPTFactoryCM {
 	
 	private static final int kSTROKE_INCREMENT = 2;
 	
 	//getHighFluxPathV2 will give up after this many iterations
-	private static final int kMAX_ITERS = 1000000;
+	private static final int kMAX_ITERS = 100000;
 	
 	private boolean error;
 	private final Graph m_graph;               //graph
 	private final TupleSet m_source;           //source node(s)
 	private final TupleSet m_target;           //target node(s)
-	private final OpenMapRealMatrix m_tProb;
-	// private static TupleSet m_intermediate;     //intermediate nodes
-	//private final int kNumIStates;              //number intermediate states
-	private final int kNumKStates;              //number target states;
+	private final OpenMapRealMatrix m_tProb;   //transition probability matrix
+	private final int kNumKStates;             //number target states;
 	private final int kMatSize;
-	private OpenMapRealMatrix m_fFluxes;
-	private OpenMapRealMatrix m_old_fFluxes;
+	private OpenMapRealMatrix m_fFluxes;       //current flux matrix. Changes as paths are extracted 
+	private OpenMapRealMatrix m_old_fFluxes;   //we keep this so we can reset fluxes
 	
 	/**
 	 * Constructor for TPTFactry. Sets graph to use
@@ -86,15 +92,20 @@ public class TPTFactoryCM {
 		
 	}
 	
-	
+	/**
+      * Extract an edge from the current m_fFluxes. That is, keeps the current
+      * state of the flux matrix so as to respect paths that have already
+      * been extracted. 
+      *
+      * @return an ArrayList of edges that represents the subset of the graph to draw.
+      */
 	public ArrayList<Edge> getNextEdge() {
-		
-		//   return GetHighFluxPath();
-		//return getHighFluxPathV1();
 		return getHighFluxPathV2();
 	}
 	
-	
+	/**
+      * Set the flux matrix to the saved original copy.
+      */
 	public void reset() {
 		this.m_fFluxes = deepCopy(m_old_fFluxes);
 		
@@ -111,31 +122,6 @@ public class TPTFactoryCM {
 			arr[i] /= sum;
 		
 		return arr;
-	}
-	
-	/**
-	 * Simply returns a TupleSet containing only the
-	 * intermediate states.
-	 *
-	 * Obsolete.
-	 *
-	 * @return
-	 */
-	private TupleSet getIntermediateStates() {
-		
-		TupleSet inters = m_graph.getNodes();
-		Iterator sItr = m_source.tuples();
-		Iterator tItr = m_target.tuples();
-		
-		for (Tuple t = (Tuple) sItr.next(); sItr.hasNext(); t = (Tuple) sItr.next()) {
-			inters.removeTuple(t);
-		}
-		
-		for (Tuple t = (Tuple) tItr.next(); tItr.hasNext(); t = (Tuple) tItr.next()) {
-			inters.removeTuple(t);
-		}
-		
-		return inters;
 	}
 	
 	/**
@@ -540,7 +526,7 @@ public class TPTFactoryCM {
 			
 			source.setDouble("flux", source.getDouble("flux") + f);
 			targ.setDouble("flux", targ.getDouble("flux") + f);
-			e.setDouble("flux", fList.pop() + f);
+			e.setDouble("flux", fList.pop() + e.getDouble("flux") + f);
 			
 			edgeList.add(e);
 		}
