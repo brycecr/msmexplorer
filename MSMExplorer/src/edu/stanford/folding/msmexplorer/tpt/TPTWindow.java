@@ -81,7 +81,7 @@ import prefuse.visual.sort.ItemSorter;
  */
 public class TPTWindow extends JFrame {
 
-	private int numPaths = 2; //Number of initial top paths to retrieve
+	private int numPaths = 6; //Number of initial top paths to retrieve
 	private Visualization m_vis; 
 	private boolean isShowingPics; //Display is showing images
 
@@ -620,7 +620,9 @@ public class TPTWindow extends JFrame {
 			ArrayList<Edge> path = tptCalc.getNextEdge();
 			if (path.isEmpty()) continue;
 
-			path.get(0).getTargetNode().set("inTPT", true);
+			//currently we aren't sure which order the paths are in
+			//path.get(0).getTargetNode().set("inTPT", true);
+			path.get(path.size()-1).getTargetNode().set("inTPT", true);
 			for (Edge e : path) {
 				e.set("inTPT", true);
 				e.getSourceNode().set("inTPT", true);
