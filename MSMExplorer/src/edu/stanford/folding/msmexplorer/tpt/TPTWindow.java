@@ -349,8 +349,8 @@ public class TPTWindow extends JFrame {
 				try {
 					d = Integer.valueOf(input.trim()).intValue();
 				} catch ( NumberFormatException nfe ) {
-					System.err.println( "Illegal number format "
-						+ "in JTextField numPathInput");
+					JOptionPane.showMessageDialog(TPTWindow.this, "Illegal number format "
+						+ "in Num Paths input", "Enter a Normal Number", JOptionPane.WARNING_MESSAGE);
 				}
 				numPaths = d;
 				tptCalc.reset();
