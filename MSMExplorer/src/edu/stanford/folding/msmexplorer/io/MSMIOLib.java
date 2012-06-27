@@ -75,6 +75,28 @@ public class MSMIOLib {
 		}
 	}
 
+	public static Graph openMSMHierarchy (Component c) {
+		return openMSMHierarchy (c, DEFAULT_DIRECTORY);
+	}
+
+	public static Graph openMSMHierarchy (Component c, String path) {
+		JFileChooser jfc = new JFileChooser(path);
+		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
+		jfc.setDialogTitle("Open GraphML or MSM file");
+		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+		int opt = jfc.showOpenDialog(c);
+		if (opt != JFileChooser.APPROVE_OPTION) {
+			return null;
+		}
+
+		File f = jfc.getSelectedFile();
+
+		HierarchySketcher.sketch(f.getAbsolutePath());
+
+		return new Graph(); //TODO: XXX: stub.
+	}
+
 	public static String saveGML (Graph g) {
 		return saveGML(g, DEFAULT_DIRECTORY, null);
 	}

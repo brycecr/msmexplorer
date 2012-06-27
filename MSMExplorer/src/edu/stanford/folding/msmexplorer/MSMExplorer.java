@@ -122,6 +122,59 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	private static final String version = "alpha v0.01"; //Current Version
 	private String imageLocation = "'./lib/images'";
 
+	public MSMExplorer() {
+		UILib.setPlatformLookAndFeel();
+
+		//Selector window
+		final JFrame selector = new JFrame("W e l c o m e  |  M S M E x p l o r e r");
+		selector.setLayout(new BorderLayout());
+		selector.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		//Enter graph view
+		JButton graphButton = new JButton("Graph View");
+		graphButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				selector.dispose();
+				frame = graphView("./lib/5macro.xml", "label"); //HERE
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			}
+		});
+
+		//Perform TPT without proceeding through Graph View
+		JButton tptButton = new JButton("Just TPT");
+		tptButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				preemptiveTPT(selector);
+			}
+		});
+
+		Box container = new Box(BoxLayout.X_AXIS);
+		container.add(Box.createHorizontalStrut(130));
+		container.add(graphButton);
+		container.add(tptButton);
+		container.add(Box.createHorizontalGlue());
+		JLabel versionLabel = new JLabel(version + "     ");
+		versionLabel.setFont(FontLib.getFont("Tahoma", 10));
+		container.add(versionLabel);
+		container.setBackground(Color.WHITE);
+
+		// Amusing spalsh image
+		BufferedImage image;
+		try {
+			image = ImageIO.read(new File("./lib/splash.jpg"));
+		} catch (IOException ex) {
+			System.err.println("Could not find splash image");
+			image = new BufferedImage(500, 300, BufferedImage.TYPE_INT_RGB);
+		}
+		ImageIcon splash = new ImageIcon(image);
+		selector.add(new JLabel(splash), BorderLayout.CENTER);
+		selector.add(container, BorderLayout.SOUTH);
+		selector.setBackground(Color.WHITE);
+		selector.pack();
+		selector.setSize(500, 380);
+		selector.setLocationRelativeTo(null);
+		selector.setVisible(true);
+	}
 
 	/**
 	 * Constructor, initializes controls and gui elements.
@@ -212,16 +265,16 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 
-		initGraph(g, m_vis);
-		if (isBigGraph) {
-			tr.getImageFactory().preloadImages(g.nodes(), "image");
-		}
+initGraph(g, m_vis);
+if (isBigGraph) {
+	tr.getImageFactory().preloadImages(g.nodes(), "image");
+}
 
 		// --------------------------------------------------------------------
 		// set up a display to show the visualization
 
-		final Display display = new Display(m_vis);
-		display.setSize(700, 700);
+final Display display = new Display(m_vis);
+display.setSize(700, 700);
 		display.pan(350, 350); // start centered
 		display.setForeground(Color.GRAY);
 		display.setBackground(Color.WHITE);
@@ -279,259 +332,259 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 							if ((ei = (EdgeItem) edgeItr.next()).getTargetItem().isVisible())
 								ei.setVisible(true);
 
-						edgeItr = ((NodeItem)i).inEdges();
-						while (edgeItr.hasNext())
-							if ((ei = (EdgeItem) edgeItr.next()).getSourceItem().isVisible())
-								ei.setVisible(true);
+							edgeItr = ((NodeItem)i).inEdges();
+							while (edgeItr.hasNext())
+								if ((ei = (EdgeItem) edgeItr.next()).getSourceItem().isVisible())
+									ei.setVisible(true);
+							}
+						}
 					}
-				}
-			}
-		});
+				});
 
-		final JTextField eqProbText = new JTextField("EqProb Threshold");
-		eqProbText.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				double d = Double.parseDouble(((JTextField)ae.getSource()).getText());
-				eqProbSlider.setValue(d);
-			}
+final JTextField eqProbText = new JTextField("EqProb Threshold");
+eqProbText.addActionListener( new ActionListener() {
+	public void actionPerformed(ActionEvent ae) {
+		double d = Double.parseDouble(((JTextField)ae.getSource()).getText());
+		eqProbSlider.setValue(d);
+	}
 
-		});
+});
 
 		// Graph Distance slider
-		final JValueSlider distSlider = new JValueSlider("Distance", 0, 40, 37);
-		distSlider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				((GraphDistanceFilter) ((ActionList) m_vis.getAction("draw")).get(0)).setDistance(distSlider.getValue().intValue());
-				eqProbSlider.fire();
-			}
-		});
-		distSlider.setBackground(Color.WHITE);
-		distSlider.setPreferredSize(new Dimension(300, 30));
-		distSlider.setMaximumSize(new Dimension(300, 30));
+final JValueSlider distSlider = new JValueSlider("Distance", 0, 40, 37);
+distSlider.addChangeListener(new ChangeListener() {
+	public void stateChanged(ChangeEvent e) {
+		((GraphDistanceFilter) ((ActionList) m_vis.getAction("draw")).get(0)).setDistance(distSlider.getValue().intValue());
+		eqProbSlider.fire();
+	}
+});
+distSlider.setBackground(Color.WHITE);
+distSlider.setPreferredSize(new Dimension(300, 30));
+distSlider.setMaximumSize(new Dimension(300, 30));
 
-		Box eqBox = new Box(BoxLayout.X_AXIS);
-		eqBox.add(eqProbSlider);
-		eqBox.add(eqProbText);
+Box eqBox = new Box(BoxLayout.X_AXIS);
+eqBox.add(eqProbSlider);
+eqBox.add(eqProbText);
 
-		Box cf = new Box(BoxLayout.Y_AXIS);
-		cf.add(eqBox);
-		cf.add(distSlider);
-		cf.setBorder(BorderFactory.createTitledBorder("Connectivity Filter"));
-		fpanel.add(cf);
+Box cf = new Box(BoxLayout.Y_AXIS);
+cf.add(eqBox);
+cf.add(distSlider);
+cf.setBorder(BorderFactory.createTitledBorder("Connectivity Filter"));
+fpanel.add(cf);
 
 		// Toggle Picture mode (high quality toggle)
 		// TODO: doesn't correctly respond to ctrl-H
-		JToggleButton togglePM = new JToggleButton("Picture Mode", false);
-		togglePM.addActionListener(new ActionListener() {
+JToggleButton togglePM = new JToggleButton("Picture Mode", false);
+togglePM.addActionListener(new ActionListener() {
 
-			public void actionPerformed(ActionEvent ae) {
-				display.setHighQuality(((JToggleButton) ae.getSource()).isSelected());
-			}
-		});
-		togglePM.setSelected(true);
+	public void actionPerformed(ActionEvent ae) {
+		display.setHighQuality(((JToggleButton) ae.getSource()).isSelected());
+	}
+});
+togglePM.setSelected(true);
 
 		// Toggle between curve and straight lines
-		JToggleButton curveBtn = new JToggleButton("Edge Type", false);
-		curveBtn.addActionListener(new ActionListener() {
+JToggleButton curveBtn = new JToggleButton("Edge Type", false);
+curveBtn.addActionListener(new ActionListener() {
 
-			public void actionPerformed(ActionEvent ae) {
-				if (((JToggleButton) ae.getSource()).isSelected()) {
-					((EdgeRenderer) ((DefaultRendererFactory) m_vis.getRendererFactory()).getDefaultEdgeRenderer()).setEdgeType(Constants.EDGE_TYPE_CURVE);
-				} else {
-					((EdgeRenderer) ((DefaultRendererFactory) m_vis.getRendererFactory()).getDefaultEdgeRenderer()).setEdgeType(Constants.EDGE_TYPE_LINE);
-				}
+	public void actionPerformed(ActionEvent ae) {
+		if (((JToggleButton) ae.getSource()).isSelected()) {
+			((EdgeRenderer) ((DefaultRendererFactory) m_vis.getRendererFactory()).getDefaultEdgeRenderer()).setEdgeType(Constants.EDGE_TYPE_CURVE);
+		} else {
+			((EdgeRenderer) ((DefaultRendererFactory) m_vis.getRendererFactory()).getDefaultEdgeRenderer()).setEdgeType(Constants.EDGE_TYPE_LINE);
+		}
 
-				m_vis.run("draw");
-			}
-		});
+		m_vis.run("draw");
+	}
+});
 
-		Box rendBox = new Box(BoxLayout.X_AXIS);
-		rendBox.setBorder(BorderFactory.createTitledBorder("Gen. Renderer"));
-		rendBox.add(togglePM);
-		rendBox.add(curveBtn);
-		fpanel.add(rendBox);
+Box rendBox = new Box(BoxLayout.X_AXIS);
+rendBox.setBorder(BorderFactory.createTitledBorder("Gen. Renderer"));
+rendBox.add(togglePM);
+rendBox.add(curveBtn);
+fpanel.add(rendBox);
 
 		// Button group to select which node Renderer to use
 		// (circle or rounded-rectangle label)
-		ButtonGroup nodeRenderers = new ButtonGroup();
+ButtonGroup nodeRenderers = new ButtonGroup();
 
-		JRadioButton circleRB = new JRadioButton("Circle", false);
-		circleRB.addActionListener(new ActionListener() {
+JRadioButton circleRB = new JRadioButton("Circle", false);
+circleRB.addActionListener(new ActionListener() {
 
-			public void actionPerformed(ActionEvent ae) {
-				JRadioButton circleRB = (JRadioButton) ae.getSource();
-				if (circleRB.isSelected()) {
-					m_vis.setRendererFactory(new DefaultRendererFactory(new ShapeRenderer()/*, new SelfRefEdgeRenderer()*/));
-					m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
-				}
-			}
-		});
-		nodeRenderers.add(circleRB);
+	public void actionPerformed(ActionEvent ae) {
+		JRadioButton circleRB = (JRadioButton) ae.getSource();
+		if (circleRB.isSelected()) {
+			m_vis.setRendererFactory(new DefaultRendererFactory(new ShapeRenderer()/*, new SelfRefEdgeRenderer()*/));
+			m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
+		}
+	}
+});
+nodeRenderers.add(circleRB);
 
-		JRadioButton labelRB = new JRadioButton("Label", false);
-		labelRB.addActionListener(new ActionListener() {
+JRadioButton labelRB = new JRadioButton("Label", false);
+labelRB.addActionListener(new ActionListener() {
 
-			public void actionPerformed(ActionEvent ae) {
-				JRadioButton labelRB = (JRadioButton) ae.getSource();
-				if (labelRB.isSelected()) {
-					m_vis.setRendererFactory(new DefaultRendererFactory(tr/*, new SelfRefEdgeRenderer()*/));
-				}
-			}
-		});
-		nodeRenderers.add(labelRB);
+	public void actionPerformed(ActionEvent ae) {
+		JRadioButton labelRB = (JRadioButton) ae.getSource();
+		if (labelRB.isSelected()) {
+			m_vis.setRendererFactory(new DefaultRendererFactory(tr/*, new SelfRefEdgeRenderer()*/));
+		}
+	}
+});
+nodeRenderers.add(labelRB);
 
-		Box nrBox = new Box(BoxLayout.X_AXIS);
-		nrBox.setBorder(BorderFactory.createTitledBorder("Node Renderer"));
-		nrBox.add(circleRB);
-		nrBox.add(labelRB);
-		labelRB.setSelected(true);
+Box nrBox = new Box(BoxLayout.X_AXIS);
+nrBox.setBorder(BorderFactory.createTitledBorder("Node Renderer"));
+nrBox.add(circleRB);
+nrBox.add(labelRB);
+labelRB.setSelected(true);
 
-		fpanel.add(nrBox);
+fpanel.add(nrBox);
 
-		JButton pause = new JButton("Stop Layout");
-		pause.addActionListener(new ActionListener() {
+JButton pause = new JButton("Stop Layout");
+pause.addActionListener(new ActionListener() {
 
-			public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e) {
 				//if (((ActionList)m_vis.getAction("lll")).isRunning())
-				((ActionList) m_vis.getAction("lll")).cancel();
-			}
-		});
+		((ActionList) m_vis.getAction("lll")).cancel();
+	}
+});
 //		if (isBigGraph) //HERE
 //			pause.setEnabled(false);
 
-		JButton start = new JButton("Run Layout");
-		start.addActionListener(new ActionListener() {
+JButton start = new JButton("Run Layout");
+start.addActionListener(new ActionListener() {
 
-			public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e) {
 				//if (!lll.isScheduled())
-				((ActionList) m_vis.getAction("lll")).run();
-			}
-		});
+		((ActionList) m_vis.getAction("lll")).run();
+	}
+});
 //		if (isBigGraph) //HERE
 //			start.setEnabled(false);
 
 		// Run or stop layout
-		Box runControls = new Box(BoxLayout.X_AXIS);
-		runControls.add(start);
-		runControls.add(pause);
-		runControls.setBorder(
-			BorderFactory.createTitledBorder("Run Control"));
-		fpanel.add(runControls);
+Box runControls = new Box(BoxLayout.X_AXIS);
+runControls.add(start);
+runControls.add(pause);
+runControls.setBorder(
+	BorderFactory.createTitledBorder("Run Control"));
+fpanel.add(runControls);
 
 		// Open full-size image of selected node
-		JButton openImg = new JButton("Open Image");
-		openImg.addActionListener(new ActionListener() {
+JButton openImg = new JButton("Open Image");
+openImg.addActionListener(new ActionListener() {
 
-			public void actionPerformed(ActionEvent ae) {
-				Tuple focus = (Tuple) m_vis.getGroup(Visualization.FOCUS_ITEMS).tuples().next();
-				Picture imgFrame = new Picture((String) focus.get("image"));
-				imgFrame.show();
+	public void actionPerformed(ActionEvent ae) {
+		Tuple focus = (Tuple) m_vis.getGroup(Visualization.FOCUS_ITEMS).tuples().next();
+		Picture imgFrame = new Picture((String) focus.get("image"));
+		imgFrame.show();
 
 
-			}
-		});
+	}
+});
 
 		//Save raster image file
-		JButton exportDisplay = new JButton("Save Image");
-		exportDisplay.addActionListener(new ExportDisplayAction(display));
+JButton exportDisplay = new JButton("Save Image");
+exportDisplay.addActionListener(new ExportDisplayAction(display));
 
-		Box imgControls = new Box(BoxLayout.X_AXIS);
-		imgControls.setBorder(BorderFactory.createTitledBorder("Image Controls"));
-		imgControls.add(openImg);
-		imgControls.add(exportDisplay);
-		fpanel.add(imgControls);
+Box imgControls = new Box(BoxLayout.X_AXIS);
+imgControls.setBorder(BorderFactory.createTitledBorder("Image Controls"));
+imgControls.add(openImg);
+imgControls.add(exportDisplay);
+fpanel.add(imgControls);
 
 		//Show images on node
-		JToggleButton togglePics = new JToggleButton("Show Images", false);
-		togglePics.addActionListener(new ActionListener() {
+JToggleButton togglePics = new JToggleButton("Show Images", false);
+togglePics.addActionListener(new ActionListener() {
 
-			public void actionPerformed(ActionEvent ae) {
-				JToggleButton tp = (JToggleButton) ae.getSource();
-				if (!tp.isSelected()) {
-					tr.setImageField(null);
-					((DataSizeAction) m_vis.getAction("nodeSize")).setMaximumSize(50.0);
-					m_vis.run("nodeSize");
-				} else {
-					((DataSizeAction) m_vis.getAction("nodeSize")).setMaximumSize(1.0);
-					m_vis.run("nodeSize");
-					tr.setImageField("image");
-					tr.setImagePosition(Constants.TOP);
-					tr.getImageFactory().setMaxImageDimensions(100, 100);
-				}
-				m_vis.run("draw");
-			}
-		});
+	public void actionPerformed(ActionEvent ae) {
+		JToggleButton tp = (JToggleButton) ae.getSource();
+		if (!tp.isSelected()) {
+			tr.setImageField(null);
+			((DataSizeAction) m_vis.getAction("nodeSize")).setMaximumSize(50.0);
+			m_vis.run("nodeSize");
+		} else {
+			((DataSizeAction) m_vis.getAction("nodeSize")).setMaximumSize(1.0);
+			m_vis.run("nodeSize");
+			tr.setImageField("image");
+			tr.setImagePosition(Constants.TOP);
+			tr.getImageFactory().setMaxImageDimensions(100, 100);
+		}
+		m_vis.run("draw");
+	}
+});
 
 		// Open selector window to select start and end states for TPT
-		JButton runTPT = new JButton("TPT Selector");
-		runTPT.addActionListener(new ActionListener() {
+JButton runTPT = new JButton("TPT Selector");
+runTPT.addActionListener(new ActionListener() {
 
-			public void actionPerformed(ActionEvent ae) {
-				TPTSetupBox tsb = new TPTSetupBox(g, true, m_vis);
-			}
-		});
-		Box renderControls = new Box(BoxLayout.X_AXIS);
-		renderControls.setBorder(BorderFactory.createTitledBorder("Function Control"));
-		renderControls.add(togglePics);
-		renderControls.add(runTPT);
-		fpanel.add(renderControls);
+	public void actionPerformed(ActionEvent ae) {
+		TPTSetupBox tsb = new TPTSetupBox(g, true, m_vis);
+	}
+});
+Box renderControls = new Box(BoxLayout.X_AXIS);
+renderControls.setBorder(BorderFactory.createTitledBorder("Function Control"));
+renderControls.add(togglePics);
+renderControls.add(runTPT);
+fpanel.add(renderControls);
 
 		// Set up search Panel
-		SearchTupleSet searchGroup = new KeywordSearchTupleSet();
-		m_vis.addFocusGroup(Visualization.SEARCH_ITEMS, searchGroup);
-		searchGroup.addTupleSetListener(new TupleSetListener() {
+SearchTupleSet searchGroup = new KeywordSearchTupleSet();
+m_vis.addFocusGroup(Visualization.SEARCH_ITEMS, searchGroup);
+searchGroup.addTupleSetListener(new TupleSetListener() {
 
-			public void tupleSetChanged(TupleSet ts, Tuple[] add, Tuple[] rem) {
-				if (add.length > 0) {
-					Point2D p = new Point2D.Double();
-					p.setLocation(((VisualItem) add[0]).getX(), ((VisualItem) add[0]).getY());
-					display.animatePanToAbs(p, 1000);
-				}
-			}
-		});
+	public void tupleSetChanged(TupleSet ts, Tuple[] add, Tuple[] rem) {
+		if (add.length > 0) {
+			Point2D p = new Point2D.Double();
+			p.setLocation(((VisualItem) add[0]).getX(), ((VisualItem) add[0]).getY());
+			display.animatePanToAbs(p, 1000);
+		}
+	}
+});
 
-		SearchQueryBinding sq = new SearchQueryBinding((Table) m_vis.getGroup(nodes), "label",
-			(SearchTupleSet) m_vis.getGroup(Visualization.SEARCH_ITEMS));
+SearchQueryBinding sq = new SearchQueryBinding((Table) m_vis.getGroup(nodes), "label",
+	(SearchTupleSet) m_vis.getGroup(Visualization.SEARCH_ITEMS));
 
-		JSearchPanel search = sq.createSearchPanel(false);
-		search.setShowResultCount(true);
-		search.setBorder(BorderFactory.createEmptyBorder(5, 5, 4, 0));
+JSearchPanel search = sq.createSearchPanel(false);
+search.setShowResultCount(true);
+search.setBorder(BorderFactory.createEmptyBorder(5, 5, 4, 0));
 
-		Box searchBox = new Box(BoxLayout.X_AXIS);
-		searchBox.setBorder(BorderFactory.createTitledBorder("Search"));
-		searchBox.add(search);
-		fpanel.add(searchBox);
+Box searchBox = new Box(BoxLayout.X_AXIS);
+searchBox.setBorder(BorderFactory.createTitledBorder("Search"));
+searchBox.add(search);
+fpanel.add(searchBox);
 
 		// overview display window
-		Display overview = new Display(m_vis);
-		overview.setSize(290, 290);
-		overview.addItemBoundsListener(new FitOverviewListener());
-		overview.setHighQuality(true);
+Display overview = new Display(m_vis);
+overview.setSize(290, 290);
+overview.addItemBoundsListener(new FitOverviewListener());
+overview.setHighQuality(true);
 
-		JPanel opanel = new JPanel();
-		opanel.setBorder(BorderFactory.createTitledBorder("Overview"));
-		opanel.setBackground(Color.WHITE);
-		opanel.add(overview);
+JPanel opanel = new JPanel();
+opanel.setBorder(BorderFactory.createTitledBorder("Overview"));
+opanel.setBackground(Color.WHITE);
+opanel.add(overview);
 
-		fpanel.add(opanel);
+fpanel.add(opanel);
 
-		fpanel.add(Box.createVerticalGlue());
+fpanel.add(Box.createVerticalGlue());
 
 		// create a new JSplitPane to present the interface
-		JSplitPane split = new JSplitPane();
-		split.setLeftComponent(display);
-		split.setRightComponent(fpanel);
-		split.setOneTouchExpandable(true);
-		split.setContinuousLayout(false);
-		split.setDividerLocation(700);
+JSplitPane split = new JSplitPane();
+split.setLeftComponent(display);
+split.setRightComponent(fpanel);
+split.setOneTouchExpandable(true);
+split.setContinuousLayout(false);
+split.setDividerLocation(700);
 
 		// now we run our action list
-		m_vis.run("draw");
-		m_vis.run("lll"); 
-		m_vis.run("nodeSize");
+m_vis.run("draw");
+m_vis.run("lll"); 
+m_vis.run("nodeSize");
 
-		add(split);
-	}
+add(split);
+}
 
 	/**
 	 * Registers the graph with the Visualization.
@@ -683,57 +736,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		UILib.setPlatformLookAndFeel();
+		MSMExplorer msme = new MSMExplorer();
 
-		//Selector window
-		final JFrame selector = new JFrame("W e l c o m e  |  M S M E x p l o r e r");
-		selector.setLayout(new BorderLayout());
-		selector.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		//Enter graph view
-		JButton graphButton = new JButton("Graph View");
-		graphButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				selector.dispose();
-				frame = graphView("./lib/5macro.xml", "label"); //HERE
-				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			}
-		});
-
-		//Perform TPT without proceeding through Graph View
-		JButton tptButton = new JButton("Just TPT");
-		tptButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				preemptiveTPT(selector);
-			}
-		});
-
-		Box container = new Box(BoxLayout.X_AXIS);
-		container.add(Box.createHorizontalStrut(130));
-		container.add(graphButton);
-		container.add(tptButton);
-		container.add(Box.createHorizontalGlue());
-		JLabel versionLabel = new JLabel(version + "     ");
-		versionLabel.setFont(FontLib.getFont("Tahoma", 10));
-		container.add(versionLabel);
-		container.setBackground(Color.WHITE);
-
-		// Amusing spalsh image
-		BufferedImage image;
-		try {
-			image = ImageIO.read(new File("./lib/splash.jpg"));
-		} catch (IOException ex) {
-			System.err.println("Could not find splash image");
-			image = new BufferedImage(500, 300, BufferedImage.TYPE_INT_RGB);
-		}
-		ImageIcon splash = new ImageIcon(image);
-		selector.add(new JLabel(splash), BorderLayout.CENTER);
-		selector.add(container, BorderLayout.SOUTH);
-		selector.setBackground(Color.WHITE);
-		selector.pack();
-		selector.setSize(500, 380);
-		selector.setLocationRelativeTo(null);
-		selector.setVisible(true);
 	}   // end of main
 
 	/**
@@ -743,7 +747,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 * @param label
 	 * @return JFrame with new MSMExplorer
 	 */
-	public static JFrame graphView(String datafile, String label) {
+	public JFrame graphView(String datafile, String label) {
 		Graph g = null;
 
 		try {
@@ -764,7 +768,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 * @param label
 	 * @return newly constructed JFrame
 	 */
-	public static JFrame graphView(final Graph g, String label) {
+	public JFrame graphView(final Graph g, String label) {
 		final MSMExplorer view = new MSMExplorer(g, label);
 
 		//Force panel menu item
@@ -796,18 +800,19 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		JMenuItem makeMovie = new JMenuItem("Create PDB Movie");
 		makeMovie.addActionListener(new ActionListener() {
 
-		public void actionPerformed(ActionEvent ae) {
-		PDBFrame pdbf = new PDBFrame(g, view.m_vis);
-		}
+			public void actionPerformed(ActionEvent ae) {
+				PDBFrame pdbf = new PDBFrame(g, view.m_vis);
+			}
 		});
-		 
+
 
 		// set up menu
 		JMenu dataMenu = new JMenu("Data");
 		dataMenu.add(forcePanel);
 		dataMenu.add(statsPanel);
-				dataMenu.add(makeMovie);
+		dataMenu.add(makeMovie);
 		dataMenu.add(new OpenMSMAction(view));
+		dataMenu.add(new OpenHierarchyAction());
 		dataMenu.add(new SaveMSMAction(g, view));
 
 		JMenuBar menubar = new JMenuBar();
@@ -839,10 +844,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 				if ( oppositeFrame != null &&
 					oppositeFrame.getTitle().equals("Force Panel"));
-				 else
-					view.m_vis.cancel("layout");
-			}
-		});
+					else
+						view.m_vis.cancel("layout");
+				}
+			});
 
 		return frame;
 	}   //end of class graphView(Graph, String)
@@ -888,7 +893,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	/**
 	 * Action to open a new graph, disposing the old graph.
 	 */
-	public static class OpenGMLAction extends AbstractAction {
+	public class OpenGMLAction extends AbstractAction {
 
 		private MSMExplorer m_view;
 
@@ -925,10 +930,30 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		}
 	} // end of class OpenGraphAction
 
+	private class OpenHierarchyAction extends AbstractAction {
+
+		public OpenHierarchyAction() {
+			this.putValue(AbstractAction.NAME, "Open Hierarchy");
+			this.putValue(AbstractAction.ACCELERATOR_KEY, 
+				KeyStroke.getKeyStroke("ctrl shift O"));
+		}
+
+		public void actionPerformed(ActionEvent ae) {
+			Graph g = MSMIOLib.openMSMHierarchy(MSMExplorer.this);
+
+			if (g != null) {
+				MSMExplorer.this.getImagePath();
+				frame.dispose();
+				frame = graphView(g, "label");
+			}
+		}
+
+	}
+
 	/**
 	 * Action to open a new graph, disposing the old graph.
 	 */
-	public static class OpenMSMAction extends AbstractAction {
+	public class OpenMSMAction extends AbstractAction {
 
 		private MSMExplorer m_view;
 
@@ -955,7 +980,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		}
 	} // end of class
 
-	public static class SaveMSMAction extends AbstractAction {
+	public class SaveMSMAction extends AbstractAction {
 		private Graph graph;
 		private MSMExplorer m_view;
 
@@ -976,7 +1001,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	/**
 	 * Custom color class to color fill.
 	 */
-	public static class NodeColorAction extends ColorAction {
+	public class NodeColorAction extends ColorAction {
 
 		/*
 		 * Constructor
