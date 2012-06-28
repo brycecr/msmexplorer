@@ -119,7 +119,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	private static final String edges = "graph.edges";
 	private Visualization m_vis;
 	private static JFrame frame; //Graph view frame
-	private static final String version = "alpha v0.01"; //Current Version
+	private static final String version = "v0.03"; //Current Version
 	private String imageLocation = "'./lib/images'";
 
 	public MSMExplorer() {
