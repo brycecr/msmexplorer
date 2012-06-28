@@ -156,6 +156,8 @@ Primary Author:
 Bryce Cronkite-Ratcliff
 
 General Acknowledgements:
+Robert McGibbon
+Trevor Gokey
 Lorne Vanatta
 Vincent Voelz
 Vijay Pande
