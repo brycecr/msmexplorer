@@ -15,7 +15,7 @@ import prefuse.data.io.DataIOException;
  *
  * @author gestalt
  */
-public class MtxGraphReader extends DefaultMSMReader {
+public class MtxGraphReader extends AbstractMSMReader {
 
 	private void init(int nodes, int edges) {
 		m_nodeTable = new Table(nodes, 2);
@@ -42,10 +42,6 @@ public class MtxGraphReader extends DefaultMSMReader {
 	}
 
 	public Graph readGraph(InputStream is) throws DataIOException {
-		return readGraph(is, null);
-	}
-
-	public Graph readGraph(InputStream is, String eqProbPath) throws DataIOException {
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
@@ -76,19 +72,9 @@ public class MtxGraphReader extends DefaultMSMReader {
 					throw new DataIOException("Parse failure on: " + line, nfe);
 				}
 			}
-			Graph g = new Graph(m_nodeTable, m_edgeTable, true);
-			if (eqProbPath == null) {
-				return getEqProbs(null, g);
-			} else {
-				try {
-					return addEqProbs(g, new File(eqProbPath));
-				} catch (Exception dioe) {
-					JOptionPane.showMessageDialog(null, "problem reading eqprobs file at " + eqProbPath);
-				}	
-			}
+			return new Graph(m_nodeTable, m_edgeTable, true);
 		} catch (IOException ioex) {
 			throw new DataIOException("BufferedReader/InputStreamReader failure in MtxGraphReader", ioex);
 		}
-		return null;
 	}
 }

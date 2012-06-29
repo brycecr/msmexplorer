@@ -66,7 +66,11 @@ public class MSMIOLib {
 		GraphReader gr = (GraphReader)ff.getUserData();
 
 		try {
-			return gr.readGraph(IOLib.streamFromString(f.getAbsolutePath()));
+			Graph g = gr.readGraph(IOLib.streamFromString(f.getAbsolutePath()));
+			if (!GraphMLReader.class.isAssignableFrom(gr.getClass())) {
+				g = EQProbReader.getEqProbs(null, g);
+			}
+			return g;
 		} catch ( Exception e ) {
 			Logger.getLogger(MSMIOLib.class.getName()).log(
 				Level.WARNING, "{0}\n{1}", 
@@ -96,7 +100,7 @@ public class MSMIOLib {
 
 		assert newNode.length > 0;
 
-		DefaultMSMReader gr = null;
+		GraphReader gr = null;
 		if (newNode[0].tProbFilename.endsWith(".mtx") || 
 			newNode[0].tProbFilename.endsWith(".MTX")) {
 
@@ -107,7 +111,13 @@ public class MSMIOLib {
 		}
 
 		try {
-			return gr.readGraph(IOLib.streamFromString(newNode[0].tProbFilename), newNode[0].eqProbFilename);
+			Graph g = gr.readGraph(IOLib.streamFromString(newNode[0].tProbFilename));
+			if (newNode[0].eqProbFilename == null) {
+				g = EQProbReader.getEqProbs(null, g);
+			} else {
+				g = EQProbReader.addEqProbs(g, new File(newNode[0].eqProbFilename));
+			}
+			return g;
 		} catch ( Exception e ) {
 			Logger.getLogger(MSMIOLib.class.getName()).log(
 				Level.WARNING, "{0}\n{1}", 

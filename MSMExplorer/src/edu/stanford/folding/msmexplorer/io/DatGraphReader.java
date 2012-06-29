@@ -20,7 +20,7 @@ import prefuse.data.parser.DoubleArrayParser;
  *
  * @author gestalt
  */
-public class DatGraphReader extends DefaultMSMReader {
+public class DatGraphReader extends AbstractMSMReader {
 
 	private void init(int length) {
 		m_nodeTable = new Table(length, 2);
@@ -35,7 +35,7 @@ public class DatGraphReader extends DefaultMSMReader {
 		m_edgeTable.addColumn(TPROB, double.class); //2nd
 	}
 	
-	public Graph readGraph(InputStream is, String eqProbPath) throws DataIOException {
+	public Graph readGraph(InputStream is) throws DataIOException {
 
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -66,27 +66,9 @@ public class DatGraphReader extends DefaultMSMReader {
 					}
 				node++;
 			}
-			Graph g =  new Graph(m_nodeTable, m_edgeTable, true);
-
-			if (eqProbPath == null) {
-				return getEqProbs(null, g);
-			} else {
-				try {
-					return addEqProbs(g, new File(eqProbPath));
-				} catch (DataIOException dioe) {
-					JOptionPane.showMessageDialog(null, "problem reading eqprobs file at " + eqProbPath);
-				}
-			}
-
+			return new Graph(m_nodeTable, m_edgeTable, true);
 		} catch (Exception ex) {
 			throw new DataIOException("Buffered Reader Failure", ex);
 		}
-		return null;
 	}
-
-	public Graph readGraph(InputStream is) throws DataIOException {
-		return readGraph(is, null);
-	}
-
-		
 }
