@@ -82,7 +82,7 @@ public class MSMIOLib {
 	public static Graph openMSMHierarchy (Component c, String path) {
 		JFileChooser jfc = new JFileChooser(path);
 		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
-		jfc.setDialogTitle("Open GraphML or MSM file");
+		jfc.setDialogTitle("Open Hierarchical MSM Directory");
 		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
 		int opt = jfc.showOpenDialog(c);
