@@ -23,13 +23,19 @@ Introduction
 ------------
 MSMExplorer is a java-based visualization package for protein folding Markov State Models (MSMs) that have been produced using MSMBuilder. This software hopes to provide a simple and intuitive interface for visual analysis of MSMs, including the production of publication-quality visualizations.
 
-This program is released under the terms of the GNU GPL. Copyright Pande Lab 2010. Source code is available via subversion: svn checkout https://simtk.org/svn/MSMExplorer/currentVerion/
+This program is released under the terms of the GNU GPL. Copyright Pande Lab 2010, 2011, 2012. As of June 2012, primary development has moved to github at github.com/brycecr/msmexplorer and source code is availble at that URL:
+> git clone https://github.com/brycecr/msmexplorer/
 
-NOTE: This programs is currently an ALPHA release. Please forward all feature requests and bug reports to msmexplorer@gmail.com
+Code may also be periodically pushed to the simtk repo accessible via subversion at:
+> svn checkout https://simtk.org/svn/MSMExplorer/currentVerion/
+
+but this repo will often be stale.
+
+NOTE: This program is currently an ALPHA release. Please forward all feature requests and bug reports to msmexplorer@gmail.com
 
 Requirements
 ------------
-Requires the Java SE version 5. 4 GB or Ram or greater recommended for visualization of graphs with more than 1000 nodes.
+Requires the Java SE version 6. 4 GB or Ram or greater recommended for visualization of graphs with more than 1000 nodes.
 
 Documentation
 -------------
