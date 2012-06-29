@@ -11,6 +11,14 @@ import java.io.File;
 import java.lang.Exception;
 import java.io.FileNotFoundException;
 
+
+class FileNode {
+	public String tProbFilename;
+	public String mmapFilename;
+	public String eqProbFilename;
+	public int numStates;
+}
+
 /**
  * The HierarchySketcher is responsible for combing a directory hierarchy and
  * indexing the available MSMs and their relative relationship.
@@ -26,13 +34,7 @@ import java.io.FileNotFoundException;
  */
 public class HierarchySketcher {
 
-	private static class FileNode {
-		public String tProbFilename;
-		public String mmapFilename;
-		public int numStates;
-	}
-
-	public static void sketch(String pathToHierarchy) {
+	public static FileNode[] sketch(String pathToHierarchy) {
 		File topList[] = new File[0];
 
 		try { 
@@ -52,6 +54,7 @@ public class HierarchySketcher {
 
 				boolean hasTProb = false;
 				boolean hasMMap = false;
+				boolean hasEQProb = false;
 				FileNode node = new FileNode ();
 				int maxStates = 0;
 				for (String str : filesInDir) {
@@ -64,7 +67,7 @@ public class HierarchySketcher {
 						if (node.numStates > maxStates) {
 							maxStates = node.numStates;
 						}
-						if (hasMMap) {
+						if (hasMMap && hasEQProb) {
 							break;
 						}
 
@@ -72,7 +75,15 @@ public class HierarchySketcher {
 						assert !hasMMap;
 						hasMMap = true;
 						node.mmapFilename = f.getAbsolutePath() + '/' + str;
-						if (hasTProb) {
+						if (hasTProb && hasEQProb) {
+							break;
+						}
+					} else if (str.startsWith("Population") ||
+						str.startsWith("eqProb") ||
+						str.startsWith("eqprob")) {
+						assert !hasEQProb;
+						node.eqProbFilename = f.getAbsolutePath() + '/' + str;
+						if (hasTProb && hasMMap) {
 							break;
 						}
 					}
@@ -92,6 +103,8 @@ public class HierarchySketcher {
 		}
 
 		JOptionPane.showMessageDialog(null, agg);
+
+		return nodeArray;
 	}
 
 	private static int getNumStates(String filePath) {

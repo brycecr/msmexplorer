@@ -1,5 +1,8 @@
 package edu.stanford.folding.msmexplorer.io;
 
+import javax.swing.JOptionPane;
+
+import java.io.File;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +20,7 @@ import prefuse.data.parser.DoubleArrayParser;
  *
  * @author gestalt
  */
-public class DatGraphReader extends AbstractMSMReader {
+public class DatGraphReader extends DefaultMSMReader {
 
 	private void init(int length) {
 		m_nodeTable = new Table(length, 2);
@@ -32,7 +35,8 @@ public class DatGraphReader extends AbstractMSMReader {
 		m_edgeTable.addColumn(TPROB, double.class); //2nd
 	}
 	
-	public Graph readGraph(InputStream is) throws DataIOException {
+	public Graph readGraph(InputStream is, String eqProbPath) throws DataIOException {
+
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			DoubleArrayParser dap = new DoubleArrayParser();
@@ -63,11 +67,25 @@ public class DatGraphReader extends AbstractMSMReader {
 				node++;
 			}
 			Graph g =  new Graph(m_nodeTable, m_edgeTable, true);
-			return getEqProbs(null, g);
 
-		} catch (IOException ex) {
+			if (eqProbPath == null) {
+				return getEqProbs(null, g);
+			} else {
+				try {
+					return addEqProbs(g, new File(eqProbPath));
+				} catch (DataIOException dioe) {
+					JOptionPane.showMessageDialog(null, "problem reading eqprobs file at " + eqProbPath);
+				}
+			}
+
+		} catch (Exception ex) {
 			throw new DataIOException("Buffered Reader Failure", ex);
 		}
+		return null;
+	}
+
+	public Graph readGraph(InputStream is) throws DataIOException {
+		return readGraph(is, null);
 	}
 
 		

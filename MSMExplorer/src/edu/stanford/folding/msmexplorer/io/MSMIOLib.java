@@ -92,9 +92,28 @@ public class MSMIOLib {
 
 		File f = jfc.getSelectedFile();
 
-		HierarchySketcher.sketch(f.getAbsolutePath());
+		FileNode newNode[] = HierarchySketcher.sketch(f.getAbsolutePath());
 
-		return new Graph(); //TODO: XXX: stub.
+		assert newNode.length > 0;
+
+		DefaultMSMReader gr = null;
+		if (newNode[0].tProbFilename.endsWith(".mtx") || 
+			newNode[0].tProbFilename.endsWith(".MTX")) {
+
+			gr = new MtxGraphReader();
+
+		} else {
+			gr = new DatGraphReader();
+		}
+
+		try {
+			return gr.readGraph(IOLib.streamFromString(newNode[0].tProbFilename), newNode[0].eqProbFilename);
+		} catch ( Exception e ) {
+			Logger.getLogger(MSMIOLib.class.getName()).log(
+				Level.WARNING, "{0}\n{1}", 
+				new Object[]{e.getMessage(),StringLib.getStackTrace(e)});
+			return null;
+		}
 	}
 
 	public static String saveGML (Graph g) {

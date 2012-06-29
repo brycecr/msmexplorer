@@ -74,7 +74,7 @@ public abstract class AbstractMSMReader extends AbstractGraphReader implements M
 	 * @return
 	 * @throws DataIOException 
 	 */
-	private static Graph addEqProbs(Graph g, File f) throws DataIOException {
+	public static Graph addEqProbs(Graph g, File f) throws DataIOException {
 		int row = 0;
 		try { 
 			BufferedReader br = new BufferedReader(new FileReader(f));
