@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.JOptionPane;
 
 import prefuse.data.Graph;
 import prefuse.data.io.DataIOException;
@@ -18,7 +19,7 @@ import prefuse.util.io.SimpleFileFilter;
 
 /**
  * MSMExplorer I/O basic functions, including open and save
- * operations.
+ * operations. All methods should be static.
  *
  * @author brycecr
  */
@@ -47,7 +48,7 @@ public class MSMIOLib {
 		jfc.setFileFilter(ff);
 
 		ff = new SimpleFileFilter("dat",
-			"DAT simple format (*.dat, *.txt)",
+			"DAT dense matrix (*.dat, *.txt)",
 			new DatGraphReader());
 		ff.addExtension("txt");
 		jfc.setFileFilter(ff);
@@ -62,8 +63,14 @@ public class MSMIOLib {
 			return null;
 
 		File f = jfc.getSelectedFile();
-		ff = (SimpleFileFilter)(FileFilter)jfc.getFileFilter();
-		GraphReader gr = (GraphReader)ff.getUserData();
+		FileFilter selectedFF = (FileFilter)jfc.getFileFilter();
+
+		//Assume file is dat unless a specific file filter is selected
+		GraphReader gr = new DatGraphReader();
+		if (!selectedFF.equals(jfc.getAcceptAllFileFilter())) {
+			ff = (SimpleFileFilter)selectedFF;
+			gr = (GraphReader)ff.getUserData();
+		}
 
 		try {
 			Graph g = gr.readGraph(IOLib.streamFromString(f.getAbsolutePath()));
@@ -72,9 +79,8 @@ public class MSMIOLib {
 			}
 			return g;
 		} catch ( Exception e ) {
-			Logger.getLogger(MSMIOLib.class.getName()).log(
-				Level.WARNING, "{0}\n{1}", 
-				new Object[]{e.getMessage(),StringLib.getStackTrace(e)});
+			JOptionPane.showMessageDialog(c, "Attempt to open MSM at " + f.getName() + 
+				" failed; file not found or not in the expected format.", "MSM Read Error", JOptionPane.ERROR_MESSAGE);
 			return null;
 		}
 	}

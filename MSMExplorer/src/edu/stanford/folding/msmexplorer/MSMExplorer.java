@@ -121,6 +121,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	private static JFrame frame; //Graph view frame
 	private static final String version = "v0.03"; //Current Version
 	private String imageLocation = "'./lib/images'";
+	private ActionList<FileNode> hierarchyList = null;
 
 	public MSMExplorer() {
 		UILib.setPlatformLookAndFeel();
@@ -555,6 +556,13 @@ searchBox.setBorder(BorderFactory.createTitledBorder("Search"));
 searchBox.add(search);
 fpanel.add(searchBox);
 
+JSlider zoomSlider = new JSlider(SwingConstants.VERTICAL, 0, 5, 0);
+zoomSlider.addActionListener( new ActionListener() {
+	public void actionPerformed(ActionEvent ae) {
+		this.getValue();
+	}
+});
+
 		// overview display window
 Display overview = new Display(m_vis);
 overview.setSize(290, 290);
@@ -939,7 +947,7 @@ add(split);
 		}
 
 		public void actionPerformed(ActionEvent ae) {
-			Graph g = MSMIOLib.openMSMHierarchy(MSMExplorer.this);
+			hierarchyList = MSMIOLib.openMSMHierarchy(MSMExplorer.this);
 
 			if (g != null) {
 				MSMExplorer.this.getImagePath();

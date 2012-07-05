@@ -29,6 +29,8 @@ import prefuse.action.assignment.ColorAction;
 import prefuse.action.assignment.DataSizeAction;
 import prefuse.data.util.BreadthFirstIterator;
 import prefuse.action.layout.AxisLayout;
+import prefuse.action.Action;
+import prefuse.activity.Activity;
 import prefuse.controls.ZoomControl;
 import prefuse.controls.DragControl;
 import prefuse.controls.PanControl;
@@ -113,7 +115,7 @@ public class TPTWindow extends JFrame {
 			this.dispose();
 		}
 
-		//should create a deep copy of the graph
+		//should create a deep copy of the graph XXX is this necessary? Kind of not nice for resources...
 		final Graph gra = new Graph(g.getNodeTable(), g.getEdgeTable(), g.isDirected(), g.getNodeKeyField(), g.getEdgeSourceField(), g.getEdgeTargetField());
 		//create data columns
 		if (gra.getNodeTable().getColumnNumber("source") != -1) {
@@ -150,8 +152,11 @@ public class TPTWindow extends JFrame {
 		m_vis.add("graph", gra);
 		m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
 
+		/* Renderer Setup */
 		final LabelRenderer lr = new LabelRenderer();
-		lr.setRoundedCorner(8, 8);
+		lr.setRoundedCorner(20, 20);
+		lr.getImageFactory().preloadImages(g.getNodes().tuples(), "image");
+		lr.getImageFactory().setAsynchronous(false);
 
 		final EdgeRenderer er = new EdgeRenderer();
 		er.setEdgeType(Constants.EDGE_TYPE_CURVE);
@@ -231,6 +236,7 @@ public class TPTWindow extends JFrame {
 		axes.add(xaxis);
 		axes.add(yaxis);
 		axes.add(ylabels);
+		axes.add(new RepaintAction());
 
 		m_vis.setVisible("ylabels", new InGroupPredicate("ylabels"), false);
 
@@ -260,8 +266,20 @@ public class TPTWindow extends JFrame {
 		dataFill.add(VisualItem.HOVER, ColorLib.rgb(80, 200, 0));
 		dataFill.add(VisualItem.FIXED, ColorLib.rgb(0, 124, 252));
 
+		final ColorAction imgDataFill = new ColorAction(nodes,
+			VisualItem.FILLCOLOR, ColorLib.rgb(255, 255, 255));
+		imgDataFill.add(VisualItem.HOVER, ColorLib.rgb(80, 200, 0));
+		imgDataFill.add(VisualItem.FIXED, ColorLib.rgb(255, 255, 255));
 
-		ColorAction nodeStroke = new ColorAction(nodes, VisualItem.STROKECOLOR, ColorLib.rgb(255, 255, 255));
+		final ColorAction imgAltDataFill = new ColorAction(nodes, VisualItem.FILLCOLOR, ColorLib.rgb(255, 255, 255));
+		imgAltDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(255, 0, 0));
+		imgAltDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(0, 0, 255));
+
+		final ColorAction altDataFill = new ColorAction(nodes, VisualItem.FILLCOLOR, ColorLib.rgb(124, 252, 0));
+		altDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(255, 0, 0));
+		altDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(0, 0, 255));
+
+		final ColorAction nodeStroke = new ColorAction(nodes, VisualItem.STROKECOLOR, ColorLib.rgb(50, 50, 50));
 		nodeStroke.add(VisualItem.HOVER, ColorLib.rgb(226, 86, 0));
 		nodeStroke.add(VisualItem.HIGHLIGHT, ColorLib.rgb(0, 200, 98));
 
@@ -274,27 +292,27 @@ public class TPTWindow extends JFrame {
 		ColorAction edgeFill = new ColorAction(edges,
 			VisualItem.FILLCOLOR, ColorLib.gray(200));
 
-		final ColorAction altDataFill = new ColorAction(nodes, VisualItem.FILLCOLOR, ColorLib.rgb(124, 252, 0));
-		altDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(255, 0, 0));
-		altDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(0, 0, 255));
 
 		final DataSizeAction edgeWeight = new DataSizeAction(edges, "flux", 1000, Constants.LOG_SCALE);
 		edgeWeight.setMinimumSize(1.0);
 		edgeWeight.setMaximumSize(200);
 
-		final ActionList color = new ActionList();
+		final ActionList color = new ActionList(ActionList.INFINITY);
 		color.add(edgeWeight);
 		color.add(edgeFill);
 		color.add(edgeColor);
 		color.add(text);
+		color.add(new RepaintAction());
 		color.add(dataFill);
 
+		/*
 		final ActionList altColor = new ActionList();
 		altColor.add(edgeWeight);
 		altColor.add(edgeFill);
 		altColor.add(edgeColor);
 		altColor.add(text);
 		altColor.add(altDataFill);
+		*/
 
 		m_vis.putAction("nodeStroke", nodeStroke);
 		m_vis.putAction("tptLayout", tptLayout);
@@ -303,7 +321,7 @@ public class TPTWindow extends JFrame {
 
 
 		final DataSizeAction nodeSize = new DataSizeAction(nodes,
-			"flux", 20, Constants.LOG_SCALE);
+			"flux", 100, Constants.LOG_SCALE);
 		nodeSize.setMinimumSize(5);
 		nodeSize.setMaximumSize(20.0);
 
@@ -413,14 +431,22 @@ public class TPTWindow extends JFrame {
 		JToggleButton colorMode = new JToggleButton("Color Mode", false);
 		colorMode.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-
+				ActionList al = (ActionList)(m_vis.removeAction("color"));
+				al.remove (al.size() - 1);
 				if (((JToggleButton)ae.getSource()).isSelected()) {
-					m_vis.removeAction("color");
-					m_vis.putAction("color", altColor);
-				} else {
-					m_vis.removeAction("color");
-					m_vis.putAction("color", color);
+					if (TPTWindow.this.isShowingPics) {
+						al.add (imgAltDataFill);
+					} else {
+					al.add (altDataFill);
 				}
+				} else {
+					if (TPTWindow.this.isShowingPics) {
+						al.add (imgDataFill);
+					} else {
+					al.add (dataFill);
+					}
+				}
+				m_vis.putAction("color", al);
 				m_vis.run("color");
 			}
 		});
@@ -431,39 +457,37 @@ public class TPTWindow extends JFrame {
 			public void actionPerformed(ActionEvent ae) {
 				JToggleButton tp = (JToggleButton) ae.getSource();
 				if(!tp.isSelected()) {
-					m_vis.setRendererFactory(rf);
+					ActionList al = (ActionList)(m_vis.removeAction("color"));
+					al.remove (al.size() - 1);
+					al.add (dataFill);
+					m_vis.putAction("color", al);
 					lr.setImageField(null);
-					((DataSizeAction)m_vis.getAction("nodeSize")).setMaximumSize(50.0);
+					//((DataSizeAction)m_vis.getAction("nodeSize")).setMaximumSize(50.0);
+					nodeSize.setMaximumSize(5.0);
+					nodeSize.setMaximumSize(50.0);
 					isShowingPics = false;
-					m_vis.run("nodeSize");
 				} else {
-					/*
-					 * ((DataSizeAction)m_vis.getAction("nodeSize")).setMaximumSize(1.0);
-					 * m_vis.run("nodeSize");
-					 * sr.setImageField("image");
-					 * sr.setImagePosition(Constants.TOP);
-					 * double scale = m_vis.getDisplay(0).getScale();
-					 * if (scale < 1.0d) scale = 1.0d;
-					 * sr.getImageFactory().setMaxImageDimensions((int)(100*scale), (int)(100*scale));
-
-					 */
-
-					m_vis.setRendererFactory(new DefaultRendererFactory(tiir));
-					double scale = m_vis.getDisplay(0).getScale();
-					if (scale < 1.0d) scale = 1.0d;
-					tiir.setMaxImageDimensions((int)(100*scale), (int)(100*scale));
-					tiir.setImageSize(1 / (2 * scale));
-					tiir.setRoundedCorner(8, 8);
+					
+					ActionList al = (ActionList)(m_vis.removeAction("color"));
+					al.remove (al.size() - 1);
+					al.add (imgDataFill);
+					m_vis.putAction("color", al);
+					  lr.setImageField("image");
+					  double scale = m_vis.getDisplay(0).getScale();
+					  if (scale < 1.0d) scale = 1.0d;
+					  lr.getImageFactory().setMaxImageDimensions((int)(100*scale), (int)(100*scale));
+					  lr.setImagePosition(Constants.LEFT);
 
 					isShowingPics = true;
-					gra.addColumn("null", String.class, null);
 
 					nodeSize.setMinimumSize(1);
 					nodeSize.setMaximumSize(1);
-					m_vis.run("nodeSize");
-
 				}
+				m_vis.run("nodeSize");
+				m_vis.run("nodeStroke");
 				m_vis.run("color");
+				m_vis.invalidateAll();
+				m_vis.repaint();
 			}
 		});
 
@@ -475,7 +499,7 @@ public class TPTWindow extends JFrame {
 
 		focusGroup.addTupleSetListener(new TupleSetListener() {
 			public void tupleSetChanged(TupleSet ts, Tuple[] add, Tuple[] rem)
-{
+			{
 				if (add.length > 0 && holder.containsTuple(add[0])) {//add[0].getBoolean(VisualItem.FIXED) )
 					fixedBtn.setEnabled(true);
 					fixedBtn.setSelected(true);
@@ -511,23 +535,19 @@ public class TPTWindow extends JFrame {
 				JToggleButton nodeMode = (JToggleButton) ae.getSource();
 				if (!nodeMode.isSelected()) {
 					if (isShowingPics) {
-						tiir.setImageSpacing(0);
-						tiir.setHorizontalPadding(0);
-						tiir.setTextAttributeName("null");
+						lr.setTextField(null);
 					} else {
 						m_vis.setRendererFactory(arf);
 						m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
 					}
 				} else {
 					if (isShowingPics) {
-						tiir.setImageSpacing(3);
-						tiir.setHorizontalPadding(5);
-						tiir.setTextAttributeName("label");
+						lr.setTextField("label");
 					} else {
 						m_vis.setRendererFactory(rf);
 					}
 				}
-
+				m_vis.run("color");
 			}
 		});
 		nodeMode.setSelected(true);
