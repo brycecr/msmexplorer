@@ -85,11 +85,11 @@ public class MSMIOLib {
 		}
 	}
 
-	public static Graph openMSMHierarchy (Component c) {
+	public static Graph[] openMSMHierarchy (Component c) {
 		return openMSMHierarchy (c, DEFAULT_DIRECTORY);
 	}
 
-	public static Graph openMSMHierarchy (Component c, String path) {
+	public static Graph[] openMSMHierarchy (Component c, String path) {
 		JFileChooser jfc = new JFileChooser(path);
 		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
 		jfc.setDialogTitle("Open Hierarchical MSM Directory");
@@ -116,20 +116,23 @@ public class MSMIOLib {
 			gr = new DatGraphReader();
 		}
 
-		try {
-			Graph g = gr.readGraph(IOLib.streamFromString(newNode[0].tProbFilename));
-			if (newNode[0].eqProbFilename == null) {
-				g = EQProbReader.getEqProbs(null, g);
-			} else {
-				g = EQProbReader.addEqProbs(g, new File(newNode[0].eqProbFilename));
+		Graph[] graphs = new Graph[newNode.length];
+		for (int i = 0; i < newNode.length; ++i) {
+			try {
+				graphs[i] = gr.readGraph(IOLib.streamFromString(newNode[i].tProbFilename));
+				if (newNode[i].eqProbFilename == null) {
+					graphs[i] = EQProbReader.getEqProbs(null, graphs[i]);
+				} else {
+					graphs[i] = EQProbReader.addEqProbs(graphs[i], new File(newNode[i].eqProbFilename));
+				}
+			} catch ( Exception e ) {
+				Logger.getLogger(MSMIOLib.class.getName()).log(
+					Level.WARNING, "{0}\n{1}", 
+					new Object[]{e.getMessage(),StringLib.getStackTrace(e)});
+				return null;
 			}
-			return g;
-		} catch ( Exception e ) {
-			Logger.getLogger(MSMIOLib.class.getName()).log(
-				Level.WARNING, "{0}\n{1}", 
-				new Object[]{e.getMessage(),StringLib.getStackTrace(e)});
-			return null;
 		}
+		return graphs;
 	}
 
 	public static String saveGML (Graph g) {

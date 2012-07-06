@@ -83,7 +83,7 @@ import prefuse.visual.sort.ItemSorter;
  */
 public class TPTWindow extends JFrame {
 
-	private int numPaths = 6; //Number of initial top paths to retrieve
+	private int numPaths = 3; //Number of initial top paths to retrieve
 	private Visualization m_vis; 
 	private boolean isShowingPics; //Display is showing images
 
@@ -155,7 +155,7 @@ public class TPTWindow extends JFrame {
 		/* Renderer Setup */
 		final LabelRenderer lr = new LabelRenderer();
 		lr.setRoundedCorner(20, 20);
-		lr.getImageFactory().preloadImages(g.getNodes().tuples(), "image");
+		//lr.getImageFactory().preloadImages(g.getNodes().tuples(), "image");
 		lr.getImageFactory().setAsynchronous(false);
 
 		final EdgeRenderer er = new EdgeRenderer();
