@@ -155,7 +155,7 @@ public class TPTWindow extends JFrame {
 		/* Renderer Setup */
 		final LabelRenderer lr = new LabelRenderer();
 		lr.setRoundedCorner(20, 20);
-		//lr.getImageFactory().preloadImages(g.getNodes().tuples(), "image");
+		lr.getImageFactory().preloadImages(g.getNodes().tuples(), "image");
 		lr.getImageFactory().setAsynchronous(false);
 
 		final EdgeRenderer er = new EdgeRenderer();
@@ -378,6 +378,7 @@ public class TPTWindow extends JFrame {
 				m_vis.run("axes");
 				m_vis.run("color");
 				m_vis.run("nodeSize");
+				m_vis.run("nodeStroke");
 			}
 		});
 
@@ -451,7 +452,6 @@ public class TPTWindow extends JFrame {
 			}
 		});
 
-		final TextImageItemRenderer tiir = new TextImageItemRenderer();
 		JToggleButton togglePics = new JToggleButton("Show Images", false);
 		togglePics.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -466,6 +466,7 @@ public class TPTWindow extends JFrame {
 					nodeSize.setMaximumSize(5.0);
 					nodeSize.setMaximumSize(50.0);
 					isShowingPics = false;
+					lr.getImageFactory().preloadImages(g.getNodes().tuples(), "image");
 				} else {
 					
 					ActionList al = (ActionList)(m_vis.removeAction("color"));
@@ -483,6 +484,13 @@ public class TPTWindow extends JFrame {
 					nodeSize.setMinimumSize(1);
 					nodeSize.setMaximumSize(1);
 				}
+				//This is a sore point. If the images aren't already loaded
+				// and all node positions are fixed, Repaints aren't forced,
+				// so you won't see the images and/or things will look funky
+				// until you mouse over all or most of the nodes. I've even
+				// tried running a dedicated repaint thread in the background,
+				// but no dice. What is really needed is some notification
+				// up to the render level when all images are ready to display.
 				m_vis.run("nodeSize");
 				m_vis.run("nodeStroke");
 				m_vis.run("color");
@@ -548,6 +556,7 @@ public class TPTWindow extends JFrame {
 					}
 				}
 				m_vis.run("color");
+				m_vis.run("nodeSize");
 			}
 		});
 		nodeMode.setSelected(true);

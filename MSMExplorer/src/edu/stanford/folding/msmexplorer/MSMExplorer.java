@@ -270,9 +270,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		});
 
 		initGraph(g, m_vis);
-		if (isBigGraph) {
-			tr.getImageFactory().preloadImages(g.nodes(), "image");
-		}
+		tr.getImageFactory().preloadImages(g.nodes(), "image");
 
 		// --------------------------------------------------------------------
 		// set up a display to show the visualization
@@ -685,7 +683,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			EQPROB, 50, Constants.LOG_SCALE);
 		nodeSize.setMaximumSize(50.0);
 
-		if (g.getNodeTable().getColumnNumber("image") >= 0) {
+		if (g.getNodeTable().getColumnNumber("image") < 0) {
 			String expression = "CONCAT(" + imageLocation + ",'/State',label,'.png')";
 			g.getNodes().addColumn("image", expression);
 		}
