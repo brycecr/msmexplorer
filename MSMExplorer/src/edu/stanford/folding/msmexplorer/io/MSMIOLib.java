@@ -4,7 +4,11 @@ import java.awt.Component;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Hashtable;
+import java.util.Dictionary;
+import java.util.HashMap;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.JOptionPane;
 
@@ -133,6 +137,14 @@ public class MSMIOLib {
 			}
 		}
 		return graphs;
+	}
+
+	public static Dictionary<Integer, JLabel> getHierarchyLabels(Graph[] gs) {
+		Dictionary<Integer, JLabel> dict = new Hashtable<Integer, JLabel>(gs.length);	
+		for (int i = 0; i < gs.length; ++i) {
+			dict.put(i, new JLabel(Integer.toString(gs[i].getNodeCount())));
+		}
+		return dict;
 	}
 
 	public static String saveGML (Graph g) {

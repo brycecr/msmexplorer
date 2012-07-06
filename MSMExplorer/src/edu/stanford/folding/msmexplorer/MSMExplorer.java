@@ -125,7 +125,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	private String imageLocation = "'./lib/images'";
 	private Graph[] hierarchyList = null;
 	private JSlider zoomSlider = null;
-	private int hierarchyPos = -1;
 
 	public MSMExplorer() {
 		UILib.setPlatformLookAndFeel();
@@ -569,7 +568,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 			public void stateChanged(ChangeEvent ae) {
 				int pos = zoomSlider.getValue();
-				if (zoomSlider.isEnabled() && pos != hierarchyPos) {
+				if (zoomSlider.isEnabled() && !zoomSlider.getValueIsAdjusting()) {
 					assert hierarchyList != null;
 					//	MSMExplorer.this.getImagePath();
 					JFrame toDie = MSMExplorer.this.frame;
@@ -582,6 +581,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		fpanel.add(zoomSlider);
 		zoomSlider.setMajorTickSpacing(1);
 		zoomSlider.setPaintTicks(true);
+		zoomSlider.setPaintLabels(true);
 		zoomSlider.setSnapToTicks(true);
 		zoomSlider.setEnabled(false);
 
@@ -618,9 +618,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 	public void setHierarchy(Graph[] gs, int pos) {
 		hierarchyList = gs;
-		hierarchyPos = pos;
 		zoomSlider.setMaximum(gs.length - 1);
 		zoomSlider.setValue(pos);
+		zoomSlider.setLabelTable(MSMIOLib.getHierarchyLabels(gs));
 		zoomSlider.setEnabled(true);
 	}
 
