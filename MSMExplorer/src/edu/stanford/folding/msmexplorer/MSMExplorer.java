@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Point2D;
@@ -94,9 +95,13 @@ import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
 import edu.stanford.folding.msmexplorer.util.ui.FitOverviewListener;
 import edu.stanford.folding.msmexplorer.util.ui.JValueSliderF;
 
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.event.ComponentListener;
 import javax.swing.SwingConstants;
 import javax.swing.JSlider;
 import javax.swing.JFileChooser;
+import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import prefuse.util.PrefuseLib;
@@ -127,7 +132,23 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	private JSlider zoomSlider = null;
 
 	public MSMExplorer() {
-		UILib.setPlatformLookAndFeel();
+		try {
+			javax.swing.UIManager.LookAndFeelInfo[] installedLookAndFeels = javax.swing.UIManager.getInstalledLookAndFeels();
+			for (int idx = 0; idx < installedLookAndFeels.length; idx++) {
+				if ("Nimbus".equals(installedLookAndFeels[idx].getName())) {
+					javax.swing.UIManager.setLookAndFeel(installedLookAndFeels[idx].getClassName());
+					break;
+				}
+			}
+		} catch (ClassNotFoundException ex) {
+			java.util.logging.Logger.getLogger(MSMExplorer.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		} catch (InstantiationException ex) {
+			java.util.logging.Logger.getLogger(MSMExplorer.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		} catch (IllegalAccessException ex) {
+			java.util.logging.Logger.getLogger(MSMExplorer.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
+			java.util.logging.Logger.getLogger(MSMExplorer.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		}
 
 		//Selector window
 		final JFrame selector = new JFrame("W e l c o m e  |  M S M E x p l o r e r");
@@ -275,7 +296,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		// set up a display to show the visualization
 
 		final Display display = new Display(m_vis);
-		display.setSize(700, 700);
+		display.setSize(1200, 900);
 		display.pan(350, 350); // start centered
 		display.setForeground(Color.GRAY);
 		display.setBackground(Color.WHITE);
@@ -294,6 +315,15 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		JPanel fpanel = new JPanel();
 		fpanel.setLayout(new BoxLayout(fpanel, BoxLayout.Y_AXIS));
 		fpanel.setBackground(Color.WHITE);
+
+		this.addComponentListener(new ComponentListener() {
+			public void componentResized(ComponentEvent ce) {
+				display.setBounds(0, 0, MSMExplorer.this.getWidth(), MSMExplorer.this.getHeight());
+			}
+			public void componentMoved(ComponentEvent ce) {}
+			public void componentShown(ComponentEvent ce) {}
+			public void componentHidden(ComponentEvent ce) {}
+		});
 
 
 		//the F lets other code fire without a value change.
@@ -578,7 +608,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				}
 			}
 		});
-		fpanel.add(zoomSlider);
 		zoomSlider.setMajorTickSpacing(1);
 		zoomSlider.setPaintTicks(true);
 		zoomSlider.setPaintLabels(true);
@@ -600,13 +629,42 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		fpanel.add(Box.createVerticalGlue());
 
+		/*
+		JPanel sliderPane = new JPanel();
+		sliderPane.setLayout(new BoxLayout(sliderPane, BoxLayout.X_AXIS));
+		sliderPane.add(zoomSlider);
+		zoomSlider.setMaximumSize(new Dimension (60, 150));
+		sliderPane.add(Box.createHorizontalGlue());
+		sliderPane.setOpaque(false);
+		
+		JLayeredPane graphPane = new JLayeredPane();
+		graphPane.setPreferredSize(new Dimension(1000, 800));
+		graphPane.setLayout(new BoxLayout(graphPane, BoxLayout.Y_AXIS));
+		graphPane.setLayout(new GridLayout(2,2));
+		graphPane.add(sliderPane, new Integer(0));
+		graphPane.add(display, new Integer(1));
+		//zoomSlider.setVisible(false);
+		 * 
+		 */
+
+		JLayeredPane graphPane = new JLayeredPane();
+		graphPane.setLayout(null);
+		graphPane.add(display, new Integer(0));
+		graphPane.add(zoomSlider, new Integer(1));
+		graphPane.setPreferredSize(new Dimension (1000,800));
+		zoomSlider.setBounds(5, 10, 60, 150);
+		zoomSlider.setVisible(false);
+
+		
 		// create a new JSplitPane to present the interface
 		JSplitPane split = new JSplitPane();
-		split.setLeftComponent(display);
+		split.setLeftComponent(graphPane);
 		split.setRightComponent(fpanel);
 		split.setOneTouchExpandable(true);
 		split.setContinuousLayout(false);
-		split.setDividerLocation(700);
+		split.setDividerLocation(1200);
+		split.setOpaque(false);
+		this.setOpaque(false);
 
 		// now we run our action list
 		m_vis.run("draw");
@@ -622,6 +680,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		zoomSlider.setValue(pos);
 		zoomSlider.setLabelTable(MSMIOLib.getHierarchyLabels(gs));
 		zoomSlider.setEnabled(true);
+		zoomSlider.setVisible(true);
 	}
 
 	/**
@@ -775,6 +834,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
 		MSMExplorer msme = new MSMExplorer();
 
 	}   // end of main
@@ -865,6 +925,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		frame.pack();
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//XXX must not be quite right...
 		this.frame = frame;
 		view.frame = frame;
 
