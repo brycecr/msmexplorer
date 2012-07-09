@@ -293,9 +293,9 @@ public class TPTWindow extends JFrame {
 			VisualItem.FILLCOLOR, ColorLib.gray(200));
 
 
-		final DataSizeAction edgeWeight = new DataSizeAction(edges, "flux", 1000, Constants.LOG_SCALE);
-		edgeWeight.setMinimumSize(1.0);
-		edgeWeight.setMaximumSize(200);
+		final DataSizeAction edgeWeight = new DataSizeAction(edges, "flux", 200, Constants.LOG_SCALE);
+		edgeWeight.setMinimumSize(1);
+		edgeWeight.setMaximumSize(400);
 
 		final ActionList color = new ActionList(ActionList.INFINITY);
 		color.add(edgeWeight);
@@ -562,7 +562,7 @@ public class TPTWindow extends JFrame {
 		nodeMode.setSelected(true);
 
 
-		JRangeSlider edgeWeightSlider = new JRangeSlider(1, 4000, 1, 800, Constants.ORIENT_TOP_BOTTOM);
+		JRangeSlider edgeWeightSlider = new JRangeSlider(1, 800, 1, 400, Constants.ORIENT_TOP_BOTTOM);
 		edgeWeightSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				JRangeSlider slider = (JRangeSlider)e.getSource();
