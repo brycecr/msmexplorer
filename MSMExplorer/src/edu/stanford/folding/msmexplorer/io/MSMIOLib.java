@@ -84,7 +84,7 @@ public class MSMIOLib {
 			return g;
 		} catch ( Exception e ) {
 			JOptionPane.showMessageDialog(c, "Attempt to open MSM at " + f.getName() + 
-				" failed; file not found or not in the expected format.", "MSM Read Error", JOptionPane.ERROR_MESSAGE);
+				" failed; file not found or not in the expected format. Exception: " + e.toString(), "MSM Read Error", JOptionPane.ERROR_MESSAGE);
 			return null;
 		}
 	}

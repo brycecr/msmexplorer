@@ -66,23 +66,16 @@ public class EQProbReader {
 	 * @throws DataIOException 
 	 */
 	public static Graph addEqProbs(Graph g, File f) throws DataIOException {
-		int row = 0;
-		try { 
-			BufferedReader br = new BufferedReader(new FileReader(f));
-			String line = null;
-			Table nt = g.getNodeTable();
-			int ind = 1;
-			if ((ind = nt.getColumnNumber("eqProb")) == -1)
-				throw new DataIOException("Bad graph; eqProb not present");
-			while ((line = br.readLine()) != null)
-				nt.setDouble(row++, ind, Double.parseDouble(line));
+		Object[] probs = NewlineDelimitedReader.read(f);
+		Table nt = g.getNodeTable();
 
-		} catch (NumberFormatException nfe) {
-			throw new DataIOException("Bad number format at line " + row);
-		} catch (FileNotFoundException fnfe) {
-			throw new DataIOException("File " + f.toString() + " not found.");
-		} catch (IOException ioe) {
-			throw new DataIOException("Line read failed at line " + (++row));
+		int ind = 1;
+		if ((ind = nt.getColumnNumber("eqProb")) == -1) {
+			throw new DataIOException("Bad graph; eqProb not present");
+		}
+
+		for (int row = 0; row < probs.length; ++row) {
+			nt.setDouble(row, ind, (Double)probs[row]);
 		}
 
 		return g;

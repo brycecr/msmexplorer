@@ -1,5 +1,12 @@
 package edu.stanford.folding.msmexplorer.io;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.InputMismatchException;
+import javax.swing.JOptionPane;
+
 /**
  * A class to read generic newline delimited files. 
  * Should be useful for reading in axes labels, mapping
@@ -23,11 +30,23 @@ public class NewlineDelimitedReader {
       * @author brycecr
       */
      public static Object[] read (String filePath) {
+		try {
+			File f = new File(filePath);
+			return read (f);
+          } catch (NullPointerException npe) {
+               JOptionPane.showMessageDialog(null, "Null pathname for newline delimited "
+					+ "reader.");
+			return null;
+		}
+	}
+
+	public static Object[] read (File f) {
           Scanner scn = null;
-          ArrayList<Object> lines = null;
+          ArrayList lines = null;
+		String filePath = f.getAbsolutePath();
 
           try {
-               scn = new Scanner (new File(filePath));
+               scn = new Scanner (f);
 
                // There probably is a slicker way to do this
                // but I don't think you can beat the nominal
@@ -51,15 +70,16 @@ public class NewlineDelimitedReader {
                }
 
                return lines.toArray();
-
           } catch (FileNotFoundException fnfe) {
                JOptionPane.showMessageDialog(null, "Something slipped out from under us. "
                          + " Could not open file at " + filePath);
+			return null;
           } catch (InputMismatchException ime) {
                JOptionPane.showMessageDialog(null, "File at " + filePath + " read failure. Possible mix of"
                          + "data types in file; file must be all one data type.");
           } catch (Exception e) {
                JOptionPane.showMessageDialog(null, "Generic read failure on " + filePath);
           }
+		return null;
      }
 }
