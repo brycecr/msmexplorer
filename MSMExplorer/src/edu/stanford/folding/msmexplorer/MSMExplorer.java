@@ -132,6 +132,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	private JSlider zoomSlider = null;
 
 	public MSMExplorer() {
+		/*
+		 * //Nimbus looks cute, but seems to slow things down...not worth it, in other words
 		try {
 			javax.swing.UIManager.LookAndFeelInfo[] installedLookAndFeels = javax.swing.UIManager.getInstalledLookAndFeels();
 			for (int idx = 0; idx < installedLookAndFeels.length; idx++) {
@@ -149,6 +151,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
 			java.util.logging.Logger.getLogger(MSMExplorer.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
+		 * 
+		 */
 
 		//Selector window
 		final JFrame selector = new JFrame("W e l c o m e  |  M S M E x p l o r e r");
@@ -290,7 +294,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		});
 
 		initGraph(g, m_vis);
-		tr.getImageFactory().preloadImages(g.nodes(), "image");
+		//tr.getImageFactory().preloadImages(g.nodes(), "image");
 
 		// --------------------------------------------------------------------
 		// set up a display to show the visualization
