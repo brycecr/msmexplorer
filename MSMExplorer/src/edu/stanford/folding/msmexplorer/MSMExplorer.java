@@ -722,7 +722,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	public void setGraph(Graph g, String label) {
 		// update labeling
 		DefaultRendererFactory drf = (DefaultRendererFactory) m_vis.getRendererFactory();
-		//((LabelRenderer)drf.getDefaultRenderer()).setTextField(label);
 
 		// update graph
 		m_vis.removeGroup(graph);
@@ -1024,45 +1023,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	// ------------------------------------------------------------------------
 	//  Utility classes
 	// ------------------------------------------------------------------------
-	/**
-	 * Action to open a new graph, disposing the old graph.
-	 */
-	public class OpenGMLAction extends AbstractAction {
-
-		private MSMExplorer m_view;
-
-		/**
-		 * Constructor, initializes action.
-		 * @param the MSMExplorer instance to affect
-		 */
-		public OpenGMLAction(MSMExplorer view) {
-			m_view = view;
-			this.putValue(AbstractAction.NAME, "Open File...");
-			this.putValue(AbstractAction.ACCELERATOR_KEY,
-				KeyStroke.getKeyStroke("ctrl O"));
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			Graph g = IOLib.getGraphFile(m_view);
-
-			if (g != null) {
-				m_view.getImagePath();
-				frame.dispose();
-				graphView(g, "label");
-			}
-			/*
-			TableWriter tw = new DelimitedTextTableWriter();
-			try {
-			tw.writeTable(g.getNodeTable(), "./nodeTable.txt");
-			tw.writeTable(g.getEdgeTable(), "./edgeTable.txt");
-			System.out.println("win");
-			} catch (DataIOException ex) {
-			Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, ex);
-			}
-			 * 
-			 */
-		}
-	} // end of class OpenGraphAction
 
 	private class OpenHierarchyAction extends AbstractAction {
 
