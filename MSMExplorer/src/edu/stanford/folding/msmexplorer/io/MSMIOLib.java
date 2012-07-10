@@ -31,7 +31,10 @@ public class MSMIOLib {
 
 	private static final String DEFAULT_DIRECTORY = "~/Documents";
 
-	private MSMIOLib(){}; // no instantiation
+	private MSMIOLib() {
+	}
+
+	; // no instantiation
 
 	public static Graph getMSMFile(Component c) {
 		return getMSMFile(c, DEFAULT_DIRECTORY);
@@ -61,19 +64,20 @@ public class MSMIOLib {
 			"MTX Sparse Format (*.mtx)",
 			new MtxGraphReader());
 		jfc.setFileFilter(ff);
-		
+
 		int opt = jfc.showOpenDialog(c);
-		if (opt != JFileChooser.APPROVE_OPTION)
+		if (opt != JFileChooser.APPROVE_OPTION) {
 			return null;
+		}
 
 		File f = jfc.getSelectedFile();
-		FileFilter selectedFF = (FileFilter)jfc.getFileFilter();
+		FileFilter selectedFF = (FileFilter) jfc.getFileFilter();
 
 		//Assume file is dat unless a specific file filter is selected
 		GraphReader gr = new DatGraphReader();
 		if (!selectedFF.equals(jfc.getAcceptAllFileFilter())) {
-			ff = (SimpleFileFilter)selectedFF;
-			gr = (GraphReader)ff.getUserData();
+			ff = (SimpleFileFilter) selectedFF;
+			gr = (GraphReader) ff.getUserData();
 		}
 
 		try {
@@ -82,18 +86,21 @@ public class MSMIOLib {
 				g = EQProbReader.getEqProbs(null, g);
 			}
 			return g;
-		} catch ( Exception e ) {
-			JOptionPane.showMessageDialog(c, "Attempt to open MSM at " + f.getName() + 
-				" failed; file not found or not in the expected format. Exception: " + e.toString(), "MSM Read Error", JOptionPane.ERROR_MESSAGE);
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(c, "Attempt to open MSM "
+				+ "at " + f.getName() + " failed: file not "
+				+ "found or not in the expected format. "
+				+ "Exception: " + e.toString(), 
+				"MSM Read Error", JOptionPane.ERROR_MESSAGE);
 			return null;
 		}
 	}
 
-	public static Graph[] openMSMHierarchy (Component c) {
-		return openMSMHierarchy (c, DEFAULT_DIRECTORY);
+	public static Graph[] openMSMHierarchy(Component c) {
+		return openMSMHierarchy(c, DEFAULT_DIRECTORY);
 	}
 
-	public static Graph[] openMSMHierarchy (Component c, String path) {
+	public static Graph[] openMSMHierarchy(Component c, String path) {
 		JFileChooser jfc = new JFileChooser(path);
 		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
 		jfc.setDialogTitle("Open Hierarchical MSM Directory");
@@ -111,8 +118,8 @@ public class MSMIOLib {
 		assert newNode.length > 0;
 
 		GraphReader gr = null;
-		if (newNode[0].tProbFilename.endsWith(".mtx") || 
-			newNode[0].tProbFilename.endsWith(".MTX")) {
+		if (newNode[0].tProbFilename.endsWith(".mtx")
+			|| newNode[0].tProbFilename.endsWith(".MTX")) {
 
 			gr = new MtxGraphReader();
 
@@ -127,12 +134,22 @@ public class MSMIOLib {
 				if (newNode[i].eqProbFilename == null) {
 					graphs[i] = EQProbReader.getEqProbs(null, graphs[i]);
 				} else {
-					graphs[i] = EQProbReader.addEqProbs(graphs[i], new File(newNode[i].eqProbFilename));
+					graphs[i] = EQProbReader.addEqProbs(graphs[i], 
+						new File(newNode[i].eqProbFilename));
 				}
-			} catch ( Exception e ) {
+
+				// Set mapping for this node to the next
+				if (i < newNode.length - 1) {
+					graphs[i].addColumn("mapping", int.class);
+					Object[] mappings = NewlineDelimitedReader.read(newNode[i + 1].mmapFilename);
+					for (int j = 0; j < mappings.length; ++j) {
+						graphs[i].getNode(j).setInt("mapping", (Integer)mappings[j]);
+					}
+				}
+			} catch (Exception e) {
 				Logger.getLogger(MSMIOLib.class.getName()).log(
-					Level.WARNING, "{0}\n{1}", 
-					new Object[]{e.getMessage(),StringLib.getStackTrace(e)});
+					Level.WARNING, "{0}\n{1}",
+					new Object[]{e.getMessage(), StringLib.getStackTrace(e)});
 				return null;
 			}
 		}
@@ -140,18 +157,18 @@ public class MSMIOLib {
 	}
 
 	public static Dictionary<Integer, JLabel> getHierarchyLabels(Graph[] gs) {
-		Dictionary<Integer, JLabel> dict = new Hashtable<Integer, JLabel>(gs.length);	
+		Dictionary<Integer, JLabel> dict = new Hashtable<Integer, JLabel>(gs.length);
 		for (int i = 0; i < gs.length; ++i) {
 			dict.put(i, new JLabel(Integer.toString(gs[i].getNodeCount())));
 		}
 		return dict;
 	}
 
-	public static String saveGML (Graph g) {
+	public static String saveGML(Graph g) {
 		return saveGML(g, DEFAULT_DIRECTORY, null);
 	}
 
-	public static String saveGML (Graph g, Component c) {
+	public static String saveGML(Graph g, Component c) {
 		return saveGML(g, DEFAULT_DIRECTORY, c);
 	}
 
@@ -162,7 +179,7 @@ public class MSMIOLib {
 	 * @param path location to save file
 	 * @param c swing component to display notifications to
 	 */
-	public static String saveGML (Graph g, String path, Component c) {
+	public static String saveGML(Graph g, String path, Component c) {
 		JFileChooser jfc = new JFileChooser(path);
 		jfc.setDialogType(JFileChooser.SAVE_DIALOG);
 		jfc.setDialogTitle("Save MSM as GraphML");
@@ -176,15 +193,17 @@ public class MSMIOLib {
 		jfc.setFileFilter(ff);
 
 		int opt = jfc.showSaveDialog(c);
-		if (opt != JFileChooser.APPROVE_OPTION)
+		if (opt != JFileChooser.APPROVE_OPTION) {
 			return null;
+		}
 
 		String loc = jfc.getSelectedFile().getAbsolutePath();
 		int pos = -1;
-		if (!(loc.matches(".*\056xml") || loc.matches(".*\056graphml")))
+		if (!(loc.matches(".*\056xml") || loc.matches(".*\056graphml"))) {
 			loc += ".graphml";
+		}
 
-		GraphMLWriter gmlwr = new GraphMLWriter(); 
+		GraphMLWriter gmlwr = new GraphMLWriter();
 		try {
 			gmlwr.writeGraph(g, loc);
 		} catch (DataIOException ex) {
@@ -192,6 +211,6 @@ public class MSMIOLib {
 		}
 
 		return loc;
-		
+
 	}
 }

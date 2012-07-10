@@ -105,6 +105,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import prefuse.util.PrefuseLib;
+import prefuse.visual.AggregateTable;
 import prefuse.visual.EdgeItem;
 import prefuse.visual.NodeItem;
 
@@ -121,6 +122,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 	private static final int SIZE_THRESHOLD = 250; //Threshold for "big" graph behavior
 	private static final int DEGREE_THRESHOLD = 30;
+	private static final String aggr = "aggregates";
 	private static final String graph = "graph";
 	private static final String nodes = "graph.nodes";
 	private static final String edges = "graph.edges";
@@ -657,6 +659,13 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		add(split);
 	}
 
+	/**
+	 * Open the array of graphs gs as a related hierarchy. Initializes 
+	 * slider to switch between levels of the hierarchy.
+	 * 
+	 * @param gs
+	 * @param pos 
+	 */
 	public void setHierarchy(Graph[] gs, int pos) {
 		hierarchyList = gs;
 		zoomSlider.setMaximum(gs.length - 1);
@@ -664,6 +673,44 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		zoomSlider.setLabelTable(MSMIOLib.getHierarchyLabels(gs));
 		zoomSlider.setEnabled(true);
 		zoomSlider.setVisible(true);
+	}
+
+	/**
+	 * Can only be called on a MSMExplorer instance that already has its
+	 * own hierarchy list. Displays the aggregate graph that represents
+	 * the mapping from the graph at position bottom to the graph at
+	 * position top.
+	 * Should only be called after already initing a MSMExplorer
+	 * instance displaying the graph at hierarchy position bottom
+	 * 
+	 * @param bottom
+	 * @param top 
+	 */
+	public void setAggregates(int bottom, int top) {
+		AggregateTable at = m_vis.addAggregates(aggr);
+		at.addColumn(VisualItem.POLYGON, float[].class);
+		at.addColumn("id", int.class);
+
+		VisualGraph vg = (VisualGraph)m_vis.getVisualGroup(graph);
+		Iterator<VisualItem> vNodes = vg.nodes();
+
+		// we use a HashMap so mappings can be arbitrarily assigned
+		HashMap<Integer, AggregateItem> aggs = new HashMap<Integer, AggregateItem>(); 
+		while (vNodes.hasNext()) {
+			vNode = vNodes.next();
+			assert vNode != null;
+			int mapping = vNode.getInt("mapping");	
+			AggregateItem ai = null;
+			if (!aggs.containsKey(mapping)) {
+				ai = (AggregateItem)at.addItem();
+				ai.setInt("id", mapping);
+				aggs.put(mapping, ai);
+			} else {
+				ai = (AggregateItem)aggs.get(mapping);
+				assert ai != null;
+			}
+			ai.addItem((VisualItem)vNode);
+		}
 	}
 
 	/**
