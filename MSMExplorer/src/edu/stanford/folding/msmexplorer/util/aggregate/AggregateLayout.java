@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.stanford.folding.msmexplorer.util.render;
+package edu.stanford.folding.msmexplorer.util.aggregate;
 
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
@@ -26,7 +26,7 @@ public class AggregateLayout extends Layout {
     
     public AggregateLayout(String aggrGroup, Visualization vis) {
         super(aggrGroup);
-	this.setVisualization(vis);
+	   this.setVisualization(vis);
     }
     
     /**

@@ -26,15 +26,22 @@ msmexplorer
 
 1cc67217-0b89-0410-9b83-aacfaea71d4f
 
+aggregate
+dir
+
+
+
+add
+
 movie
 dir
 
 render
 dir
 
-ui
+stats
 dir
 
-stats
+ui
 dir
 

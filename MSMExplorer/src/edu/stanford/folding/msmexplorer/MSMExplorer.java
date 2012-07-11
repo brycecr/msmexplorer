@@ -92,7 +92,7 @@ import edu.stanford.folding.msmexplorer.util.ui.Picture;
 import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
 import edu.stanford.folding.msmexplorer.util.ui.FitOverviewListener;
 import edu.stanford.folding.msmexplorer.util.ui.JValueSliderF;
-import edu.stanford.folding.msmexplorer.util.render.AggregateLayout;
+import edu.stanford.folding.msmexplorer.util.aggregate.AggregateLayout;
 
 import java.awt.event.ComponentListener;
 import java.util.HashMap;
@@ -124,7 +124,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 	private static final int SIZE_THRESHOLD = 250; //Threshold for "big" graph behavior
 	private static final int DEGREE_THRESHOLD = 30;
-	private static final String aggr = "graph.aggregates";
+	private static final String aggr = "aggregates";
 	private static final String graph = "graph";
 	private static final String nodes = "graph.nodes";
 	private static final String edges = "graph.edges";
@@ -695,7 +695,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		Iterator<VisualItem> vNodes = vg.nodes();
 
 		Renderer polyR = new PolygonRenderer(Constants.POLY_TYPE_CURVE);
-		((PolygonRenderer)polyR).setCurveSlack(0.015f);
+		//((PolygonRenderer)polyR).setCurveSlack(0.1f);
 		((DefaultRendererFactory)m_vis.getRendererFactory()).add("ingroup('aggregates')", polyR);
 
 		// we use a HashMap so mappings can be arbitrarily assigned
@@ -726,7 +726,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			ColorLib.rgba(200,200,255,150)
 		};
 		final ColorAction aFill = new DataColorAction(aggr, "id",
-			Constants.NOMINAL, VisualItem.FILLCOLOR);
+			Constants.NOMINAL, VisualItem.FILLCOLOR, palette);
 		aFill.setVisualization(m_vis);
 
 		final ActionList draw = (ActionList)m_vis.getAction("draw");
