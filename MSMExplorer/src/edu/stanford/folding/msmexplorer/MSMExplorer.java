@@ -76,11 +76,9 @@ import prefuse.util.StrokeLib;
 import prefuse.util.display.ExportDisplayAction;
 import prefuse.util.force.Force;
 import prefuse.util.force.ForceSimulator;
-import prefuse.util.io.IOLib;
 import prefuse.util.ui.JForcePanel;
 import prefuse.util.ui.JValueSlider;
 import prefuse.util.ui.JSearchPanel;
-import prefuse.util.ui.UILib;
 import prefuse.visual.VisualGraph;
 import prefuse.visual.VisualItem;
 
@@ -94,17 +92,21 @@ import edu.stanford.folding.msmexplorer.util.ui.Picture;
 import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
 import edu.stanford.folding.msmexplorer.util.ui.FitOverviewListener;
 import edu.stanford.folding.msmexplorer.util.ui.JValueSliderF;
+import edu.stanford.folding.msmexplorer.util.render.AggregateLayout;
 
-import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.ComponentListener;
+import java.util.HashMap;
+import javax.swing.JCheckBox;
 import javax.swing.SwingConstants;
 import javax.swing.JSlider;
 import javax.swing.JFileChooser;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import prefuse.render.PolygonRenderer;
+import prefuse.render.Renderer;
 import prefuse.util.PrefuseLib;
+import prefuse.visual.AggregateItem;
 import prefuse.visual.AggregateTable;
 import prefuse.visual.EdgeItem;
 import prefuse.visual.NodeItem;
@@ -122,7 +124,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 	private static final int SIZE_THRESHOLD = 250; //Threshold for "big" graph behavior
 	private static final int DEGREE_THRESHOLD = 30;
-	private static final String aggr = "aggregates";
+	private static final String aggr = "graph.aggregates";
 	private static final String graph = "graph";
 	private static final String nodes = "graph.nodes";
 	private static final String edges = "graph.edges";
@@ -377,7 +379,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		distSlider.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent e) {
-				((GraphDistanceFilter) ((ActionList) m_vis.getAction("draw")).get(0)).setDistance(distSlider.getValue().intValue());
+				((GraphDistanceFilter) ((ActionList) 
+					m_vis.getAction("draw")).get(0)).setDistance(distSlider.getValue().intValue());
 				eqProbSlider.fire();
 			}
 		});
@@ -412,9 +415,11 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 			public void actionPerformed(ActionEvent ae) {
 				if (((JToggleButton) ae.getSource()).isSelected()) {
-					((EdgeRenderer) ((DefaultRendererFactory) m_vis.getRendererFactory()).getDefaultEdgeRenderer()).setEdgeType(Constants.EDGE_TYPE_CURVE);
+					((EdgeRenderer) ((DefaultRendererFactory) m_vis.getRendererFactory()).
+					 getDefaultEdgeRenderer()).setEdgeType(Constants.EDGE_TYPE_CURVE);
 				} else {
-					((EdgeRenderer) ((DefaultRendererFactory) m_vis.getRendererFactory()).getDefaultEdgeRenderer()).setEdgeType(Constants.EDGE_TYPE_LINE);
+					((EdgeRenderer) ((DefaultRendererFactory) m_vis.getRendererFactory()).
+					 getDefaultEdgeRenderer()).setEdgeType(Constants.EDGE_TYPE_LINE);
 				}
 
 				m_vis.run("draw");
@@ -599,6 +604,17 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		zoomSlider.setSnapToTicks(true);
 		zoomSlider.setEnabled(false);
 
+		final JCheckBox overToggle = new JCheckBox("Show Overlay");
+		overToggle.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				if (overToggle.isSelected()) {
+					int pos = zoomSlider.getValue();
+					MSMExplorer.this.setAggregates(pos, pos + 1);
+				}
+			}
+
+		});
+
 		// overview display window
 		Display overview = new Display(m_vis);
 		overview.setSize(290, 290);
@@ -614,31 +630,15 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		fpanel.add(Box.createVerticalGlue());
 
-		/*
-		JPanel sliderPane = new JPanel();
-		sliderPane.setLayout(new BoxLayout(sliderPane, BoxLayout.X_AXIS));
-		sliderPane.add(zoomSlider);
-		zoomSlider.setMaximumSize(new Dimension (60, 150));
-		sliderPane.add(Box.createHorizontalGlue());
-		sliderPane.setOpaque(false);
-		
-		JLayeredPane graphPane = new JLayeredPane();
-		graphPane.setPreferredSize(new Dimension(1000, 800));
-		graphPane.setLayout(new BoxLayout(graphPane, BoxLayout.Y_AXIS));
-		graphPane.setLayout(new GridLayout(2,2));
-		graphPane.add(sliderPane, new Integer(0));
-		graphPane.add(display, new Integer(1));
-		//zoomSlider.setVisible(false);
-		 * 
-		 */
-
 		JLayeredPane graphPane = new JLayeredPane();
 		graphPane.setLayout(null);
 		graphPane.add(display, new Integer(0));
 		graphPane.add(zoomSlider, new Integer(1));
+		graphPane.add(overToggle, new Integer(1));
 		graphPane.setPreferredSize(new Dimension (1000,800));
 		zoomSlider.setBounds(5, 10, 60, 150);
 		zoomSlider.setVisible(false);
+		overToggle.setBounds(5, 165, 80, 20);
 
 		
 		// create a new JSplitPane to present the interface
@@ -694,10 +694,14 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		VisualGraph vg = (VisualGraph)m_vis.getVisualGroup(graph);
 		Iterator<VisualItem> vNodes = vg.nodes();
 
+		Renderer polyR = new PolygonRenderer(Constants.POLY_TYPE_CURVE);
+		((PolygonRenderer)polyR).setCurveSlack(0.015f);
+		((DefaultRendererFactory)m_vis.getRendererFactory()).add("ingroup('aggregates')", polyR);
+
 		// we use a HashMap so mappings can be arbitrarily assigned
 		HashMap<Integer, AggregateItem> aggs = new HashMap<Integer, AggregateItem>(); 
 		while (vNodes.hasNext()) {
-			vNode = vNodes.next();
+			Node vNode = (Node)vNodes.next();
 			assert vNode != null;
 			int mapping = vNode.getInt("mapping");	
 			AggregateItem ai = null;
@@ -710,7 +714,28 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				assert ai != null;
 			}
 			ai.addItem((VisualItem)vNode);
-		}
+		} 
+		final ColorAction aStroke = new ColorAction(aggr, VisualItem.STROKECOLOR);
+		aStroke.setDefaultColor(ColorLib.gray(200));
+		aStroke.add("_hover", ColorLib.rgb(255,100,100));
+		aStroke.setVisualization(m_vis);
+		
+		final int[] palette = new int[] {
+			ColorLib.rgba(255,200,200,150),
+			ColorLib.rgba(200,255,200,150),
+			ColorLib.rgba(200,200,255,150)
+		};
+		final ColorAction aFill = new DataColorAction(aggr, "id",
+			Constants.NOMINAL, VisualItem.FILLCOLOR);
+		aFill.setVisualization(m_vis);
+
+		final ActionList draw = (ActionList)m_vis.getAction("draw");
+		draw.add(aFill);
+		draw.add(aStroke);
+
+		((ActionList)m_vis.getAction("lll")).add(new AggregateLayout(aggr, m_vis));
+		m_vis.run("draw");
+		m_vis.run("lll");
 	}
 
 	/**

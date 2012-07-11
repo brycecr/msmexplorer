@@ -13,6 +13,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.JOptionPane;
 
 import prefuse.data.Graph;
+import prefuse.data.Table;
 import prefuse.data.io.DataIOException;
 import prefuse.data.io.GraphMLReader;
 import prefuse.data.io.GraphMLWriter;
@@ -139,9 +140,11 @@ public class MSMIOLib {
 				}
 
 				// Set mapping for this node to the next
-				if (i < newNode.length - 1) {
-					graphs[i].addColumn("mapping", int.class);
-					Object[] mappings = NewlineDelimitedReader.read(newNode[i + 1].mmapFilename);
+				if (i == newNode.length - 1) {
+					System.err.println("num states is " + graphs[i].getNodeCount());
+					Table nt = graphs[i].getNodeTable();
+					nt.addColumn("mapping", int.class);
+					Object[] mappings = NewlineDelimitedReader.read(newNode[i - 1].mmapFilename);
 					for (int j = 0; j < mappings.length; ++j) {
 						graphs[i].getNode(j).setInt("mapping", (Integer)mappings[j]);
 					}
