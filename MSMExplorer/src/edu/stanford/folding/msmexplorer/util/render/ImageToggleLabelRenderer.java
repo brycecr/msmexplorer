@@ -18,6 +18,8 @@ public class ImageToggleLabelRenderer extends LabelRenderer {
      * as the field name for looking up text, and no image is used.
      */
     public ImageToggleLabelRenderer() {
+	        //initializes an ImageFactory whether or not one is ever
+	        //used, and keeps this image factory around
 		m_images = new ImageFactory();
     }
     
