@@ -94,6 +94,7 @@ import edu.stanford.folding.msmexplorer.util.ui.JValueSliderF;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregateLayout;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregatePrioritySorter;
 
+import edu.stanford.folding.msmexplorer.util.render.ImageToggleLabelRenderer;
 import java.awt.event.ComponentListener;
 import java.util.HashMap;
 import javax.swing.JCheckBox;
@@ -103,7 +104,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-import prefuse.render.ImageToggleLabelRenderer;
 import prefuse.render.PolygonRenderer;
 import prefuse.render.Renderer;
 import prefuse.util.PrefuseLib;

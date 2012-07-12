@@ -1,5 +1,6 @@
 package edu.stanford.folding.msmexplorer.tpt;
 
+import edu.stanford.folding.msmexplorer.util.render.ImageToggleLabelRenderer;
 import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -62,7 +63,6 @@ import prefuse.action.filter.VisibilityFilter;
 import prefuse.action.layout.AxisLabelLayout;
 import prefuse.render.AxisRenderer;
 import prefuse.render.ImageFactory;
-import prefuse.render.ImageToggleLabelRenderer;
 import prefuse.render.RendererFactory;
 import prefuse.visual.expression.VisiblePredicate;
 import prefuse.render.Renderer;
@@ -476,7 +476,6 @@ public class TPTWindow extends JFrame {
 
 					double scale = 1.0d / m_vis.getDisplay(0).getScale();
 					scale *= scale;
-					System.out.println("scale is " + scale);
 					ifa.setMaxImageDimensions((int)(150.0d*scale), (int)(150.0d*scale));
 					ifa.preloadImages(g.getNodes().tuples(), "image");
 					assert !ifa.isAsynchronous();
