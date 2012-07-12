@@ -47,7 +47,6 @@ import prefuse.data.tuple.DefaultTupleSet;
 import prefuse.action.ActionList;
 import prefuse.render.ShapeRenderer;
 import prefuse.render.EdgeRenderer;
-import prefuse.render.LabelRenderer;
 import prefuse.util.ColorLib;
 import prefuse.util.force.Force;
 import prefuse.util.force.ForceSimulator;
@@ -56,7 +55,6 @@ import prefuse.util.ui.JForcePanel;
 import prefuse.util.ui.JRangeSlider;
 import prefuse.visual.VisualItem;
 import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
-import java.awt.Image;
 import java.awt.geom.Rectangle2D;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
@@ -64,6 +62,7 @@ import prefuse.action.filter.VisibilityFilter;
 import prefuse.action.layout.AxisLabelLayout;
 import prefuse.render.AxisRenderer;
 import prefuse.render.ImageFactory;
+import prefuse.render.ImageToggleLabelRenderer;
 import prefuse.render.RendererFactory;
 import prefuse.visual.expression.VisiblePredicate;
 import prefuse.render.Renderer;
@@ -150,7 +149,7 @@ public class TPTWindow extends JFrame {
 		m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
 
 		/* Renderer Setup */
-		final LabelRenderer lr = new LabelRenderer();
+		final ImageToggleLabelRenderer lr = new ImageToggleLabelRenderer();
 		lr.setRoundedCorner(100, 100);
 		lr.getImageFactory().setAsynchronous(false);
 		final ImageFactory ifa = lr.getImageFactory();

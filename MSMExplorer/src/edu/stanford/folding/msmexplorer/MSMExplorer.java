@@ -68,7 +68,6 @@ import prefuse.data.tuple.TupleSet;
 import prefuse.data.tuple.DefaultTupleSet;
 import prefuse.render.DefaultRendererFactory;
 import prefuse.render.EdgeRenderer;
-import prefuse.render.LabelRenderer;
 import prefuse.render.ShapeRenderer;
 import prefuse.util.ColorLib;
 import prefuse.util.FontLib;
@@ -93,7 +92,6 @@ import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
 import edu.stanford.folding.msmexplorer.util.ui.FitOverviewListener;
 import edu.stanford.folding.msmexplorer.util.ui.JValueSliderF;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregateLayout;
-import edu.stanford.folding.msmexplorer.util.aggregate.AggregateDragControl;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregatePrioritySorter;
 
 import java.awt.event.ComponentListener;
@@ -105,6 +103,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import prefuse.render.ImageToggleLabelRenderer;
 import prefuse.render.PolygonRenderer;
 import prefuse.render.Renderer;
 import prefuse.util.PrefuseLib;
@@ -112,7 +111,6 @@ import prefuse.visual.AggregateItem;
 import prefuse.visual.AggregateTable;
 import prefuse.visual.EdgeItem;
 import prefuse.visual.NodeItem;
-import prefuse.visual.sort.ItemSorter;
 
 /**
  * Class to execute MSMExplorer, a visualization module for
@@ -211,7 +209,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		// create a new, empty visualization for our data
 
-		final LabelRenderer tr = new LabelRenderer();
+		final ImageToggleLabelRenderer tr = new ImageToggleLabelRenderer();
 		tr.setVerticalAlignment(Constants.BOTTOM);
 		tr.setRoundedCorner(8, 8);
 		// selfref renderer is for self-transitions. However, at this point,
