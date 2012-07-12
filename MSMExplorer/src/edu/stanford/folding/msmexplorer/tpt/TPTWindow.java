@@ -56,12 +56,14 @@ import prefuse.util.ui.JForcePanel;
 import prefuse.util.ui.JRangeSlider;
 import prefuse.visual.VisualItem;
 import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
+import java.awt.Image;
 import java.awt.geom.Rectangle2D;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 import prefuse.action.filter.VisibilityFilter;
 import prefuse.action.layout.AxisLabelLayout;
 import prefuse.render.AxisRenderer;
+import prefuse.render.ImageFactory;
 import prefuse.render.RendererFactory;
 import prefuse.visual.expression.VisiblePredicate;
 import prefuse.render.Renderer;
@@ -84,6 +86,7 @@ public class TPTWindow extends JFrame {
 
 	private static final String nodes = "graph.nodes";
 	private static final String edges = "graph.edges";
+	private static final String graph = "graph";
 
 	private static final int MAX_DEPTH = 100;
 	private static final int AXIS_WIDTH = 40;
@@ -125,7 +128,6 @@ public class TPTWindow extends JFrame {
 
 			gra.getNodeTable().addColumn("source", boolean.class, false);
 			gra.getNodeTable().addColumn("target", boolean.class, false);
-			//g.addColumn("inTPT", boolean.class, false);
 			gra.getNodeTable().addColumn("inTPT", boolean.class, false);
 			gra.getEdgeTable().addColumn("inTPT", boolean.class, false);
 			gra.addColumn("flux", double.class, 0.0d);
@@ -144,14 +146,14 @@ public class TPTWindow extends JFrame {
 		setNumPaths(tptCalc, gra, numPaths);
 
 		m_vis = new Visualization();
-		m_vis.add("graph", gra);
+		m_vis.add(graph, gra);
 		m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
 
 		/* Renderer Setup */
 		final LabelRenderer lr = new LabelRenderer();
 		lr.setRoundedCorner(100, 100);
-		lr.getImageFactory().preloadImages(g.getNodes().tuples(), "image");
 		lr.getImageFactory().setAsynchronous(false);
+		final ImageFactory ifa = lr.getImageFactory();
 
 		final EdgeRenderer er = new EdgeRenderer();
 		er.setEdgeType(Constants.EDGE_TYPE_CURVE);
@@ -458,10 +460,10 @@ public class TPTWindow extends JFrame {
 					m_vis.putAction("color", al);
 					lr.setImageField(null);
 					//((DataSizeAction)m_vis.getAction("nodeSize")).setMaximumSize(50.0);
-					nodeSize.setMaximumSize(5.0);
+					nodeSize.setMinimumSize(5.0);
 					nodeSize.setMaximumSize(50.0);
 					isShowingPics = false;
-					lr.getImageFactory().preloadImages(g.getNodes().tuples(), "image");
+					ifa.preloadImages(g.getNodes().tuples(), "image");
 				} else {
 					
 					ActionList al = (ActionList)(m_vis.removeAction("color"));
@@ -469,15 +471,20 @@ public class TPTWindow extends JFrame {
 					al.add (imgDataFill);
 					m_vis.putAction("color", al);
 					  lr.setImageField("image");
-					  double scale = m_vis.getDisplay(0).getScale();
-					  if (scale < 1.0d) scale = 1.0d;
-					  lr.getImageFactory().setMaxImageDimensions((int)(100*scale), (int)(100*scale));
 					  lr.setImagePosition(Constants.LEFT);
 
 					isShowingPics = true;
 
-					nodeSize.setMinimumSize(1);
-					nodeSize.setMaximumSize(1);
+					double scale = 1.0d / m_vis.getDisplay(0).getScale();
+					scale *= scale;
+					System.out.println("scale is " + scale);
+					ifa.setMaxImageDimensions((int)(150.0d*scale), (int)(150.0d*scale));
+					ifa.preloadImages(g.getNodes().tuples(), "image");
+					assert !ifa.isAsynchronous();
+
+					//if (scale < 1.0d) scale = -1.0d;
+					nodeSize.setMinimumSize(1.0d*scale);
+					nodeSize.setMaximumSize(1.0d*scale);
 				}
 				//This is a sore point. If the images aren't already loaded
 				// and all node positions are fixed, Repaints aren't forced,
@@ -489,7 +496,8 @@ public class TPTWindow extends JFrame {
 				m_vis.run("nodeSize");
 				m_vis.run("nodeStroke");
 				m_vis.run("color");
-				m_vis.invalidateAll();
+				//m_vis.run("tptLayout");
+				//m_vis.invalidateAll();
 				m_vis.repaint();
 			}
 		});
