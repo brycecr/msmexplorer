@@ -648,7 +648,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		graphPane.setPreferredSize(new Dimension (1000,800));
 		zoomSlider.setBounds(5, 10, 60, 150);
 		zoomSlider.setVisible(false);
-		overToggle.setBounds(5, 165, 200, 20);
+		overToggle.setBounds(5, 165, 120, 20);
 		overToggle.setVisible(false);
 
 		

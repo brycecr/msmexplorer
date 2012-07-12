@@ -149,7 +149,7 @@ public class TPTWindow extends JFrame {
 
 		/* Renderer Setup */
 		final LabelRenderer lr = new LabelRenderer();
-		lr.setRoundedCorner(20, 20);
+		lr.setRoundedCorner(100, 100);
 		lr.getImageFactory().preloadImages(g.getNodes().tuples(), "image");
 		lr.getImageFactory().setAsynchronous(false);
 
@@ -267,12 +267,12 @@ public class TPTWindow extends JFrame {
 		imgDataFill.add(VisualItem.FIXED, ColorLib.rgb(255, 255, 255));
 
 		final ColorAction imgAltDataFill = new ColorAction(nodes, VisualItem.FILLCOLOR, ColorLib.rgb(255, 255, 255));
-		imgAltDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(255, 0, 0));
-		imgAltDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(0, 0, 255));
+		imgAltDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(180, 40, 40));
+		imgAltDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(40, 40, 180));
 
 		final ColorAction altDataFill = new ColorAction(nodes, VisualItem.FILLCOLOR, ColorLib.rgb(124, 252, 0));
-		altDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(255, 0, 0));
-		altDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(0, 0, 255));
+		altDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(180, 40, 40));
+		altDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(40, 40, 180));
 
 		final ColorAction nodeStroke = new ColorAction(nodes, VisualItem.STROKECOLOR, ColorLib.rgb(50, 50, 50));
 		nodeStroke.add(VisualItem.HOVER, ColorLib.rgb(226, 86, 0));
