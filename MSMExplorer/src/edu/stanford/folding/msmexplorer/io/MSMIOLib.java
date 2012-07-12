@@ -115,6 +115,13 @@ public class MSMIOLib {
 		File f = jfc.getSelectedFile();
 
 		FileNode newNode[] = HierarchySketcher.sketch(f.getAbsolutePath());
+		if (newNode.length == 0) {
+			JOptionPane.showMessageDialog(null, 
+				"Could not find MSM hierarchy at " 
+				+ f.getAbsolutePath(), "Hierarchy Open Error", 
+				JOptionPane.ERROR_MESSAGE);
+			return new Graph[0];
+		}
 
 		assert newNode.length > 0;
 

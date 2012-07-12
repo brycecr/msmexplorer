@@ -25,8 +25,8 @@ public class AggregateLayout extends Layout {
     private double[] m_pts;   // buffer for computing convex hulls
     
     public AggregateLayout(String aggrGroup, Visualization vis) {
-        super(aggrGroup);
-	   this.setVisualization(vis);
+	    super(aggrGroup);
+	    this.setVisualization(vis);
     }
     
     /**

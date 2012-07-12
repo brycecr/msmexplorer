@@ -93,6 +93,8 @@ import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
 import edu.stanford.folding.msmexplorer.util.ui.FitOverviewListener;
 import edu.stanford.folding.msmexplorer.util.ui.JValueSliderF;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregateLayout;
+import edu.stanford.folding.msmexplorer.util.aggregate.AggregateDragControl;
+import edu.stanford.folding.msmexplorer.util.aggregate.AggregatePrioritySorter;
 
 import java.awt.event.ComponentListener;
 import java.util.HashMap;
@@ -110,6 +112,7 @@ import prefuse.visual.AggregateItem;
 import prefuse.visual.AggregateTable;
 import prefuse.visual.EdgeItem;
 import prefuse.visual.NodeItem;
+import prefuse.visual.sort.ItemSorter;
 
 /**
  * Class to execute MSMExplorer, a visualization module for
@@ -134,6 +137,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	private String imageLocation = "'./lib/images'";
 	private Graph[] hierarchyList = null;
 	private JSlider zoomSlider = null;
+	private JCheckBox overToggle = null;
 
 	public MSMExplorer() {
 
@@ -236,16 +240,18 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				}
 				for (int i = 0; i < add.length; ++i) {
 					((VisualItem) add[i]).setFixed(false);
-					Iterator focusEdges = ((Node) add[i]).edges();
-					while (focusEdges.hasNext()) {
-						VisualItem currEdge = (VisualItem) focusEdges.next();
-						currEdge.setHover(false);
-					}
-					((VisualItem) add[i]).setFixed(true);
-					Iterator focusEdges2 = ((Node) add[i]).edges();
-					while (focusEdges2.hasNext()) {
-						VisualItem currEdge = (VisualItem) focusEdges2.next();
-						currEdge.setHover(true);
+					if (add[i] instanceof Node) {
+						Iterator focusEdges = ((Node) add[i]).edges();
+						while (focusEdges.hasNext()) {
+							VisualItem currEdge = (VisualItem) focusEdges.next();
+							currEdge.setHover(false);
+						}
+						((VisualItem) add[i]).setFixed(true);
+						Iterator focusEdges2 = ((Node) add[i]).edges();
+						while (focusEdges2.hasNext()) {
+							VisualItem currEdge = (VisualItem) focusEdges2.next();
+							currEdge.setHover(true);
+						}
 					}
 				}
 				if (ts.getTupleCount() == 0) {
@@ -291,12 +297,12 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		// main display controls
 		display.addControlListener(new FocusControlWithDeselect(1));
-		display.addControlListener(new DragControl());
 		display.addControlListener(new PanControl());
 		display.addControlListener(new ZoomControl());
 		display.addControlListener(new WheelZoomControl());
 		display.addControlListener(new ZoomToFitControl());
 		display.addControlListener(new NeighborHighlightControl());
+		display.addControlListener(new DragControl());
 
 		// Main control panel
 		JPanel fpanel = new JPanel();
@@ -477,19 +483,16 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				((ActionList) m_vis.getAction("lll")).cancel();
 			}
 		});
-//		if (isBigGraph) //HERE
-//			pause.setEnabled(false);
 
 		JButton start = new JButton("Run Layout");
 		start.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				//if (!lll.isScheduled())
-				((ActionList) m_vis.getAction("lll")).run();
+				if (!m_vis.getAction("lll").isRunning()) {
+					((ActionList) m_vis.getAction("lll")).run();
+				}
 			}
 		});
-//		if (isBigGraph) //HERE
-//			start.setEnabled(false);
 
 		// Run or stop layout
 		Box runControls = new Box(BoxLayout.X_AXIS);
@@ -604,12 +607,19 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		zoomSlider.setSnapToTicks(true);
 		zoomSlider.setEnabled(false);
 
-		final JCheckBox overToggle = new JCheckBox("Show Overlay");
+		overToggle = new JCheckBox("Show Overlay");
 		overToggle.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				if (overToggle.isSelected()) {
 					int pos = zoomSlider.getValue();
 					MSMExplorer.this.setAggregates(pos, pos + 1);
+				} else {
+					assert !overToggle.isSelected();
+					int pos = zoomSlider.getValue();
+					JFrame toDie = MSMExplorer.this.frame;
+					MSMExplorer msme = graphView(hierarchyList[pos], "label");
+					msme.setHierarchy(hierarchyList, pos);
+					toDie.dispose();
 				}
 			}
 
@@ -638,7 +648,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		graphPane.setPreferredSize(new Dimension (1000,800));
 		zoomSlider.setBounds(5, 10, 60, 150);
 		zoomSlider.setVisible(false);
-		overToggle.setBounds(5, 165, 80, 20);
+		overToggle.setBounds(5, 165, 200, 20);
+		overToggle.setVisible(false);
 
 		
 		// create a new JSplitPane to present the interface
@@ -673,6 +684,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		zoomSlider.setLabelTable(MSMIOLib.getHierarchyLabels(gs));
 		zoomSlider.setEnabled(true);
 		zoomSlider.setVisible(true);
+		overToggle.setVisible(true);
 	}
 
 	/**
@@ -687,12 +699,15 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 * @param top 
 	 */
 	public void setAggregates(int bottom, int top) {
+
+		//VisualGraph vg = (VisualGraph)m_vis.getVisualGroup(graph);
+		TupleSet vg = m_vis.getGroup(nodes);
+		Iterator<VisualItem> vNodes = vg.tuples();
+		//Iterator<VisualItem> vNodes = vg.nodes();
+
 		AggregateTable at = m_vis.addAggregates(aggr);
 		at.addColumn(VisualItem.POLYGON, float[].class);
 		at.addColumn("id", int.class);
-
-		VisualGraph vg = (VisualGraph)m_vis.getVisualGroup(graph);
-		Iterator<VisualItem> vNodes = vg.nodes();
 
 		Renderer polyR = new PolygonRenderer(Constants.POLY_TYPE_CURVE);
 		//((PolygonRenderer)polyR).setCurveSlack(0.1f);
@@ -717,7 +732,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		} 
 		final ColorAction aStroke = new ColorAction(aggr, VisualItem.STROKECOLOR);
 		aStroke.setDefaultColor(ColorLib.gray(200));
-		aStroke.add("_hover", ColorLib.rgb(255,100,100));
+		aStroke.add(VisualItem.FIXED, ColorLib.rgb(255,100,100));
 		aStroke.setVisualization(m_vis);
 		
 		final int[] palette = new int[] {
@@ -726,12 +741,15 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			ColorLib.rgba(200,200,255,150)
 		};
 		final ColorAction aFill = new DataColorAction(aggr, "id",
-			Constants.NOMINAL, VisualItem.FILLCOLOR, palette);
+			Constants.NOMINAL, VisualItem.FILLCOLOR, ColorLib.getCategoryPalette(50, 0.95f, .15f, .9f, .5f));
 		aFill.setVisualization(m_vis);
 
 		final ActionList draw = (ActionList)m_vis.getAction("draw");
 		draw.add(aFill);
 		draw.add(aStroke);
+
+		m_vis.setInteractive(aggr, null, false);
+		m_vis.getDisplay(0).setItemSorter(new AggregatePrioritySorter());
 
 		((ActionList)m_vis.getAction("lll")).add(new AggregateLayout(aggr, m_vis));
 		m_vis.run("draw");
@@ -790,7 +808,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		StrokeAction nodeWeight = new StrokeAction(nodes,
 			StrokeLib.getStroke(1.0f));
-		edgeWeight.add(VisualItem.HIGHLIGHT, StrokeLib.getStroke(2.0f));
+		nodeWeight.add(VisualItem.HIGHLIGHT, StrokeLib.getStroke(2.0f));
 
 		DataSizeAction nodeSize = new DataSizeAction(nodes,
 			EQPROB, 50, Constants.LOG_SCALE);
@@ -839,6 +857,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		m_vis.putAction("layout", animate);
 
 		m_vis.runAfter("draw", "layout");
+		m_vis.alwaysRunAfter("lll", "draw");
 
 		// get forces from simulator
 		ForceSimulator fsim = ((ForceDirectedLayout) ((ActionList) m_vis.getAction("lll")).get(0)).getForceSimulator(); //HERE
