@@ -10,6 +10,8 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
@@ -56,16 +58,21 @@ import prefuse.util.ui.JForcePanel;
 import prefuse.util.ui.JRangeSlider;
 import prefuse.visual.VisualItem;
 import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 import prefuse.action.filter.VisibilityFilter;
 import prefuse.action.layout.AxisLabelLayout;
+import prefuse.controls.Control;
 import prefuse.render.AxisRenderer;
 import prefuse.render.ImageFactory;
 import prefuse.render.RendererFactory;
 import prefuse.visual.expression.VisiblePredicate;
 import prefuse.render.Renderer;
+import prefuse.util.GraphicsLib;
+import prefuse.util.display.DisplayLib;
 import prefuse.visual.expression.InGroupPredicate;
 import prefuse.visual.sort.ItemSorter;
 
@@ -82,11 +89,14 @@ public class TPTWindow extends JFrame {
 	private int numPaths = 3; //Number of initial top paths to retrieve
 	private Visualization m_vis; 
 	private boolean isShowingPics; //Display is showing images
+	private ImageFactory ifa = null;
 
 	private static final String nodes = "graph.nodes";
 	private static final String edges = "graph.edges";
 	private static final String graph = "graph";
 
+	private static final int ZOOM_MARGIN = 130;
+	private static final long ZOOM_DURATION = 1000;
 	private static final int MAX_DEPTH = 100;
 	private static final int AXIS_WIDTH = 40;
 
@@ -151,7 +161,7 @@ public class TPTWindow extends JFrame {
 		/* Renderer Setup */
 		final ImageToggleLabelRenderer lr = new ImageToggleLabelRenderer();
 		lr.setRoundedCorner(100, 100);
-		final ImageFactory ifa = lr.getImageFactory();
+		ifa = lr.getImageFactory();
 		lr.getImageFactory().setAsynchronous(false);
 
 		final EdgeRenderer er = new EdgeRenderer();
@@ -223,7 +233,7 @@ public class TPTWindow extends JFrame {
 		//yaxis.setLayoutBounds(rect);
 		
 		ActionList tptLayout = new ActionList(ActionList.INFINITY);
-		tptLayout.add(new ForceDirectedLayout("graph"));
+		tptLayout.add(new ForceDirectedLayout(graph));
 		tptLayout.add(new RepaintAction());
 		tptLayout.add(filter);
 
@@ -268,12 +278,10 @@ public class TPTWindow extends JFrame {
 		imgDataFill.add(VisualItem.FIXED, ColorLib.rgb(255, 255, 255));
 
 		final ColorAction imgAltDataFill = new ColorAction(nodes, VisualItem.FILLCOLOR, ColorLib.rgb(255, 255, 255));
-		imgAltDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(180, 40, 40));
-		imgAltDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(40, 40, 180));
+		imgAltDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(220, 40, 100));
+		imgAltDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(40, 100, 220));
 
 		final ColorAction altDataFill = new ColorAction(nodes, VisualItem.FILLCOLOR, ColorLib.rgb(124, 252, 0));
-		altDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(180, 40, 40));
-		altDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(40, 40, 180));
 
 		final ColorAction nodeStroke = new ColorAction(nodes, VisualItem.STROKECOLOR, ColorLib.rgb(50, 50, 50));
 		nodeStroke.add(VisualItem.HOVER, ColorLib.rgb(226, 86, 0));
@@ -334,7 +342,8 @@ public class TPTWindow extends JFrame {
 		display.addControlListener(new DragControl());
 		display.addControlListener(new PanControl());
 		display.addControlListener(new ZoomControl());
-		display.addControlListener(new ZoomToFitControl());
+		final ZoomToFitControl ztfc = new ZoomToFitControl();
+		display.addControlListener(ztfc);
 		display.addControlListener(new WheelZoomControl());
 		display.addControlListener(new HoverActionControl("color"));
 
@@ -447,57 +456,32 @@ public class TPTWindow extends JFrame {
 				m_vis.run("color");
 			}
 		});
+		
+		final JToggleButton nodeMode = new JToggleButton("Node Labels");
+		nodeMode.addActionListener(new ActionListener() {
 
-		JToggleButton togglePics = new JToggleButton("Show Images", false);
-		togglePics.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				JToggleButton tp = (JToggleButton) ae.getSource();
-				if(!tp.isSelected()) {
-					ActionList al = (ActionList)(m_vis.removeAction("color"));
-					al.remove (al.size() - 1);
-					al.add (dataFill);
-					m_vis.putAction("color", al);
-					lr.setImageField(null);
-					//((DataSizeAction)m_vis.getAction("nodeSize")).setMaximumSize(50.0);
-					nodeSize.setMinimumSize(5.0);
-					nodeSize.setMaximumSize(50.0);
-					isShowingPics = false;
-					ifa.preloadImages(g.getNodes().tuples(), "image");
+				JToggleButton nodeMode = (JToggleButton) ae.getSource();
+				if (!nodeMode.isSelected()) {
+					if (isShowingPics) {
+						lr.setTextField(null);
+					} else {
+						m_vis.setRendererFactory(arf);
+						m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
+					}
 				} else {
-					
-					ActionList al = (ActionList)(m_vis.removeAction("color"));
-					al.remove (al.size() - 1);
-					al.add (imgDataFill);
-					m_vis.putAction("color", al);
-					  lr.setImageField("image");
-					  lr.setImagePosition(Constants.LEFT);
-
-					isShowingPics = true;
-
-					double scale = 1.0d / m_vis.getDisplay(0).getScale();
-					ifa.setMaxImageDimensions((int)(150.0d * scale), (int)(150.0d * scale));
-					ifa.preloadImages(g.getNodes().tuples(), "image");
-					//assert !ifa.isAsynchronous();
-
-					//if (scale < 1.0d) scale = -1.0d;
-					nodeSize.setMinimumSize(1.0d);
-					nodeSize.setMaximumSize(1.0d);
+					if (isShowingPics) {
+						lr.setTextField("label");
+					} else {
+						m_vis.setRendererFactory(rf);
+					}
 				}
-				//This is a sore point. If the images aren't already loaded
-				// and all node positions are fixed, Repaints aren't forced,
-				// so you won't see the images and/or things will look funky
-				// until you mouse over all or most of the nodes. I've even
-				// tried running a dedicated repaint thread in the background,
-				// but no dice. What is really needed is some notification
-				// up to the render level when all images are ready to display.
-				m_vis.run("nodeSize");
-				m_vis.run("nodeStroke");
 				m_vis.run("color");
-				m_vis.run("tptLayout");
-				m_vis.invalidateAll();
-				m_vis.repaint();
+				m_vis.run("nodeSize");
 			}
 		});
+		nodeMode.setSelected(true);
+
 
 
 		JButton exportDisplay = new JButton("Save Image");
@@ -536,30 +520,6 @@ public class TPTWindow extends JFrame {
 			}
 		});
 
-		JToggleButton nodeMode = new JToggleButton("Node Labels");
-		nodeMode.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent ae) {
-				JToggleButton nodeMode = (JToggleButton) ae.getSource();
-				if (!nodeMode.isSelected()) {
-					if (isShowingPics) {
-						lr.setTextField(null);
-					} else {
-						m_vis.setRendererFactory(arf);
-						m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
-					}
-				} else {
-					if (isShowingPics) {
-						lr.setTextField("label");
-					} else {
-						m_vis.setRendererFactory(rf);
-					}
-				}
-				m_vis.run("color");
-				m_vis.run("nodeSize");
-			}
-		});
-		nodeMode.setSelected(true);
 
 
 		JRangeSlider edgeWeightSlider = new JRangeSlider(1, 800, 1, 400, Constants.ORIENT_TOP_BOTTOM);
@@ -572,13 +532,106 @@ public class TPTWindow extends JFrame {
 			}
 		});
 
-		JRangeSlider nodeSizeSlider = new JRangeSlider(1, 1000, 1, 50, Constants.ORIENT_TOP_BOTTOM);
+		final JRangeSlider nodeSizeSlider = new JRangeSlider(1, 300, 1, 5, Constants.ORIENT_TOP_BOTTOM);
 		nodeSizeSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				JRangeSlider slider = (JRangeSlider)e.getSource();
 				nodeSize.setMaximumSize(slider.getHighValue());
 				nodeSize.setMinimumSize(slider.getLowValue());
+				
+				if (isShowingPics) {
+					lr.setImageFactory(new ImageFactory());
+					ifa = lr.getImageFactory();
+					ifa.setAsynchronous(false);
+
+					double val = (double)slider.getHighValue();
+					if (!nodeMode.isSelected()) {
+						m_vis.setRendererFactory(rf);
+					}
+					ActionList al = (ActionList)(m_vis.removeAction("color"));
+					al.remove (al.size() - 1);
+					al.add (imgDataFill);
+					m_vis.putAction("color", al);
+					lr.setImagePosition(Constants.LEFT);
+					
+					isShowingPics = true;
+					//attempts to set image node correlated with
+					
+					double scale = 1.0d / m_vis.getDisplay(0).getScale();
+					//nodeSize.setMinimumSize(1.0d*scale*scale);
+					//nodeSize.setMaximumSize(1.0d*scale*scale);
+					nodeSize.setMinimumSize(slider.getLowValue()*scale*scale);
+					nodeSize.setMaximumSize(slider.getHighValue()*scale*scale);
+					ifa.setMaxImageDimensions((int)(150.0d*scale*val), (int)(150.0d*scale*val));
+					
+					//this will synchronously wait for images to be loaded.
+					//synchronous behavior makes the visualization behavior
+					//more predicatble, but could cause a long wait.
+					ifa.preloadImages(g.getNodes().tuples(), "image");
+					lr.setImageField("image");
+				}
+				
 				m_vis.run("nodeSize");
+				m_vis.run("nodeStroke");
+				m_vis.run("color");
+				m_vis.run("tptLayout");
+				m_vis.invalidateAll();
+				m_vis.repaint();
+			}
+		});
+
+		final JToggleButton togglePics = new JToggleButton("Show Images", false);
+		togglePics.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				JToggleButton tp = (JToggleButton) ae.getSource();
+				if(!tp.isSelected()) {
+					ActionList al = (ActionList)(m_vis.removeAction("color"));
+					al.remove (al.size() - 1);
+					al.add (dataFill);
+					m_vis.putAction("color", al);
+					lr.setImageField(null);
+					nodeSize.setMinimumSize(1.0);
+					nodeSize.setMaximumSize(50.0);
+					isShowingPics = false;
+					if (!nodeMode.isSelected()) {
+						m_vis.setRendererFactory(arf);
+						m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
+					}
+				} else {
+					
+					if (!nodeMode.isSelected()) {
+						m_vis.setRendererFactory(rf);
+					}
+					ActionList al = (ActionList)(m_vis.removeAction("color"));
+					al.remove (al.size() - 1);
+					al.add (imgDataFill);
+					m_vis.putAction("color", al);
+					lr.setImagePosition(Constants.LEFT);
+					
+					isShowingPics = true;
+					//attempts to set image node correlated with
+					
+					double scale = 1.0d / m_vis.getDisplay(0).getScale();
+					//nodeSize.setMinimumSize(1.0d*scale*scale);
+					//nodeSize.setMaximumSize(1.0d*scale*scale);
+					nodeSize.setMinimumSize(1.0d*scale*scale);
+					nodeSize.setMaximumSize(1.0d*scale*scale);
+					ifa.setMaxImageDimensions((int)(150.0d*scale), (int)(150.0d*scale));
+					
+					//this will synchronously wait for images to be loaded.
+					//synchronous behavior makes the visualization behavior
+					//more predicatble, but could cause a long wait.
+					ifa.preloadImages(g.getNodes().tuples(), "image");
+					lr.setImageField("image");
+				}
+
+				m_vis.run("nodeSize");
+				m_vis.run("nodeStroke");
+				m_vis.run("color");
+				m_vis.run("tptLayout");
+				m_vis.run("axes");
+				m_vis.invalidateAll();
+				m_vis.repaint();
 			}
 		});
 
@@ -656,6 +709,14 @@ public class TPTWindow extends JFrame {
 				e.set("inTPT", true);
 				e.getSourceNode().set("inTPT", true);
 			}
+		}
+	}
+
+	private void zoomToFit(Display display, String group) {
+		if (!display.isTranformInProgress()) {
+			Rectangle2D bounds = m_vis.getBounds(group);
+			GraphicsLib.expand(bounds, ZOOM_MARGIN * (int)(1/display.getScale()));
+			DisplayLib.fitViewToBounds(display, bounds, ZOOM_DURATION);
 		}
 	}
 
