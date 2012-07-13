@@ -151,8 +151,8 @@ public class TPTWindow extends JFrame {
 		/* Renderer Setup */
 		final ImageToggleLabelRenderer lr = new ImageToggleLabelRenderer();
 		lr.setRoundedCorner(100, 100);
-		lr.getImageFactory().setAsynchronous(false);
 		final ImageFactory ifa = lr.getImageFactory();
+		lr.getImageFactory().setAsynchronous(false);
 
 		final EdgeRenderer er = new EdgeRenderer();
 		er.setEdgeType(Constants.EDGE_TYPE_CURVE);
@@ -475,14 +475,13 @@ public class TPTWindow extends JFrame {
 					isShowingPics = true;
 
 					double scale = 1.0d / m_vis.getDisplay(0).getScale();
-					scale *= scale;
-					ifa.setMaxImageDimensions((int)(150.0d*scale), (int)(150.0d*scale));
+					ifa.setMaxImageDimensions((int)(150.0d * scale), (int)(150.0d * scale));
 					ifa.preloadImages(g.getNodes().tuples(), "image");
-					assert !ifa.isAsynchronous();
+					//assert !ifa.isAsynchronous();
 
 					//if (scale < 1.0d) scale = -1.0d;
-					nodeSize.setMinimumSize(1.0d*scale);
-					nodeSize.setMaximumSize(1.0d*scale);
+					nodeSize.setMinimumSize(1.0d);
+					nodeSize.setMaximumSize(1.0d);
 				}
 				//This is a sore point. If the images aren't already loaded
 				// and all node positions are fixed, Repaints aren't forced,
@@ -494,8 +493,8 @@ public class TPTWindow extends JFrame {
 				m_vis.run("nodeSize");
 				m_vis.run("nodeStroke");
 				m_vis.run("color");
-				//m_vis.run("tptLayout");
-				//m_vis.invalidateAll();
+				m_vis.run("tptLayout");
+				m_vis.invalidateAll();
 				m_vis.repaint();
 			}
 		});
