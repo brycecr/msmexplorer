@@ -105,13 +105,13 @@ public class HierarchyIOLib {
 	}
 
 
-	public boolean setMapping(HierarchyBundle hb, int bottom, int top) {
+	public static boolean setMapping(HierarchyBundle hb, int bottom, int top) {
 		
 		Object[] top_mappings = NewlineDelimitedReader.read(hb.mappings[top]);
 
 		Table nt = hb.graphs[bottom].getNodeTable();
 		if (nt.getColumnNumber(MAPPING) < 0) {
-			nt.addColumn(MAPPING, Integer.class);
+			nt.addColumn(MAPPING, int.class);
 		}
 
 		// The simple case: we're mapping to the model with the most
@@ -129,9 +129,25 @@ public class HierarchyIOLib {
 		//if no mapping column currently available
 		try {
 			HashMap<Integer, Integer> seen_mappings = new HashMap<Integer, Integer>();
-			for (int row = 0; row < t.getRowCount(); ++row) {
-				int top_state = top.getInt(row);
-				t.set(row, MAPPING, );
+			for (int row = 0; row < bottom_mappings.length; ++row) {
+				int top_state = (Integer)top_mappings[row];
+				int bottom_state = (Integer)bottom_mappings[row];
+				if (!seen_mappings.containsKey(bottom_state)) {
+					seen_mappings.put(bottom_state, top_state);
+				} else if (bottom_state != seen_mappings.get(bottom_state)) {
+					//FIXME handle this case...with arrays?
+					JOptionPane.showMessageDialog(null, 
+						"The hierarchy you are trying "
+						+ "to display is not nested. We"
+						+ " currently don't support "
+						+ "non-nesting hierarchies, so"
+						+ " you'll get a faux nested "
+						+ "analog of the model", 
+						MAPPING, JOptionPane.ERROR_MESSAGE);
+				}
+			}
+			for (Integer i : seen_mappings.keySet()) {
+				nt.set(i, MAPPING, seen_mappings.get(i));
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, 

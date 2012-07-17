@@ -113,6 +113,10 @@ public class MSMIOLib {
 		return HierarchyIOLib.getHierarchyLabels(gs);
 	}
 
+	public static boolean setMapping(HierarchyBundle hb, int bottom, int top) {
+		return HierarchyIOLib.setMapping(hb, bottom, top);
+	}
+
 	public static String saveGML(Graph g) {
 		return saveGML(g, DEFAULT_DIRECTORY, null);
 	}
@@ -148,6 +152,7 @@ public class MSMIOLib {
 
 		String loc = jfc.getSelectedFile().getAbsolutePath();
 		int pos = -1;
+		//XXX what is this??
 		if (!(loc.matches(".*\056xml") || loc.matches(".*\056graphml"))) {
 			loc += ".graphml";
 		}

@@ -611,7 +611,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			public void actionPerformed(ActionEvent ae) {
 				if (overToggle.isSelected()) {
 					int pos = zoomSlider.getValue();
-					MSMExplorer.this.setAggregates(pos, pos + 1);
+					MSMExplorer.this.setAggregates(pos, pos - 1);
 				} else {
 					assert !overToggle.isSelected();
 					int pos = zoomSlider.getValue();
@@ -699,10 +699,23 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 */
 	public void setAggregates(int bottom, int top) {
 
-		//VisualGraph vg = (VisualGraph)m_vis.getVisualGroup(graph);
+		//Intercept weird requests, inform user, and then do nothing
+		if (bottom == 0) {
+			JOptionPane.showMessageDialog(this, "Cannot display"
+				+ "an overlay on top of the highest level"
+				+ "of the hieararchy.");
+			return;
+
+		} else if (bottom == top) {
+			JOptionPane.showMessageDialog(this, "Can't overlay"
+				+ " a model with itself!");
+			return;
+		}
+
+		MSMIOLib.setMapping(hierarchy, bottom, top);
+
 		TupleSet vg = m_vis.getGroup(nodes);
 		Iterator<VisualItem> vNodes = vg.tuples();
-		//Iterator<VisualItem> vNodes = vg.nodes();
 
 		AggregateTable at = m_vis.addAggregates(aggr);
 		at.addColumn(VisualItem.POLYGON, float[].class);
