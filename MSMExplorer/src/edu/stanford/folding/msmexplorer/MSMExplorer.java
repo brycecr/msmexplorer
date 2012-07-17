@@ -136,12 +136,12 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	private String imageLocation = "'./lib/images'";
 	private HierarchyBundle hierarchy = null;
 	private JSlider zoomSlider = null;
-	private JCheckBox overToggle = null;
+	private JSlider overSlider = null;
 
 	public MSMExplorer() {
 
 		//Selector window
-		final JFrame selector = new JFrame("W e l c o m e  |  M S M E x p l o r e r");
+		final JFrame selector = new JFrame("W e l c o m e  |  M S M E x p// l o r e r");
 		selector.setLayout(new BorderLayout());
 		selector.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -309,12 +309,19 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		fpanel.setBackground(Color.WHITE);
 
 		this.addComponentListener(new ComponentListener() {
+
 			public void componentResized(ComponentEvent ce) {
 				display.setBounds(0, 0, MSMExplorer.this.getWidth(), MSMExplorer.this.getHeight());
 			}
-			public void componentMoved(ComponentEvent ce) {}
-			public void componentShown(ComponentEvent ce) {}
-			public void componentHidden(ComponentEvent ce) {}
+
+			public void componentMoved(ComponentEvent ce) {
+			}
+
+			public void componentShown(ComponentEvent ce) {
+			}
+
+			public void componentHidden(ComponentEvent ce) {
+			}
 		});
 
 
@@ -384,8 +391,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		distSlider.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent e) {
-				((GraphDistanceFilter) ((ActionList) 
-					m_vis.getAction("draw")).get(0)).setDistance(distSlider.getValue().intValue());
+				((GraphDistanceFilter) ((ActionList) m_vis.getAction("draw")).get(0)).setDistance(distSlider.getValue().intValue());
 				eqProbSlider.fire();
 			}
 		});
@@ -420,11 +426,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 			public void actionPerformed(ActionEvent ae) {
 				if (((JToggleButton) ae.getSource()).isSelected()) {
-					((EdgeRenderer) ((DefaultRendererFactory) m_vis.getRendererFactory()).
-					 getDefaultEdgeRenderer()).setEdgeType(Constants.EDGE_TYPE_CURVE);
+					((EdgeRenderer) ((DefaultRendererFactory) m_vis.getRendererFactory()).getDefaultEdgeRenderer()).setEdgeType(Constants.EDGE_TYPE_CURVE);
 				} else {
-					((EdgeRenderer) ((DefaultRendererFactory) m_vis.getRendererFactory()).
-					 getDefaultEdgeRenderer()).setEdgeType(Constants.EDGE_TYPE_LINE);
+					((EdgeRenderer) ((DefaultRendererFactory) m_vis.getRendererFactory()).getDefaultEdgeRenderer()).setEdgeType(Constants.EDGE_TYPE_LINE);
 				}
 
 				m_vis.run("draw");
@@ -606,23 +610,36 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		zoomSlider.setSnapToTicks(true);
 		zoomSlider.setEnabled(false);
 
-		overToggle = new JCheckBox("Show Overlay");
-		overToggle.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				if (overToggle.isSelected()) {
-					int pos = zoomSlider.getValue();
-					MSMExplorer.this.setAggregates(pos, pos - 1);
+		overSlider = new JSlider(SwingConstants.VERTICAL, -1, -1, -1);
+		overSlider.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent ae) {
+				int top = overSlider.getValue();
+				int bottom = zoomSlider.getValue();
+				if (overSlider.getValueIsAdjusting() || 
+					top < 0 || !overSlider.isEnabled() || top >= bottom) {
+					if (top >= bottom) {
+						overSlider.setValue(overSlider.getMaximum());
+					}
+					return;
+				}
+
+				if (top < hierarchy.graphs.length - 1) {
+					MSMExplorer.this.setAggregates(bottom, top);
 				} else {
-					assert !overToggle.isSelected();
-					int pos = zoomSlider.getValue();
+					assert top == hierarchy.graphs.length;
 					JFrame toDie = MSMExplorer.this.frame;
-					MSMExplorer msme = graphView(hierarchy.graphs[pos], "label");
-					msme.setHierarchy(hierarchy, pos);
+					MSMExplorer msme = graphView(hierarchy.graphs[bottom], "label");
+					msme.setHierarchy(hierarchy, bottom);
 					toDie.dispose();
 				}
 			}
-
 		});
+		overSlider.setMajorTickSpacing(1);
+		overSlider.setPaintTicks(true);
+		overSlider.setPaintLabels(true);
+		overSlider.setSnapToTicks(true);
+		overSlider.setEnabled(false);
 
 		// overview display window
 		Display overview = new Display(m_vis);
@@ -643,14 +660,14 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		graphPane.setLayout(null);
 		graphPane.add(display, new Integer(0));
 		graphPane.add(zoomSlider, new Integer(1));
-		graphPane.add(overToggle, new Integer(1));
-		graphPane.setPreferredSize(new Dimension (1000,800));
+		graphPane.add(overSlider, new Integer(1));
+		graphPane.setPreferredSize(new Dimension(1000, 800));
 		zoomSlider.setBounds(5, 10, 60, 150);
 		zoomSlider.setVisible(false);
-		overToggle.setBounds(5, 165, 120, 20);
-		overToggle.setVisible(false);
+		overSlider.setBounds(65, 10, 60, 150);
+		overSlider.setVisible(false);
 
-		
+
 		// create a new JSplitPane to present the interface
 		JSplitPane split = new JSplitPane();
 		split.setLeftComponent(graphPane);
@@ -683,7 +700,12 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		zoomSlider.setLabelTable(MSMIOLib.getHierarchyLabels(hb.graphs));
 		zoomSlider.setEnabled(true);
 		zoomSlider.setVisible(true);
-		overToggle.setVisible(true);
+		overSlider.setMaximum(hb.graphs.length - 1);
+		overSlider.setMinimum(0);
+		overSlider.setValue(hb.graphs.length - 1);
+		overSlider.setLabelTable(MSMIOLib.getAltHierarchyLabels(hb.graphs));
+		overSlider.setVisible(true);
+		overSlider.setEnabled(true);
 	}
 
 	/**
@@ -699,11 +721,16 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 */
 	public void setAggregates(int bottom, int top) {
 
+		if (top == overSlider.getMaximum()) {
+			return;
+		}
+
 		//Intercept weird requests, inform user, and then do nothing
 		if (bottom == 0) {
 			JOptionPane.showMessageDialog(this, "Cannot display"
 				+ "an overlay on top of the highest level"
 				+ "of the hieararchy.");
+			overSlider.setValue(hierarchy.graphs.length);
 			return;
 
 		} else if (bottom == top) {
@@ -717,53 +744,63 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		TupleSet vg = m_vis.getGroup(nodes);
 		Iterator<VisualItem> vNodes = vg.tuples();
 
-		AggregateTable at = m_vis.addAggregates(aggr);
-		at.addColumn(VisualItem.POLYGON, float[].class);
-		at.addColumn("id", int.class);
+		AggregateTable at = null;
+		if (m_vis.getGroup(aggr) == null) {
+			at = m_vis.addAggregates(aggr);
+			at.addColumn(VisualItem.POLYGON, float[].class);
+			at.addColumn("id", int.class);
 
-		Renderer polyR = new PolygonRenderer(Constants.POLY_TYPE_CURVE);
-		//((PolygonRenderer)polyR).setCurveSlack(0.1f);
-		((DefaultRendererFactory)m_vis.getRendererFactory()).add("ingroup('aggregates')", polyR);
 
+			Renderer polyR = new PolygonRenderer(Constants.POLY_TYPE_CURVE);
+			//((PolygonRenderer)polyR).setCurveSlack(0.1f);
+			((DefaultRendererFactory) m_vis.getRendererFactory()).add("ingroup('aggregates')", polyR);
+
+			final ColorAction aStroke = new ColorAction(aggr, VisualItem.STROKECOLOR);
+			aStroke.setDefaultColor(ColorLib.gray(200));
+			aStroke.add(VisualItem.FIXED, ColorLib.rgb(255, 100, 100));
+			aStroke.setVisualization(m_vis);
+
+			final int[] palette = new int[]{
+				ColorLib.rgba(255, 200, 200, 150),
+				ColorLib.rgba(200, 255, 200, 150),
+				ColorLib.rgba(200, 200, 255, 150)
+			};
+			final ColorAction aFill = new DataColorAction(aggr, "id",
+				Constants.NOMINAL, VisualItem.FILLCOLOR, ColorLib.getCategoryPalette(50, 0.95f, .15f, .9f, .5f));
+			aFill.setVisualization(m_vis);
+
+			final ActionList draw = (ActionList) m_vis.getAction("draw");
+			draw.add(aFill);
+			draw.add(aStroke);
+
+			m_vis.getDisplay(0).setItemSorter(new AggregatePrioritySorter());
+
+			((ActionList) m_vis.getAction("lll")).add(new AggregateLayout(aggr, m_vis));
+		} else {
+			at = (AggregateTable) m_vis.getGroup(aggr);
+			Table nt = (Table) ((Graph) m_vis.getGroup(graph)).getNodeTable();
+			for (int row = 0; row < nt.getRowCount(); ++row) {
+				at.removeRow(row);
+			}
+		}
 		// we use a HashMap so mappings can be arbitrarily assigned
-		HashMap<Integer, AggregateItem> aggs = new HashMap<Integer, AggregateItem>(); 
+		HashMap<Integer, AggregateItem> aggs = new HashMap<Integer, AggregateItem>();
 		while (vNodes.hasNext()) {
-			Node vNode = (Node)vNodes.next();
+			Node vNode = (Node) vNodes.next();
 			assert vNode != null;
-			int mapping = vNode.getInt("mapping");	
+			int mapping = vNode.getInt("mapping");
 			AggregateItem ai = null;
 			if (!aggs.containsKey(mapping)) {
-				ai = (AggregateItem)at.addItem();
+				ai = (AggregateItem) at.addItem();
 				ai.setInt("id", mapping);
 				aggs.put(mapping, ai);
 			} else {
-				ai = (AggregateItem)aggs.get(mapping);
+				ai = (AggregateItem) aggs.get(mapping);
 				assert ai != null;
 			}
-			ai.addItem((VisualItem)vNode);
-		} 
-		final ColorAction aStroke = new ColorAction(aggr, VisualItem.STROKECOLOR);
-		aStroke.setDefaultColor(ColorLib.gray(200));
-		aStroke.add(VisualItem.FIXED, ColorLib.rgb(255,100,100));
-		aStroke.setVisualization(m_vis);
-		
-		final int[] palette = new int[] {
-			ColorLib.rgba(255,200,200,150),
-			ColorLib.rgba(200,255,200,150),
-			ColorLib.rgba(200,200,255,150)
-		};
-		final ColorAction aFill = new DataColorAction(aggr, "id",
-			Constants.NOMINAL, VisualItem.FILLCOLOR, ColorLib.getCategoryPalette(50, 0.95f, .15f, .9f, .5f));
-		aFill.setVisualization(m_vis);
-
-		final ActionList draw = (ActionList)m_vis.getAction("draw");
-		draw.add(aFill);
-		draw.add(aStroke);
-
+			ai.addItem((VisualItem) vNode);
+		}
 		m_vis.setInteractive(aggr, null, false);
-		m_vis.getDisplay(0).setItemSorter(new AggregatePrioritySorter());
-
-		((ActionList)m_vis.getAction("lll")).add(new AggregateLayout(aggr, m_vis));
 		m_vis.run("draw");
 		m_vis.run("lll");
 	}
@@ -919,7 +956,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
+
 		MSMExplorer msme = new MSMExplorer();
 
 	}   // end of main
@@ -1079,7 +1116,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	// ------------------------------------------------------------------------
 	//  Utility classes
 	// ------------------------------------------------------------------------
-
 	private class OpenHierarchyAction extends AbstractAction {
 
 		public OpenHierarchyAction() {
@@ -1090,14 +1126,15 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		public void actionPerformed(ActionEvent ae) {
 			hierarchy = MSMIOLib.openMSMHierarchy(MSMExplorer.this);
-			assert hierarchy != null && hierarchy.graphs.length > 0;
-
-			if (hierarchy != null) {
-				//MSMExplorer.this.getImagePath();
-				MSMExplorer.this.frame.dispose();
-				MSMExplorer msme = graphView(hierarchy.graphs[0], "label");
-				msme.setHierarchy(hierarchy, 0);
+			if (hierarchy == null || hierarchy.graphs == null
+				|| hierarchy.mappings == null || hierarchy.graphs.length < 1) {
+				return;
 			}
+
+			//MSMExplorer.this.getImagePath();
+			MSMExplorer.this.frame.dispose();
+			MSMExplorer msme = graphView(hierarchy.graphs[0], "label");
+			msme.setHierarchy(hierarchy, 0);
 		}
 	}
 

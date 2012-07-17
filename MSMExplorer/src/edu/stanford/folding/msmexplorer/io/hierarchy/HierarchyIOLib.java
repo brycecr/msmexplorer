@@ -9,19 +9,26 @@ import edu.stanford.folding.msmexplorer.io.EQProbReader;
 import edu.stanford.folding.msmexplorer.io.MSMIOLib;
 import edu.stanford.folding.msmexplorer.io.MtxGraphReader;
 import edu.stanford.folding.msmexplorer.io.NewlineDelimitedReader;
+
 import java.awt.Component;
 import java.io.File;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
+
+//supposedly the Hashtable class is obsolete, but
+//it seems to be the only reasonable implementation
+//of Dictionary, which JSlider needs for labels.
+import java.util.Hashtable; 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+
 import prefuse.data.Graph;
 import prefuse.data.Table;
-import prefuse.data.column.Column;
 import prefuse.data.io.GraphReader;
 import prefuse.util.StringLib;
 import prefuse.util.io.IOLib;
@@ -56,7 +63,9 @@ public class HierarchyIOLib {
 		if (newNode.length == 0) {
 			JOptionPane.showMessageDialog(null, 
 				"Could not find MSM hierarchy at " 
-				+ f.getAbsolutePath(), "Hierarchy Open Error", 
+				+ f.getAbsolutePath() + "\nNot a "
+				+ "properly formatted hierarchy", 
+				"Hierarchy Open Error", 
 				JOptionPane.ERROR_MESSAGE);
 			return new HierarchyBundle();
 		}
@@ -104,6 +113,27 @@ public class HierarchyIOLib {
 		return dict;
 	}
 
+	/**
+	 * Used to label the overlay slider. Replaces the top (highest population)
+	 * member of the dictionary with the label "None".
+	 * 
+	 * @param gs Graph array to use
+	 * @return Dictionary of labels
+	 */
+	public static Dictionary<Integer, JLabel> getAltHierarchyLabels(Graph[] gs) {
+		Dictionary<Integer, JLabel> dict = getHierarchyLabels(gs);
+		Enumeration e = dict.keys();
+		Integer i = -1;
+		while (e.hasMoreElements()) {
+			Integer current = (Integer)e.nextElement();
+			if (current > i) {
+				i = current;
+			}
+		}
+		dict.remove(i);
+		dict.put(i, new JLabel("None"));
+		return dict;
+	}
 
 	public static boolean setMapping(HierarchyBundle hb, int bottom, int top) {
 		
@@ -129,13 +159,15 @@ public class HierarchyIOLib {
 		//if no mapping column currently available
 		try {
 			HashMap<Integer, Integer> seen_mappings = new HashMap<Integer, Integer>();
+			boolean nonnested = false;
 			for (int row = 0; row < bottom_mappings.length; ++row) {
 				int top_state = (Integer)top_mappings[row];
 				int bottom_state = (Integer)bottom_mappings[row];
 				if (!seen_mappings.containsKey(bottom_state)) {
 					seen_mappings.put(bottom_state, top_state);
-				} else if (bottom_state != seen_mappings.get(bottom_state)) {
+				} else if (top_state != seen_mappings.get(bottom_state) && !nonnested) {
 					//FIXME handle this case...with arrays?
+					nonnested = true;
 					JOptionPane.showMessageDialog(null, 
 						"The hierarchy you are trying "
 						+ "to display is not nested. We"

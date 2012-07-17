@@ -112,6 +112,10 @@ public class MSMIOLib {
 	public static Dictionary<Integer, JLabel> getHierarchyLabels(Graph[] gs) {
 		return HierarchyIOLib.getHierarchyLabels(gs);
 	}
+	
+	public static Dictionary<Integer, JLabel> getAltHierarchyLabels(Graph[] gs) {
+		return HierarchyIOLib.getAltHierarchyLabels(gs);
+	}
 
 	public static boolean setMapping(HierarchyBundle hb, int bottom, int top) {
 		return HierarchyIOLib.setMapping(hb, bottom, top);
