@@ -1,6 +1,5 @@
-package edu.stanford.folding.msmexplorer.io;
+package edu.stanford.folding.msmexplorer.io.hierarchy;
 
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import java.util.ArrayList;
@@ -8,7 +7,6 @@ import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Comparator;
 import java.io.File;
-import java.lang.Exception;
 import java.io.FileNotFoundException;
 
 
@@ -34,7 +32,9 @@ class FileNode {
  */
 public class HierarchySketcher {
 
-	public static FileNode[] sketch(String pathToHierarchy) {
+	private static final String mapping_col = "mapping";
+
+	protected static FileNode[] sketch(String pathToHierarchy) {
 		File topList[] = new File[0];
 
 		try { 

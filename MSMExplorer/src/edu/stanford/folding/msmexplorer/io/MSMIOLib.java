@@ -1,5 +1,8 @@
 package edu.stanford.folding.msmexplorer.io;
 
+import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchySketcher;
+import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
+import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyIOLib;
 import java.awt.Component;
 import java.io.File;
 import java.util.logging.Level;
@@ -31,6 +34,7 @@ import prefuse.util.io.SimpleFileFilter;
 public class MSMIOLib {
 
 	private static final String DEFAULT_DIRECTORY = "~/Documents";
+	private static final String MAPPING = "mapping";
 
 	private MSMIOLib() {
 	}
@@ -97,81 +101,16 @@ public class MSMIOLib {
 		}
 	}
 
-	public static Graph[] openMSMHierarchy(Component c) {
+	public static HierarchyBundle openMSMHierarchy(Component c) {
 		return openMSMHierarchy(c, DEFAULT_DIRECTORY);
 	}
 
-	public static Graph[] openMSMHierarchy(Component c, String path) {
-		JFileChooser jfc = new JFileChooser(path);
-		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
-		jfc.setDialogTitle("Open Hierarchical MSM Directory");
-		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-		int opt = jfc.showOpenDialog(c);
-		if (opt != JFileChooser.APPROVE_OPTION) {
-			return null;
-		}
-
-		File f = jfc.getSelectedFile();
-
-		FileNode newNode[] = HierarchySketcher.sketch(f.getAbsolutePath());
-		if (newNode.length == 0) {
-			JOptionPane.showMessageDialog(null, 
-				"Could not find MSM hierarchy at " 
-				+ f.getAbsolutePath(), "Hierarchy Open Error", 
-				JOptionPane.ERROR_MESSAGE);
-			return new Graph[0];
-		}
-
-		assert newNode.length > 0;
-
-		GraphReader gr = null;
-		if (newNode[0].tProbFilename.endsWith(".mtx")
-			|| newNode[0].tProbFilename.endsWith(".MTX")) {
-
-			gr = new MtxGraphReader();
-
-		} else {
-			gr = new DatGraphReader();
-		}
-
-		Graph[] graphs = new Graph[newNode.length];
-		for (int i = 0; i < newNode.length; ++i) {
-			try {
-				graphs[i] = gr.readGraph(IOLib.streamFromString(newNode[i].tProbFilename));
-				if (newNode[i].eqProbFilename == null) {
-					graphs[i] = EQProbReader.getEqProbs(null, graphs[i]);
-				} else {
-					graphs[i] = EQProbReader.addEqProbs(graphs[i], 
-						new File(newNode[i].eqProbFilename));
-				}
-
-				// Set mapping for this node to the next
-				if (i == newNode.length - 1) {
-					System.err.println("num states is " + graphs[i].getNodeCount());
-					Table nt = graphs[i].getNodeTable();
-					nt.addColumn("mapping", int.class);
-					Object[] mappings = NewlineDelimitedReader.read(newNode[i - 1].mmapFilename);
-					for (int j = 0; j < mappings.length; ++j) {
-						graphs[i].getNode(j).setInt("mapping", (Integer)mappings[j]);
-					}
-				}
-			} catch (Exception e) {
-				Logger.getLogger(MSMIOLib.class.getName()).log(
-					Level.WARNING, "{0}\n{1}",
-					new Object[]{e.getMessage(), StringLib.getStackTrace(e)});
-				return null;
-			}
-		}
-		return graphs;
+	public static HierarchyBundle openMSMHierarchy(Component c, String path) {
+		return HierarchyIOLib.openMSMHierarchy(c, path);
 	}
 
 	public static Dictionary<Integer, JLabel> getHierarchyLabels(Graph[] gs) {
-		Dictionary<Integer, JLabel> dict = new Hashtable<Integer, JLabel>(gs.length);
-		for (int i = 0; i < gs.length; ++i) {
-			dict.put(i, new JLabel(Integer.toString(gs[i].getNodeCount())));
-		}
-		return dict;
+		return HierarchyIOLib.getHierarchyLabels(gs);
 	}
 
 	public static String saveGML(Graph g) {

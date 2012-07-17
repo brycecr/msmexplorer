@@ -1,5 +1,6 @@
 package edu.stanford.folding.msmexplorer;
 
+import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
 import edu.stanford.folding.msmexplorer.io.MSMIOLib;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -133,7 +134,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	private JFrame frame; //Graph view frame
 	private static final String version = "v0.03"; //Current Version
 	private String imageLocation = "'./lib/images'";
-	private Graph[] hierarchyList = null;
+	private HierarchyBundle hierarchy = null;
 	private JSlider zoomSlider = null;
 	private JCheckBox overToggle = null;
 
@@ -590,11 +591,11 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			public void stateChanged(ChangeEvent ae) {
 				int pos = zoomSlider.getValue();
 				if (zoomSlider.isEnabled() && !zoomSlider.getValueIsAdjusting()) {
-					assert hierarchyList != null;
+					assert hierarchy != null;
 					//	MSMExplorer.this.getImagePath();
 					JFrame toDie = MSMExplorer.this.frame;
-					MSMExplorer msme = graphView(hierarchyList[pos], "label");
-					msme.setHierarchy(hierarchyList, pos);
+					MSMExplorer msme = graphView(hierarchy.graphs[pos], "label");
+					msme.setHierarchy(hierarchy, pos);
 					toDie.dispose();
 				}
 			}
@@ -615,8 +616,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					assert !overToggle.isSelected();
 					int pos = zoomSlider.getValue();
 					JFrame toDie = MSMExplorer.this.frame;
-					MSMExplorer msme = graphView(hierarchyList[pos], "label");
-					msme.setHierarchy(hierarchyList, pos);
+					MSMExplorer msme = graphView(hierarchy.graphs[pos], "label");
+					msme.setHierarchy(hierarchy, pos);
 					toDie.dispose();
 				}
 			}
@@ -675,11 +676,11 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 * @param gs
 	 * @param pos 
 	 */
-	public void setHierarchy(Graph[] gs, int pos) {
-		hierarchyList = gs;
-		zoomSlider.setMaximum(gs.length - 1);
+	public void setHierarchy(HierarchyBundle hb, int pos) {
+		hierarchy = hb;
+		zoomSlider.setMaximum(hb.graphs.length - 1);
 		zoomSlider.setValue(pos);
-		zoomSlider.setLabelTable(MSMIOLib.getHierarchyLabels(gs));
+		zoomSlider.setLabelTable(MSMIOLib.getHierarchyLabels(hb.graphs));
 		zoomSlider.setEnabled(true);
 		zoomSlider.setVisible(true);
 		overToggle.setVisible(true);
@@ -990,18 +991,18 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		menubar.add(dataMenu);
 
 		// launch window
-		JFrame frame = new JFrame("G r a p h  V i e w  |  M S M E x p l o r e r");
-		frame.setJMenuBar(menubar);
-		frame.setContentPane(view);
-		frame.pack();
-		frame.setVisible(true);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		JFrame frm = new JFrame("G r a p h  V i e w  |  M S M E x p l o r e r");
+		frm.setJMenuBar(menubar);
+		frm.setContentPane(view);
+		frm.pack();
+		frm.setVisible(true);
+		frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//XXX must not be quite right...
-		this.frame = frame;
-		view.frame = frame;
+		this.frame = frm;
+		view.frame = frm;
 
 		// Window activate/deactivate behavior
-		frame.addWindowListener(new WindowAdapter() {
+		frm.addWindowListener(new WindowAdapter() {
 
 			@Override
 			public void windowActivated(WindowEvent e) {
@@ -1075,14 +1076,14 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		}
 
 		public void actionPerformed(ActionEvent ae) {
-			hierarchyList = MSMIOLib.openMSMHierarchy(MSMExplorer.this);
-			assert hierarchyList != null && hierarchyList.length > 0;
+			hierarchy = MSMIOLib.openMSMHierarchy(MSMExplorer.this);
+			assert hierarchy != null && hierarchy.graphs.length > 0;
 
-			if (hierarchyList != null) {
+			if (hierarchy != null) {
 				//MSMExplorer.this.getImagePath();
 				MSMExplorer.this.frame.dispose();
-				MSMExplorer msme = graphView(hierarchyList[0], "label");
-				msme.setHierarchy(hierarchyList, 0);
+				MSMExplorer msme = graphView(hierarchy.graphs[0], "label");
+				msme.setHierarchy(hierarchy, 0);
 			}
 		}
 	}
