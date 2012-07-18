@@ -497,12 +497,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			public void actionPerformed(ActionEvent e) {
 				Action layoutAction = m_vis.getAction("lll");
 				layoutAction.cancel();
-				/*
-				if (layoutAction.getDuration() == ActionList.INFINITY) {
-					layoutAction.setDuration(500);
-				}
-				 * 
-				 */
 			}
 		});
 
@@ -772,16 +766,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 			final ColorAction aStroke = new ColorAction(aggr, VisualItem.STROKECOLOR);
 			aStroke.setDefaultColor(ColorLib.gray(200));
-			aStroke.add(VisualItem.FIXED, ColorLib.rgb(255, 100, 100));
-			aStroke.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 100, 100));
-			aStroke.add(VisualItem.HOVER, ColorLib.rgb(255, 100, 100));
+			aStroke.add(VisualItem.FIXED, ColorLib.rgb(240, 150, 100));
 			aStroke.setVisualization(m_vis);
 
-			final int[] palette = new int[]{
-				ColorLib.rgba(255, 200, 200, 150),
-				ColorLib.rgba(200, 255, 200, 150),
-				ColorLib.rgba(200, 200, 255, 150)
-			};
 			final ColorAction aFill = new DataColorAction(aggr, "id",
 				Constants.NOMINAL, VisualItem.FILLCOLOR, ColorLib.getCategoryPalette(50, 0.95f, .15f, .9f, .5f));
 			aFill.setVisualization(m_vis);

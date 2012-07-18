@@ -63,6 +63,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
+import prefuse.action.Action;
 import prefuse.action.filter.VisibilityFilter;
 import prefuse.action.layout.AxisLabelLayout;
 import prefuse.controls.Control;
@@ -76,7 +77,6 @@ import prefuse.util.display.DisplayLib;
 import prefuse.visual.expression.InGroupPredicate;
 import prefuse.visual.sort.ItemSorter;
 
-
 /**
  * Interface for visualizing graphs produced by TPT Theory.
  * Automatically initializes a @TPTFactory over the provided data
@@ -87,21 +87,18 @@ import prefuse.visual.sort.ItemSorter;
 public class TPTWindow extends JFrame {
 
 	private int numPaths = 3; //Number of initial top paths to retrieve
-	private Visualization m_vis; 
+	private Visualization m_vis;
 	private boolean isShowingPics; //Display is showing images
 	private ImageFactory ifa = null;
-
 	private static final String nodes = "graph.nodes";
 	private static final String edges = "graph.edges";
 	private static final String graph = "graph";
-
 	private static final int ZOOM_MARGIN = 130;
 	private static final long ZOOM_DURATION = 1000;
 	private static final int MAX_DEPTH = 100;
 	private static final int AXIS_WIDTH = 40;
-
 	private boolean axisVisible = true;
-	
+
 	/**
 	 * Overloaded constructor to allow the use of
 	 * ArrayLists of tuples in the place of TupleSets.
@@ -116,7 +113,7 @@ public class TPTWindow extends JFrame {
 
 	public TPTWindow(final Graph g, TupleSet source, TupleSet target) {
 
-		if (overlap (source, target)) {
+		if (overlap(source, target)) {
 			JOptionPane.showMessageDialog(this, "Source and target sets overlap. "
 				+ "Please select the sets again.", "Overlaping TupleSets", JOptionPane.WARNING_MESSAGE);
 			this.dispose();
@@ -127,11 +124,11 @@ public class TPTWindow extends JFrame {
 		//create data columns
 		if (gra.getNodeTable().getColumnNumber("source") != -1) {
 			revert(gra.getEdgeTable().getColumn("flux"));
-			revert(gra.getNodeTable().getColumn("flux"));	
-			revert(gra.getNodeTable().getColumn("source"));	
-			revert(gra.getNodeTable().getColumn("target"));	
-			revert(gra.getNodeTable().getColumn("inTPT"));	
-			revert(gra.getEdgeTable().getColumn("inTPT"));	
+			revert(gra.getNodeTable().getColumn("flux"));
+			revert(gra.getNodeTable().getColumn("source"));
+			revert(gra.getNodeTable().getColumn("target"));
+			revert(gra.getNodeTable().getColumn("inTPT"));
+			revert(gra.getEdgeTable().getColumn("inTPT"));
 			revert(gra.getNodeTable().getColumn("TPT Distance"));
 		} else {
 
@@ -145,11 +142,13 @@ public class TPTWindow extends JFrame {
 
 		final TPTFactoryCM tptCalc = new TPTFactoryCM(gra, source, target);
 
-		for (Iterator tuples = source.tuples(); tuples.hasNext(); )
-			((Tuple)tuples.next()).set("source", true);
+		for (Iterator tuples = source.tuples(); tuples.hasNext();) {
+			((Tuple) tuples.next()).set("source", true);
+		}
 
-		for (Iterator tuples = target.tuples(); tuples.hasNext(); )
-			((Tuple)tuples.next()).set("target", true);
+		for (Iterator tuples = target.tuples(); tuples.hasNext();) {
+			((Tuple) tuples.next()).set("target", true);
+		}
 
 
 		setNumPaths(tptCalc, gra, numPaths);
@@ -172,14 +171,15 @@ public class TPTWindow extends JFrame {
 			Renderer yrend = new AxisRenderer(Constants.LEFT, Constants.TOP);
 
 			public Renderer getRenderer(VisualItem item) {
-				if (item.isInGroup(nodes)) 
+				if (item.isInGroup(nodes)) {
 					return lr;
-				else if (item.isInGroup(edges))
+				} else if (item.isInGroup(edges)) {
 					return er;
-				else if (axisVisible)
+				} else if (axisVisible) {
 					return yrend;
-				else
+				} else {
 					return null;
+				}
 			}
 		};
 		final RendererFactory arf = new RendererFactory() {
@@ -188,14 +188,15 @@ public class TPTWindow extends JFrame {
 			Renderer sr = new ShapeRenderer();
 
 			public Renderer getRenderer(VisualItem item) {
-				if (item.isInGroup(nodes)) 
+				if (item.isInGroup(nodes)) {
 					return sr;
-				else if (item.isInGroup(edges))
+				} else if (item.isInGroup(edges)) {
 					return er;
-				else if (axisVisible)
+				} else if (axisVisible) {
 					return yrend;
-				else
+				} else {
 					return null;
+				}
 			}
 		};
 		//final DefaultRendererFactory drf = new DefaultRendererFactory(sr);
@@ -207,21 +208,23 @@ public class TPTWindow extends JFrame {
 
 		BreadthFirstIterator bfi = new BreadthFirstIterator();
 		bfi.init(source.tuples(), MAX_DEPTH, Constants.NODE_TRAVERSAL);
-		
+
 		// traverse the graph
 		int maxd = 1;
-		while ( bfi.hasNext() ) {
-			VisualItem item = (VisualItem)bfi.next();
+		while (bfi.hasNext()) {
+			VisualItem item = (VisualItem) bfi.next();
 			int d = bfi.getDepth(item);
-			if (d > maxd)
+			if (d > maxd) {
 				maxd = d;
+			}
 
 			item.set("TPT Distance", d);
 		}
 		maxd++;
 		Iterator t_itr = target.tuples();
-		while (t_itr.hasNext())
-			((Tuple)t_itr.next()).set("TPT Distance", maxd);
+		while (t_itr.hasNext()) {
+			((Tuple) t_itr.next()).set("TPT Distance", maxd);
+		}
 
 		AxisLayout xaxis = new AxisLayout(nodes, "TPT Distance", Constants.X_AXIS, VisiblePredicate.TRUE);
 		AxisLayout yaxis = new AxisLayout(nodes, "eqProb", Constants.Y_AXIS, VisiblePredicate.TRUE);
@@ -231,7 +234,7 @@ public class TPTWindow extends JFrame {
 		final AxisLabelLayout ylabels = new AxisLabelLayout("ylabels", yaxis);
 		//xaxis.setLayoutBounds(rect);
 		//yaxis.setLayoutBounds(rect);
-		
+
 		ActionList tptLayout = new ActionList(ActionList.INFINITY);
 		tptLayout.add(new ForceDirectedLayout(graph));
 		tptLayout.add(new RepaintAction());
@@ -251,7 +254,7 @@ public class TPTWindow extends JFrame {
 		altAxes.add(xaxis);
 		altAxes.add(yaxis);
 
-		ForceSimulator fsim = ((ForceDirectedLayout)tptLayout.get(0)).getForceSimulator();
+		ForceSimulator fsim = ((ForceDirectedLayout) tptLayout.get(0)).getForceSimulator();
 		Force[] forces = fsim.getForces();
 
 		final Force NBodyForce = forces[0];
@@ -278,10 +281,12 @@ public class TPTWindow extends JFrame {
 		imgDataFill.add(VisualItem.FIXED, ColorLib.rgb(255, 255, 255));
 
 		final ColorAction imgAltDataFill = new ColorAction(nodes, VisualItem.FILLCOLOR, ColorLib.rgb(255, 255, 255));
-		imgAltDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(220, 40, 100));
-		imgAltDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(40, 100, 220));
+		imgAltDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(240, 120, 120));
+		imgAltDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(120, 200, 240));
 
 		final ColorAction altDataFill = new ColorAction(nodes, VisualItem.FILLCOLOR, ColorLib.rgb(124, 252, 0));
+		altDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(240, 120, 120));
+		altDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(120, 200, 240));
 
 		final ColorAction nodeStroke = new ColorAction(nodes, VisualItem.STROKECOLOR, ColorLib.rgb(50, 50, 50));
 		nodeStroke.add(VisualItem.HOVER, ColorLib.rgb(226, 86, 0));
@@ -316,7 +321,7 @@ public class TPTWindow extends JFrame {
 		altColor.add(edgeColor);
 		altColor.add(text);
 		altColor.add(altDataFill);
-		*/
+		 */
 
 		m_vis.putAction("nodeStroke", nodeStroke);
 		m_vis.putAction("tptLayout", tptLayout);
@@ -332,7 +337,7 @@ public class TPTWindow extends JFrame {
 		m_vis.putAction("nodeSize", nodeSize);
 
 		Display display = new Display(m_vis);
-		display.setSize(700,700);
+		display.setSize(700, 700);
 		display.pan(350, 350);
 		display.setForeground(Color.WHITE);
 		display.setBackground(Color.WHITE);
@@ -348,36 +353,39 @@ public class TPTWindow extends JFrame {
 		display.addControlListener(new HoverActionControl("color"));
 
 		//Puts labels at furthest z-distance
-		display.setItemSorter( new ItemSorter() {
+		display.setItemSorter(new ItemSorter() {
+
 			@Override
 			public int score(VisualItem i) {
-				if (i.isInGroup("ylabels")) 
+				if (i.isInGroup("ylabels")) {
 					return 0;
-				else
+				} else {
 					return super.score(i);
+				}
 			}
 		});
-		
+
 		Insets insets = display.getInsets();
 		rect.setRect(insets.left + AXIS_WIDTH, insets.top, display.getWidth() - insets.right, display.getHeight() - insets.bottom);
 		lrect.setRect(insets.left, insets.top, insets.left + AXIS_WIDTH, display.getHeight() - insets.bottom);
 
 
 		JTextField numPathInput = new JTextField("Num Paths");
-		numPathInput.addActionListener( new ActionListener() {
-			public void actionPerformed( ActionEvent ae) {
-				String input = ((JTextField)ae.getSource()).getText();
+		numPathInput.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent ae) {
+				String input = ((JTextField) ae.getSource()).getText();
 
 				int d = 1;
 				try {
 					d = Integer.valueOf(input.trim()).intValue();
-				} catch ( NumberFormatException nfe ) {
+				} catch (NumberFormatException nfe) {
 					JOptionPane.showMessageDialog(TPTWindow.this, "Illegal number format "
 						+ "in Num Paths input", "Enter a Normal Number", JOptionPane.WARNING_MESSAGE);
 				}
 				numPaths = d;
 				tptCalc.reset();
-				setNumPaths(tptCalc, gra, numPaths );
+				setNumPaths(tptCalc, gra, numPaths);
 
 				m_vis.run("tptLayout");
 				m_vis.run("axes");
@@ -390,18 +398,21 @@ public class TPTWindow extends JFrame {
 		final DefaultTupleSet holder = new DefaultTupleSet();
 		final TupleSet focusGroup = m_vis.getGroup(Visualization.FOCUS_ITEMS);
 		final JToggleButton fixedBtn = new JToggleButton("Fix Position", false);
-		fixedBtn.addActionListener( new ActionListener() {
-			public void actionPerformed( ActionEvent ae ){
+		fixedBtn.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent ae) {
 
 				//TupleSet focused = m_vis.getFocusGroup(Visualization.FOCUS_ITEMS);
-				if ( focusGroup.getTupleCount() == 0) return;
-				Tuple toFocus = (Tuple)focusGroup.tuples().next();
+				if (focusGroup.getTupleCount() == 0) {
+					return;
+				}
+				Tuple toFocus = (Tuple) focusGroup.tuples().next();
 
-				if ( ((JToggleButton)ae.getSource()).isSelected() ) {
-					((VisualItem)toFocus).setFixed(true);
+				if (((JToggleButton) ae.getSource()).isSelected()) {
+					((VisualItem) toFocus).setFixed(true);
 					holder.addTuple(toFocus);
 				} else {
-					((VisualItem)toFocus).setFixed(false);
+					((VisualItem) toFocus).setFixed(false);
 					holder.removeTuple(toFocus);
 				}
 
@@ -412,9 +423,10 @@ public class TPTWindow extends JFrame {
 		fixedBtn.setEnabled(false);
 
 		JToggleButton axisMode = new JToggleButton("Show Axis", true);
-		axisMode.addActionListener( new ActionListener() {
+		axisMode.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent ae) {
-				if (((JToggleButton)ae.getSource()).isSelected()) {
+				if (((JToggleButton) ae.getSource()).isSelected()) {
 					ylabels.setEnabled(true);
 					m_vis.run("axes");
 				} else {
@@ -424,10 +436,10 @@ public class TPTWindow extends JFrame {
 				TupleSet all = m_vis.getGroup(nodes);
 				Iterator itr = all.tuples();
 				while (itr.hasNext()) {
-					VisualItem t = (VisualItem)itr.next();
-					holder.addTuple((Tuple)t);
+					VisualItem t = (VisualItem) itr.next();
+					holder.addTuple((Tuple) t);
 					t.setFixed(true);
-		}
+				}
 				//m_vis.run("tptLayout");
 				//m_vis.run("color");
 				//m_vis.run("nodeSize");
@@ -435,28 +447,29 @@ public class TPTWindow extends JFrame {
 		});
 
 		JToggleButton colorMode = new JToggleButton("Color Mode", false);
-		colorMode.addActionListener( new ActionListener() {
+		colorMode.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent ae) {
-				ActionList al = (ActionList)(m_vis.removeAction("color"));
-				al.remove (al.size() - 1);
-				if (((JToggleButton)ae.getSource()).isSelected()) {
+				ActionList al = (ActionList) (m_vis.removeAction("color"));
+				al.remove(al.size() - 1);
+				if (((JToggleButton) ae.getSource()).isSelected()) {
 					if (TPTWindow.this.isShowingPics) {
-						al.add (imgAltDataFill);
+						al.add(imgAltDataFill);
 					} else {
-					al.add (altDataFill);
-				}
+						al.add(altDataFill);
+					}
 				} else {
 					if (TPTWindow.this.isShowingPics) {
-						al.add (imgDataFill);
+						al.add(imgDataFill);
 					} else {
-					al.add (dataFill);
+						al.add(dataFill);
 					}
 				}
 				m_vis.putAction("color", al);
 				m_vis.run("color");
 			}
 		});
-		
+
 		final JToggleButton nodeMode = new JToggleButton("Node Labels");
 		nodeMode.addActionListener(new ActionListener() {
 
@@ -485,13 +498,13 @@ public class TPTWindow extends JFrame {
 
 
 		JButton exportDisplay = new JButton("Save Image");
-		exportDisplay.addActionListener( new ExportDisplayAction(display) );
+		exportDisplay.addActionListener(new ExportDisplayAction(display));
 
 
 
 		focusGroup.addTupleSetListener(new TupleSetListener() {
-			public void tupleSetChanged(TupleSet ts, Tuple[] add, Tuple[] rem)
-			{
+
+			public void tupleSetChanged(TupleSet ts, Tuple[] add, Tuple[] rem) {
 				if (add.length > 0 && holder.containsTuple(add[0])) {//add[0].getBoolean(VisualItem.FIXED) )
 					fixedBtn.setEnabled(true);
 					fixedBtn.setSelected(true);
@@ -512,7 +525,7 @@ public class TPTWindow extends JFrame {
 			public void actionPerformed(ActionEvent ae) {
 				JFrame forceFrame = new JFrame("Force Panel");
 
-				ForceSimulator fsim = ((ForceDirectedLayout)((ActionList)m_vis.getAction("tptLayout")).get(0)).getForceSimulator();
+				ForceSimulator fsim = ((ForceDirectedLayout) ((ActionList) m_vis.getAction("tptLayout")).get(0)).getForceSimulator();
 				JForcePanel fPanel = new JForcePanel(fsim);
 				forceFrame.add(fPanel);
 				forceFrame.pack();
@@ -524,8 +537,9 @@ public class TPTWindow extends JFrame {
 
 		JRangeSlider edgeWeightSlider = new JRangeSlider(1, 800, 1, 400, Constants.ORIENT_TOP_BOTTOM);
 		edgeWeightSlider.addChangeListener(new ChangeListener() {
+
 			public void stateChanged(ChangeEvent e) {
-				JRangeSlider slider = (JRangeSlider)e.getSource();
+				JRangeSlider slider = (JRangeSlider) e.getSource();
 				edgeWeight.setMaximumSize(slider.getHighValue());
 				edgeWeight.setMinimumSize(slider.getLowValue());
 				m_vis.run("color");
@@ -534,43 +548,44 @@ public class TPTWindow extends JFrame {
 
 		final JRangeSlider nodeSizeSlider = new JRangeSlider(1, 300, 1, 5, Constants.ORIENT_TOP_BOTTOM);
 		nodeSizeSlider.addChangeListener(new ChangeListener() {
+
 			public void stateChanged(ChangeEvent e) {
-				JRangeSlider slider = (JRangeSlider)e.getSource();
+				JRangeSlider slider = (JRangeSlider) e.getSource();
 				nodeSize.setMaximumSize(slider.getHighValue());
 				nodeSize.setMinimumSize(slider.getLowValue());
-				
+
 				if (isShowingPics) {
 					lr.setImageFactory(new ImageFactory());
 					ifa = lr.getImageFactory();
 					ifa.setAsynchronous(false);
 
-					double val = (double)slider.getHighValue();
+					double val = (double) slider.getHighValue();
 					if (!nodeMode.isSelected()) {
 						m_vis.setRendererFactory(rf);
 					}
-					ActionList al = (ActionList)(m_vis.removeAction("color"));
-					al.remove (al.size() - 1);
-					al.add (imgDataFill);
+					ActionList al = (ActionList) (m_vis.removeAction("color"));
+					al.remove(al.size() - 1);
+					al.add(imgDataFill);
 					m_vis.putAction("color", al);
 					lr.setImagePosition(Constants.LEFT);
-					
+
 					isShowingPics = true;
 					//attempts to set image node correlated with
-					
+
 					double scale = 1.0d / m_vis.getDisplay(0).getScale();
 					//nodeSize.setMinimumSize(1.0d*scale*scale);
 					//nodeSize.setMaximumSize(1.0d*scale*scale);
-					nodeSize.setMinimumSize(slider.getLowValue()*scale*scale);
-					nodeSize.setMaximumSize(slider.getHighValue()*scale*scale);
-					ifa.setMaxImageDimensions((int)(150.0d*scale*val), (int)(150.0d*scale*val));
-					
+					nodeSize.setMinimumSize(slider.getLowValue() * scale * scale);
+					nodeSize.setMaximumSize(slider.getHighValue() * scale * scale);
+					ifa.setMaxImageDimensions((int) (150.0d * scale * val), (int) (150.0d * scale * val));
+
 					//this will synchronously wait for images to be loaded.
 					//synchronous behavior makes the visualization behavior
 					//more predicatble, but could cause a long wait.
 					ifa.preloadImages(g.getNodes().tuples(), "image");
 					lr.setImageField("image");
 				}
-				
+
 				m_vis.run("nodeSize");
 				m_vis.run("nodeStroke");
 				m_vis.run("color");
@@ -581,13 +596,19 @@ public class TPTWindow extends JFrame {
 		});
 
 		final JToggleButton togglePics = new JToggleButton("Show Images", false);
-		togglePics.addActionListener( new ActionListener() {
+		togglePics.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent ae) {
 				JToggleButton tp = (JToggleButton) ae.getSource();
-				if(!tp.isSelected()) {
-					ActionList al = (ActionList)(m_vis.removeAction("color"));
-					al.remove (al.size() - 1);
-					al.add (dataFill);
+				if (!tp.isSelected()) {
+					ActionList al = (ActionList) (m_vis.removeAction("color"));
+					Action currentColorFill = al.remove(al.size() - 1);
+					if (currentColorFill == imgDataFill) {
+						al.add(dataFill);
+					} else {
+						assert currentColorFill == imgAltDataFill;
+						al.add(altDataFill);
+					}
 					m_vis.putAction("color", al);
 					lr.setImageField(null);
 					nodeSize.setMinimumSize(1.0);
@@ -598,26 +619,31 @@ public class TPTWindow extends JFrame {
 						m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
 					}
 				} else {
-					
+
 					if (!nodeMode.isSelected()) {
 						m_vis.setRendererFactory(rf);
 					}
-					ActionList al = (ActionList)(m_vis.removeAction("color"));
-					al.remove (al.size() - 1);
-					al.add (imgDataFill);
+					ActionList al = (ActionList) (m_vis.removeAction("color"));
+					Action currentColorFill = al.remove(al.size() - 1);
+					if (currentColorFill == dataFill) {
+						al.add(imgDataFill);
+					} else {
+						assert currentColorFill == altDataFill;
+						al.add(imgAltDataFill);
+					}
 					m_vis.putAction("color", al);
 					lr.setImagePosition(Constants.LEFT);
-					
+
 					isShowingPics = true;
 					//attempts to set image node correlated with
-					
+
 					double scale = 1.0d / m_vis.getDisplay(0).getScale();
 					//nodeSize.setMinimumSize(1.0d*scale*scale);
 					//nodeSize.setMaximumSize(1.0d*scale*scale);
-					nodeSize.setMinimumSize(1.0d*scale*scale);
-					nodeSize.setMaximumSize(1.0d*scale*scale);
-					ifa.setMaxImageDimensions((int)(150.0d*scale), (int)(150.0d*scale));
-					
+					nodeSize.setMinimumSize(1.0d * scale * scale);
+					nodeSize.setMaximumSize(1.0d * scale * scale);
+					ifa.setMaxImageDimensions((int) (150.0d * scale), (int) (150.0d * scale));
+
 					//this will synchronously wait for images to be loaded.
 					//synchronous behavior makes the visualization behavior
 					//more predicatble, but could cause a long wait.
@@ -657,7 +683,7 @@ public class TPTWindow extends JFrame {
 		southPanel.add(buttonPanel);
 		southPanel.add(sliderPanel);
 
-		display.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+		display.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(southPanel, BorderLayout.SOUTH);
 		panel.add(display, BorderLayout.CENTER);
@@ -670,8 +696,8 @@ public class TPTWindow extends JFrame {
 		TupleSet all = m_vis.getGroup(nodes);
 		Iterator itr = all.tuples();
 		while (itr.hasNext()) {
-			VisualItem t = (VisualItem)itr.next();
-			holder.addTuple((Tuple)t);
+			VisualItem t = (VisualItem) itr.next();
+			holder.addTuple((Tuple) t);
 			t.setFixed(true);
 		}
 		m_vis.run("color");
@@ -686,25 +712,29 @@ public class TPTWindow extends JFrame {
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
 
-	private void setNumPaths( TPTFactoryCM tptCalc, Graph g, int numPaths ) {
+	private void setNumPaths(TPTFactoryCM tptCalc, Graph g, int numPaths) {
 
 		Column edgeField = g.getEdgeTable().getColumn("inTPT");
-		Column  nodeField = g.getNodeTable().getColumn("inTPT");
+		Column nodeField = g.getNodeTable().getColumn("inTPT");
 
-		for ( int i = 0; i < edgeField.getRowCount(); ++i )
+		for (int i = 0; i < edgeField.getRowCount(); ++i) {
 			edgeField.revertToDefault(i);
+		}
 
-		for ( int i = 0; i < nodeField.getRowCount(); ++i )
+		for (int i = 0; i < nodeField.getRowCount(); ++i) {
 			nodeField.revertToDefault(i);
+		}
 
 		for (int i = 0; i < numPaths; ++i) {
 
 			ArrayList<Edge> path = tptCalc.getNextEdge();
-			if (path.isEmpty()) continue;
+			if (path.isEmpty()) {
+				continue;
+			}
 
 			//currently we aren't sure which order the paths are in
 			//path.get(0).getTargetNode().set("inTPT", true);
-			path.get(path.size()-1).getTargetNode().set("inTPT", true);
+			path.get(path.size() - 1).getTargetNode().set("inTPT", true);
 			for (Edge e : path) {
 				e.set("inTPT", true);
 				e.getSourceNode().set("inTPT", true);
@@ -715,35 +745,39 @@ public class TPTWindow extends JFrame {
 	private void zoomToFit(Display display, String group) {
 		if (!display.isTranformInProgress()) {
 			Rectangle2D bounds = m_vis.getBounds(group);
-			GraphicsLib.expand(bounds, ZOOM_MARGIN * (int)(1/display.getScale()));
+			GraphicsLib.expand(bounds, ZOOM_MARGIN * (int) (1 / display.getScale()));
 			DisplayLib.fitViewToBounds(display, bounds, ZOOM_DURATION);
 		}
 	}
 
-	private void processColumn( Column col, int size ) {
+	private void processColumn(Column col, int size) {
 
 		double max = max(col);
 		double min = min(col);
 
-		double[] palette = new double[size+1];
+		double[] palette = new double[size + 1];
 
-		for (int i = 0; i < size+1; ++i)
-			palette[i] = 2*i + 1.0d;
+		for (int i = 0; i < size + 1; ++i) {
+			palette[i] = 2 * i + 1.0d;
+		}
 
 		double step = (max - min) / size;
 		double base = 1.0;
 
-		for (int i = 0; i < col.getRowCount(); ++i)
-			col.setDouble(palette[(int)(col.getDouble(i) / step)], i);
+		for (int i = 0; i < col.getRowCount(); ++i) {
+			col.setDouble(palette[(int) (col.getDouble(i) / step)], i);
+		}
 	}
 
-	private double max( Column col ) {
+	private double max(Column col) {
 
 		double max = col.getDouble(0);
 
-		for (int i = 1; i < col.getRowCount(); ++i)
-			if (col.getDouble(i) > max)
+		for (int i = 1; i < col.getRowCount(); ++i) {
+			if (col.getDouble(i) > max) {
 				max = col.getDouble(i);
+			}
+		}
 
 		return max;
 	}
@@ -754,13 +788,15 @@ public class TPTWindow extends JFrame {
 	 * @param column of doubles
 	 * @return minimum double value
 	 */
-	private double min( Column col ) {
+	private double min(Column col) {
 
 		double min = col.getDouble(0);
 
-		for (int i = 1; i < col.getRowCount(); ++i)
-			if (col.getDouble(i) < min)
+		for (int i = 1; i < col.getRowCount(); ++i) {
+			if (col.getDouble(i) < min) {
 				min = col.getDouble(i);
+			}
+		}
 
 		return min;
 	}
@@ -771,32 +807,37 @@ public class TPTWindow extends JFrame {
 	 * @param ArrayList of tuples to put in TupleSet
 	 * @return resulting TupleSet
 	 */
-	public static TupleSet toTupleSet( ArrayList<Tuple> source ) {
+	public static TupleSet toTupleSet(ArrayList<Tuple> source) {
 
 		TupleSet set = new DefaultTupleSet();
 
-		for (Tuple t : source)
+		for (Tuple t : source) {
 			set.addTuple(t);
+		}
 
 		return set;
 	}
 
-	public static void revert (Column column) {
-		for (int i = 0; i < column.getRowCount(); ++i)
+	public static void revert(Column column) {
+		for (int i = 0; i < column.getRowCount(); ++i) {
 			column.revertToDefault(i);
+		}
 	}
 
-	public static boolean overlap (TupleSet one, TupleSet two) {
-		if (one.equals(two))
+	public static boolean overlap(TupleSet one, TupleSet two) {
+		if (one.equals(two)) {
 			return true;
-		
+		}
+
 		Iterator iOne = one.tuples();
 		Iterator iTwo = two.tuples();
 
-		while (iOne.hasNext() && iTwo.hasNext()) 
-			if (iOne.next().equals(iTwo.next()))
+		while (iOne.hasNext() && iTwo.hasNext()) {
+			if (iOne.next().equals(iTwo.next())) {
 				return true;
+			}
+		}
 
-		return false;	
+		return false;
 	}
 }

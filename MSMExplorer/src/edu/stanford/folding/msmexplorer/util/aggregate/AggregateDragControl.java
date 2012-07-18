@@ -75,7 +75,6 @@ public class AggregateDragControl extends DragControl {
 	protected static void setFixed(VisualItem item, boolean fixed) {
 		if ( item instanceof AggregateItem ) {
 			Iterator items = ((AggregateItem)item).items();
-			//item.setHighlighted(true);
 			while ( items.hasNext() ) {
 				setFixed((VisualItem)items.next(), fixed);
 			}
