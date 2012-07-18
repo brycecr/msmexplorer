@@ -31,6 +31,16 @@ public class AggregateDragControl extends DragControl {
 	public AggregateDragControl(String action) {
 		super(action);
 	}
+
+	public void itemEntered(VisualItem item, MouseEvent e) {
+		super.itemEntered(item, e);
+		setFixed(item, true);
+	}
+
+	public void itemExited(VisualItem item, MouseEvent e) {
+		super.itemExited(item, e);
+		setFixed(item, false);
+	}
 	
 	@Override
 	public void itemReleased(VisualItem item, MouseEvent e) {
@@ -65,6 +75,7 @@ public class AggregateDragControl extends DragControl {
 	protected static void setFixed(VisualItem item, boolean fixed) {
 		if ( item instanceof AggregateItem ) {
 			Iterator items = ((AggregateItem)item).items();
+			//item.setHighlighted(true);
 			while ( items.hasNext() ) {
 				setFixed((VisualItem)items.next(), fixed);
 			}

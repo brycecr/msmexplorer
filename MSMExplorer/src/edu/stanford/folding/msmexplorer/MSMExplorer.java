@@ -405,6 +405,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			public void stateChanged(ChangeEvent e) {
 				((GraphDistanceFilter) ((ActionList) m_vis.getAction("draw")).get(0)).setDistance(distSlider.getValue().intValue());
 				eqProbSlider.fire();
+				m_vis.run("aggLayout");
 			}
 		});
 		distSlider.setBackground(Color.WHITE);
@@ -772,6 +773,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			final ColorAction aStroke = new ColorAction(aggr, VisualItem.STROKECOLOR);
 			aStroke.setDefaultColor(ColorLib.gray(200));
 			aStroke.add(VisualItem.FIXED, ColorLib.rgb(255, 100, 100));
+			aStroke.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 100, 100));
+			aStroke.add(VisualItem.HOVER, ColorLib.rgb(255, 100, 100));
 			aStroke.setVisualization(m_vis);
 
 			final int[] palette = new int[]{
@@ -783,9 +786,11 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				Constants.NOMINAL, VisualItem.FILLCOLOR, ColorLib.getCategoryPalette(50, 0.95f, .15f, .9f, .5f));
 			aFill.setVisualization(m_vis);
 
-			final ActionList draw = (ActionList) m_vis.getAction("draw");
+			ActionList draw = (ActionList) m_vis.getAction("draw");
 			draw.add(aFill);
-			draw.add(aStroke);
+
+			ActionList animate = (ActionList)m_vis.getAction("animate");
+			animate.add(aStroke);
 
 			m_vis.getDisplay(0).setItemSorter(new AggregatePrioritySorter());
 
@@ -912,19 +917,16 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			lll.add(new ForceDirectedLayout(graph));              //Else, continually animate
 		}
 
-		final ActionList agglll = new ActionList();
-		agglll.add(lll);
 
 		// finally, we register our ActionList with the Visualization.
 		// we can later execute our Actions by invoking a method on our
 		// Visualization, using the name we've chosen below.
 		m_vis.putAction("draw", draw);
 		m_vis.putAction("lll", lll);
-		m_vis.putAction("agglll", agglll);
 		m_vis.putAction("nodeSize", nodeSize);
-		m_vis.putAction("layout", animate);
+		m_vis.putAction("animate", animate);
 
-		m_vis.runAfter("draw", "layout");
+		m_vis.runAfter("draw", "animate");
 		m_vis.alwaysRunAfter("lll", "draw");
 
 		// get forces from simulator
@@ -1075,7 +1077,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 			@Override
 			public void windowActivated(WindowEvent e) {
-				view.m_vis.run("layout");
+				view.m_vis.run("animate");
 			}
 
 			@Override
@@ -1090,7 +1092,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 				if (oppositeFrame != null
 					&& oppositeFrame.getTitle().equals("Force Panel")); else {
-					view.m_vis.cancel("layout");
+					view.m_vis.cancel("animate");
 				}
 			}
 		});
