@@ -8,81 +8,88 @@ import java.awt.event.MouseEvent;
 import java.util.Iterator;
 import javax.swing.SwingUtilities;
 import prefuse.Display;
+import prefuse.Visualization;
+import prefuse.action.Action;
 import prefuse.controls.DragControl;
 import prefuse.visual.AggregateItem;
 import prefuse.visual.VisualItem;
 
 /**
  * Interactive drag control that is "aggregate-aware"
- * 
+ *
  * @auhtor Jeffrey Heer
  */
 public class AggregateDragControl extends DragControl {
+	
+	/**
+	 * Creates a new drag control that issues repaint requests as an item
+	 * is dragged.
+	 */
+	public AggregateDragControl() {
+	}
 
-        private VisualItem activeItem;
+	public AggregateDragControl(String action) {
+		super(action);
+	}
+	
+	@Override
+	public void itemReleased(VisualItem item, MouseEvent e) {
+		super.itemReleased(item, e);
+		Visualization vis = ((Display)e.getComponent()).getVisualization();
+		Action a = vis.getAction(action);
+		if (a != null) {
+			((Display)e.getComponent()).getVisualization().run(action);
+		}
+	}
+	/**
+	 * @see prefuse.controls.Control#itemDragged(prefuse.visual.VisualItem, java.awt.event.MouseEvent)
+	 */
+	@Override
+	public void itemDragged(VisualItem item, MouseEvent e) {
+		if ((item instanceof AggregateItem)) {
+			if (!SwingUtilities.isLeftMouseButton(e)) return;
+			dragged = true;
+			Display d = (Display)e.getComponent();
+			d.getAbsoluteCoordinate(e.getPoint(), temp);
+			double dx = temp.getX()-down.getX();
+			double dy = temp.getY()-down.getY();
+			
+			move(item, dx, dy);
+			
+			down.setLocation(temp);
+		} else {
+			super.itemDragged(item, e);
+		}
+	}
+	
+	protected static void setFixed(VisualItem item, boolean fixed) {
+		if ( item instanceof AggregateItem ) {
+			Iterator items = ((AggregateItem)item).items();
+			while ( items.hasNext() ) {
+				setFixed((VisualItem)items.next(), fixed);
+			}
+		} else {
+			item.setFixed(fixed);
+		}
+	}
+	
+	protected static void move(VisualItem item, double dx, double dy) {
+		if (item == null) {
+			return;
+		}
 
-        /**
-         * Creates a new drag control that issues repaint requests as an item
-         * is dragged.
-         */
-        public AggregateDragControl() {
-        }
-
-        /**
-         * @see prefuse.controls.Control#itemDragged(prefuse.visual.VisualItem, java.awt.event.MouseEvent)
-         */
-        @Override
-        public void itemDragged(VisualItem item, MouseEvent e) {
-                if (!SwingUtilities.isLeftMouseButton(e)) {
-                        return;
-                }
-                dragged = true;
-                Display d = (Display) e.getComponent();
-                d.getAbsoluteCoordinate(e.getPoint(), temp);
-                double dx = temp.getX() - down.getX();
-                double dy = temp.getY() - down.getY();
-
-                move(item, dx, dy);
-
-                down.setLocation(temp);
-        }
-
-        protected static void setFixed(VisualItem item, boolean fixed) {
-                if (item instanceof AggregateItem) {
-                        Iterator items = ((AggregateItem) item).items();
-                        while (items.hasNext()) {
-                                setFixed((VisualItem) items.next(), fixed);
-                        }
-                } else {
-                        item.setFixed(fixed);
-                }
-        }
-
-        public void itemPressed(VisualItem item, MouseEvent e) {
-                if (!SwingUtilities.isLeftMouseButton(e)) {
-                        return;
-                }
-                dragged = false;
-                Display d = (Display) e.getComponent();
-                d.getAbsoluteCoordinate(e.getPoint(), down);
-                setFixed(item, true);
-        }
-
-        protected static void move(VisualItem item, double dx, double dy) {
-                if (item instanceof AggregateItem) {
-                        Iterator<VisualItem> items = ((AggregateItem) item).items();
-                        while (items.hasNext()) {
-                                move(items.next(), dx, dy);
-                        }
-                } else {
-                        double x = item.getX();
-                        double y = item.getY();
-                        item.setStartX(x);
-                        item.setStartY(y);
-                        item.setX(x + dx);
-                        item.setY(y + dy);
-                        item.setEndX(x + dx);
-                        item.setEndY(y + dy);
-                }
-        }
+		if ( item instanceof AggregateItem ) {
+			Iterator items = ((AggregateItem)item).items();
+			while ( items.hasNext() ) {
+				VisualItem aitem = (VisualItem)items.next();
+				move(aitem, dx, dy);
+			}
+		} else {
+			double x = item.getX();
+			double y = item.getY();
+			item.setStartX(x);  item.setStartY(y);
+			item.setX(x+dx);    item.setY(y+dy);
+			item.setEndX(x+dx); item.setEndY(y+dy);
+		}
+	}
 } // end of class AggregateDragControl

@@ -84,6 +84,7 @@ import prefuse.visual.VisualItem;
 
 import edu.stanford.folding.msmexplorer.tpt.TPTSetupBox;
 import edu.stanford.folding.msmexplorer.tpt.TPTWindow;
+import edu.stanford.folding.msmexplorer.util.aggregate.AggregateDragControl;
 import edu.stanford.folding.msmexplorer.util.render.SelfRefEdgeRenderer;
 import edu.stanford.folding.msmexplorer.util.stats.GraphStatsManager;
 import edu.stanford.folding.msmexplorer.util.stats.GraphStatsWindow;
@@ -105,6 +106,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import prefuse.action.Action;
 import prefuse.render.PolygonRenderer;
 import prefuse.render.Renderer;
 import prefuse.util.PrefuseLib;
@@ -229,6 +231,16 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		focusGroup.addTupleSetListener(new TupleSetListener() {
 
 			public void tupleSetChanged(TupleSet ts, Tuple[] add, Tuple[] rem) {
+				for (int i = 0; i < add.length; ++i) {
+					if (add[i] instanceof AggregateItem) {
+						return;
+					}
+				}
+				for (int i = 0; i < rem.length; ++i) {
+					if (rem[i] instanceof AggregateItem) {
+						return;
+					}
+				}
 				for (int i = 0; i < rem.length; ++i) {
 					((VisualItem) rem[i]).setFixed(false);
 					Iterator focusEdges = ((Node) rem[i]).edges();
@@ -297,11 +309,11 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		// main display controls
 		display.addControlListener(new FocusControlWithDeselect(1));
 		display.addControlListener(new PanControl());
+		display.addControlListener(new AggregateDragControl("aggLayout"));
 		display.addControlListener(new ZoomControl());
 		display.addControlListener(new WheelZoomControl());
 		display.addControlListener(new ZoomToFitControl());
 		display.addControlListener(new NeighborHighlightControl());
-		display.addControlListener(new DragControl());
 
 		// Main control panel
 		JPanel fpanel = new JPanel();
@@ -482,8 +494,14 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		pause.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				//if (((ActionList)m_vis.getAction("lll")).isRunning())
-				((ActionList) m_vis.getAction("lll")).cancel();
+				Action layoutAction = m_vis.getAction("lll");
+				layoutAction.cancel();
+				/*
+				if (layoutAction.getDuration() == ActionList.INFINITY) {
+					layoutAction.setDuration(500);
+				}
+				 * 
+				 */
 			}
 		});
 
@@ -492,7 +510,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 			public void actionPerformed(ActionEvent e) {
 				if (!m_vis.getAction("lll").isRunning()) {
-					((ActionList) m_vis.getAction("lll")).run();
+					ActionList layoutAction = (ActionList)m_vis.getAction("lll");
+					layoutAction.run();
 				}
 			}
 		});
@@ -612,26 +631,21 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		overSlider = new JSlider(SwingConstants.VERTICAL, -1, -1, -1);
 		overSlider.addChangeListener(new ChangeListener() {
-
+			
 			public void stateChanged(ChangeEvent ae) {
 				int top = overSlider.getValue();
 				int bottom = zoomSlider.getValue();
-				if (overSlider.getValueIsAdjusting() || 
-					top < 0 || !overSlider.isEnabled() || top >= bottom) {
-					if (top >= bottom) {
-						overSlider.setValue(overSlider.getMaximum());
-					}
+				if (overSlider.getValueIsAdjusting() ||
+					top < 0 || !overSlider.isEnabled() ) {
 					return;
-				}
-
-				if (top < hierarchy.graphs.length - 1) {
-					MSMExplorer.this.setAggregates(bottom, top);
-				} else {
-					assert top == hierarchy.graphs.length;
+				} else if (top >= bottom) {
 					JFrame toDie = MSMExplorer.this.frame;
 					MSMExplorer msme = graphView(hierarchy.graphs[bottom], "label");
 					msme.setHierarchy(hierarchy, bottom);
 					toDie.dispose();
+					overSlider.setValue(overSlider.getMaximum());
+				} else if (top < hierarchy.graphs.length - 1) {
+					MSMExplorer.this.setAggregates(bottom, top);
 				}
 			}
 		});
@@ -775,7 +789,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 			m_vis.getDisplay(0).setItemSorter(new AggregatePrioritySorter());
 
-			((ActionList) m_vis.getAction("lll")).add(new AggregateLayout(aggr, m_vis));
+			final Action aggLayout = new AggregateLayout(aggr, m_vis);
+			m_vis.putAction("aggLayout", aggLayout);
+			((ActionList) m_vis.getAction("lll")).add(aggLayout);
 		} else {
 			at = (AggregateTable) m_vis.getGroup(aggr);
 			Table nt = (Table) ((Graph) m_vis.getGroup(graph)).getNodeTable();
@@ -800,7 +816,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 			ai.addItem((VisualItem) vNode);
 		}
-		m_vis.setInteractive(aggr, null, false);
 		m_vis.run("draw");
 		m_vis.run("lll");
 	}
@@ -897,11 +912,15 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			lll.add(new ForceDirectedLayout(graph));              //Else, continually animate
 		}
 
+		final ActionList agglll = new ActionList();
+		agglll.add(lll);
+
 		// finally, we register our ActionList with the Visualization.
 		// we can later execute our Actions by invoking a method on our
 		// Visualization, using the name we've chosen below.
 		m_vis.putAction("draw", draw);
 		m_vis.putAction("lll", lll);
+		m_vis.putAction("agglll", agglll);
 		m_vis.putAction("nodeSize", nodeSize);
 		m_vis.putAction("layout", animate);
 
