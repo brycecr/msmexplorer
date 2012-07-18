@@ -35,11 +35,6 @@ public class AggregateDragControl extends DragControl {
 	@Override
 	public void itemReleased(VisualItem item, MouseEvent e) {
 		super.itemReleased(item, e);
-		Visualization vis = ((Display)e.getComponent()).getVisualization();
-		Action a = vis.getAction(action);
-		if (a != null) {
-			((Display)e.getComponent()).getVisualization().run(action);
-		}
 	}
 	/**
 	 * @see prefuse.controls.Control#itemDragged(prefuse.visual.VisualItem, java.awt.event.MouseEvent)
@@ -59,6 +54,11 @@ public class AggregateDragControl extends DragControl {
 			down.setLocation(temp);
 		} else {
 			super.itemDragged(item, e);
+		}
+		Visualization vis = ((Display)e.getComponent()).getVisualization();
+		Action a = vis.getAction(action);
+		if (a != null) {
+			((Display)e.getComponent()).getVisualization().run(action);
 		}
 	}
 	
