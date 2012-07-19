@@ -96,6 +96,7 @@ import edu.stanford.folding.msmexplorer.util.aggregate.AggregateLayout;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregatePrioritySorter;
 
 import edu.stanford.folding.msmexplorer.util.render.ImageToggleLabelRenderer;
+import java.awt.GridLayout;
 import java.awt.event.ComponentListener;
 import java.util.HashMap;
 import javax.swing.SwingConstants;
@@ -341,7 +342,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		//the F lets other code fire without a value change.
 		//note that currently this orchestrates the behavior of both filters
-		final JValueSliderF eqProbSlider = new JValueSliderF(EQPROB, 0., 1., 0.);
+		final JValueSliderF eqProbSlider = new JValueSliderF("EqProb Cutoff", 0., 1., 0.);
 		eqProbSlider.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent e) {
@@ -390,8 +391,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				}
 			}
 		});
+		//eqProbSlider.setLayout(new BoxLayout(eqProbSlider, BoxLayout.Y_AXIS));
+		eqProbSlider.setLayout(new GridLayout(0,2));
 
-		final JTextField eqProbText = new JTextField("EqProb Threshold");
+		final JTextField eqProbText = new JTextField("EqProb Thresh");
 		eqProbText.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent ae) {
@@ -399,6 +402,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				eqProbSlider.setValue(d);
 			}
 		});
+		eqProbSlider.add(eqProbText);
 
 		// Graph Distance slider
 		final JValueSlider distSlider = new JValueSlider("Distance", 0, 40, 37);
@@ -414,9 +418,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		distSlider.setPreferredSize(new Dimension(300, 30));
 		distSlider.setMaximumSize(new Dimension(300, 30));
 
-		Box eqBox = new Box(BoxLayout.X_AXIS);
+		Box eqBox = new Box(BoxLayout.Y_AXIS);
+		//eqBox.add(eqProbText);
 		eqBox.add(eqProbSlider);
-		eqBox.add(eqProbText);
+		eqBox.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 
 		Box cf = new Box(BoxLayout.Y_AXIS);
 		cf.add(eqBox);
@@ -686,9 +691,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		split.setRightComponent(fpanel);
 		split.setOneTouchExpandable(true);
 		split.setContinuousLayout(false);
-		split.setDividerLocation(1200);
-		split.setOpaque(false);
-		this.setOpaque(false);
+		split.setDividerLocation(1100);
 
 		// now we run our action list
 		m_vis.run("draw");
