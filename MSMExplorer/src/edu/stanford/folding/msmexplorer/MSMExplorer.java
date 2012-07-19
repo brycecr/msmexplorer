@@ -318,6 +318,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		fpanel.setLayout(new BoxLayout(fpanel, BoxLayout.Y_AXIS));
 		fpanel.setBackground(Color.WHITE);
 
+		//we used absolute (i.e. null) layout so we could get the hierarchy sliders
+		//to overlay on the visualization; thus, because no layout is doing it for
+		// us, we have to handle resizing of the main visualization.
 		this.addComponentListener(new ComponentListener() {
 
 			public void componentResized(ComponentEvent ce) {
@@ -325,12 +328,13 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 
 			public void componentMoved(ComponentEvent ce) {
+				/*empty*/
 			}
-
 			public void componentShown(ComponentEvent ce) {
+				/*empty*/
 			}
-
 			public void componentHidden(ComponentEvent ce) {
+				/*empty*/
 			}
 		});
 
@@ -463,6 +467,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				JRadioButton circleRB = (JRadioButton) ae.getSource();
 				if (circleRB.isSelected()) {
 					m_vis.setRendererFactory(new DefaultRendererFactory(new ShapeRenderer()/*, new SelfRefEdgeRenderer()*/));
+					((DefaultRendererFactory)m_vis.getRendererFactory()).add("ingroup('aggregates')", new PolygonRenderer(Constants.POLY_TYPE_CURVE));
 					m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
 				}
 			}

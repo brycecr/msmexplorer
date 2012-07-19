@@ -69,7 +69,6 @@ import prefuse.visual.expression.VisiblePredicate;
 import prefuse.render.Renderer;
 import prefuse.util.GraphicsLib;
 import prefuse.util.display.DisplayLib;
-import prefuse.visual.expression.InGroupPredicate;
 import prefuse.visual.sort.ItemSorter;
 
 /**
@@ -242,7 +241,6 @@ public class TPTWindow extends JFrame {
 		axes.add(ylabels);
 		axes.add(new RepaintAction());
 
-		m_vis.setVisible("ylabels", new InGroupPredicate("ylabels"), false);
 
 		final ActionList altAxes = new ActionList();
 		altAxes.add(filter);
@@ -705,6 +703,7 @@ public class TPTWindow extends JFrame {
 		this.setTitle("T P T V i e w  |  M S M E x p l o r e r");
 		this.setVisible(true);
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		m_vis.setInteractive(ylabels.getGroup(), null, false);
 	}
 
 	private void setNumPaths(TPTFactoryCM tptCalc, Graph g, int numPaths) {
@@ -825,10 +824,9 @@ public class TPTWindow extends JFrame {
 		}
 
 		Iterator iOne = one.tuples();
-		Iterator iTwo = two.tuples();
 
-		while (iOne.hasNext() && iTwo.hasNext()) {
-			if (iOne.next().equals(iTwo.next())) {
+		while (iOne.hasNext()) {
+			if (two.containsTuple((Tuple)iOne.next())) {
 				return true;
 			}
 		}
