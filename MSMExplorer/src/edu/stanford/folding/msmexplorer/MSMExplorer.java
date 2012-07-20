@@ -97,6 +97,7 @@ import edu.stanford.folding.msmexplorer.util.aggregate.AggregateLayout;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregatePrioritySorter;
 
 import edu.stanford.folding.msmexplorer.util.render.ImageToggleLabelRenderer;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ComponentListener;
@@ -144,8 +145,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	private static final String version = "v0.03"; //Current Version
 	private String imageLocation = "'./lib/images'";
 	private HierarchyBundle hierarchy = null;
-	private JSlider zoomSlider = null;
-	private JSlider overSlider = null;
+	private JPanel harchPanel = null;
 
 	public MSMExplorer() {
 
@@ -507,7 +507,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		fpanel.add(nrBox);
 
-		JButton pause = new JButton("Stop Layout");
+		final JButton pause = new JButton("Stop Layout");
 		pause.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -610,7 +610,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		SearchQueryBinding sq = new SearchQueryBinding((Table) m_vis.getGroup(nodes), "label",
 			(SearchTupleSet) m_vis.getGroup(Visualization.SEARCH_ITEMS));
 
-		JSearchPanel search = sq.createSearchPanel(false);
+		final JSearchPanel search = sq.createSearchPanel(false);
 		search.setShowResultCount(true);
 		search.setBorder(BorderFactory.createEmptyBorder(5, 5, 4, 0));
 
@@ -622,30 +622,37 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		final JToggleButton axisToggle = new JToggleButton("Show Axis", false);
 		axisToggle.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				m_vis.removeAction("axes");
-				m_vis.cancel("lll");
-
-				((DefaultRendererFactory) m_vis.getRendererFactory()).add("ingroup('labels')", new AxisRenderer(Constants.LEFT, Constants.TOP));
-
-				Rectangle2D bounds = m_vis.getDisplay(0).getItemBounds();
-				AxisLayout xaxis = new AxisLayout(nodes, "label", Constants.X_AXIS, VisiblePredicate.TRUE);
-				xaxis.setLayoutBounds(bounds);
-				AxisLayout yaxis = new AxisLayout(nodes, "eqProb", Constants.Y_AXIS, VisiblePredicate.TRUE);
-				yaxis.setLayoutBounds(bounds);
-
-				AxisLabelLayout ylabels = new AxisLabelLayout("labels", yaxis, bounds);
-
-				final ActionList axes = new ActionList();
-				axes.add(xaxis);
-				axes.add(yaxis);
-				axes.add(ylabels);
-				axes.add(new RepaintAction());
-
-				m_vis.putAction("axes", axes);
-				m_vis.run("axes");
-				Rectangle2D lbounds = m_vis.getBounds(graph);
-				GraphicsLib.expand(lbounds, 50 + (int) (1 / display.getScale()));
-				DisplayLib.fitViewToBounds(display, lbounds, 1000);
+				
+				if (axisToggle.isSelected()) {
+					m_vis.removeAction("axes");
+					m_vis.cancel("lll");
+					
+					((DefaultRendererFactory) m_vis.getRendererFactory()).add("ingroup('labels')", new AxisRenderer(Constants.LEFT, Constants.TOP));
+					
+					Rectangle2D bounds = m_vis.getDisplay(0).getItemBounds();
+					AxisLayout xaxis = new AxisLayout(nodes, "label", Constants.X_AXIS, VisiblePredicate.TRUE);
+					xaxis.setLayoutBounds(bounds);
+					AxisLayout yaxis = new AxisLayout(nodes, "eqProb", Constants.Y_AXIS, VisiblePredicate.TRUE);
+					yaxis.setLayoutBounds(bounds);
+					
+					AxisLabelLayout ylabels = new AxisLabelLayout("labels", yaxis, bounds);
+					
+					final ActionList axes = new ActionList();
+					axes.add(xaxis);
+					axes.add(yaxis);
+					axes.add(ylabels);
+					axes.add(new RepaintAction());
+					
+					m_vis.putAction("axes", axes);
+					m_vis.run("axes");
+					m_vis.run("aggLayout");
+					Rectangle2D lbounds = m_vis.getBounds(graph);
+					GraphicsLib.expand(lbounds, 50 + (int) (1 / display.getScale()));
+					DisplayLib.fitViewToBounds(display, lbounds, 1000);
+				} else {
+					m_vis.cancel("axes");
+					m_vis.getGroup("labels").clear();
+				}
 			}
 		});
 
@@ -654,7 +661,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		axisBox.add(axisToggle);
 		fpanel.add(axisBox);
 
-		zoomSlider = new JSlider(SwingConstants.VERTICAL, 0, 0, 0);
+		final JSlider zoomSlider = new JSlider(SwingConstants.VERTICAL, 0, 0, 0);
 		zoomSlider.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent ae) {
@@ -675,7 +682,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		zoomSlider.setSnapToTicks(true);
 		zoomSlider.setEnabled(false);
 
-		overSlider = new JSlider(SwingConstants.VERTICAL, -1, -1, -1);
+		final JSlider overSlider = new JSlider(SwingConstants.VERTICAL, -1, -1, -1);
 		overSlider.addChangeListener(new ChangeListener() {
 			
 			public void stateChanged(ChangeEvent ae) {
@@ -701,16 +708,33 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		overSlider.setSnapToTicks(true);
 		overSlider.setEnabled(false);
 
+		JLabel harchLabel = new JLabel("Level");
+		harchLabel.setFont(FontLib.getFont("Tahoma", 11));
+
+		JLabel overLabel = new JLabel("Overlay");
+		overLabel.setFont(FontLib.getFont("Tahoma", 11));
+
+		harchPanel = new JPanel();
+		harchPanel.setLayout(null);
+		harchPanel.add(zoomSlider);
+		harchPanel.add(overSlider);
+		harchPanel.add(overLabel);
+		harchPanel.add(harchLabel);
+		zoomSlider.setBounds(5, 10, 60, 150);
+		overSlider.setBounds(65, 10, 60, 150);
+		harchLabel.setBounds(10,0,60,20);
+		overLabel.setBounds(65, 0, 60, 20);
+		harchPanel.setEnabled(false);
+		harchPanel.setVisible(false);
+
+
 		JLayeredPane graphPane = new JLayeredPane();
 		graphPane.setLayout(null);
 		graphPane.add(display, new Integer(0));
-		graphPane.add(zoomSlider, new Integer(1));
-		graphPane.add(overSlider, new Integer(1));
+		graphPane.add(harchPanel, new Integer(1));
+		harchPanel.setBounds(0, 0, 150, 160);
+		harchPanel.setOpaque(false);
 		graphPane.setPreferredSize(new Dimension(1000, 800));
-		zoomSlider.setBounds(5, 10, 60, 150);
-		zoomSlider.setVisible(false);
-		overSlider.setBounds(65, 10, 60, 150);
-		overSlider.setVisible(false);
 
 		fpanel.add(Box.createRigidArea(new Dimension(0,200)));
 
@@ -739,17 +763,21 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 */
 	public void setHierarchy(HierarchyBundle hb, int pos) {
 		hierarchy = hb;
+		JSlider zoomSlider = (JSlider)harchPanel.getComponent(0);
 		zoomSlider.setMaximum(hb.graphs.length - 1);
 		zoomSlider.setValue(pos);
 		zoomSlider.setLabelTable(MSMIOLib.getHierarchyLabels(hb.graphs));
-		zoomSlider.setEnabled(true);
-		zoomSlider.setVisible(true);
+
+		JSlider overSlider = (JSlider)harchPanel.getComponent(1);
 		overSlider.setMaximum(hb.graphs.length - 1);
 		overSlider.setMinimum(0);
 		overSlider.setValue(hb.graphs.length - 1);
 		overSlider.setLabelTable(MSMIOLib.getAltHierarchyLabels(hb.graphs));
-		overSlider.setVisible(true);
+
+		zoomSlider.setEnabled(true);
 		overSlider.setEnabled(true);
+		harchPanel.setEnabled(true);
+		harchPanel.setVisible(true);
 	}
 
 	/**
@@ -765,6 +793,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 */
 	public void setAggregates(int bottom, int top) {
 
+		JSlider overSlider = (JSlider)harchPanel.getComponent(1);
 		if (top == overSlider.getMaximum()) {
 			return;
 		}
