@@ -223,8 +223,6 @@ public class TPTWindow extends JFrame {
 		AxisLayout xaxis = new AxisLayout(nodes, "TPT Distance", Constants.X_AXIS, VisiblePredicate.TRUE);
 		AxisLayout yaxis = new AxisLayout(nodes, "eqProb", Constants.Y_AXIS, VisiblePredicate.TRUE);
 
-		Rectangle2D rect = new Rectangle2D.Double();
-		Rectangle2D lrect = new Rectangle2D.Double();
 		final AxisLabelLayout ylabels = new AxisLabelLayout("ylabels", yaxis);
 		//xaxis.setLayoutBounds(rect);
 		//yaxis.setLayoutBounds(rect);
@@ -358,6 +356,8 @@ public class TPTWindow extends JFrame {
 			}
 		});
 
+		Rectangle2D rect = new Rectangle2D.Double();
+		Rectangle2D lrect = new Rectangle2D.Double();
 		Insets insets = display.getInsets();
 		rect.setRect(insets.left + AXIS_WIDTH, insets.top, display.getWidth() - insets.right, display.getHeight() - insets.bottom);
 		lrect.setRect(insets.left, insets.top, insets.left + AXIS_WIDTH, display.getHeight() - insets.bottom);

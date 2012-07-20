@@ -11,6 +11,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -97,6 +98,7 @@ import edu.stanford.folding.msmexplorer.util.aggregate.AggregatePrioritySorter;
 
 import edu.stanford.folding.msmexplorer.util.render.ImageToggleLabelRenderer;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.ComponentListener;
 import java.util.HashMap;
 import javax.swing.SwingConstants;
@@ -106,13 +108,19 @@ import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import prefuse.action.Action;
+import prefuse.action.layout.AxisLabelLayout;
+import prefuse.action.layout.AxisLayout;
+import prefuse.render.AxisRenderer;
 import prefuse.render.PolygonRenderer;
 import prefuse.render.Renderer;
+import prefuse.util.GraphicsLib;
 import prefuse.util.PrefuseLib;
+import prefuse.util.display.DisplayLib;
 import prefuse.visual.AggregateItem;
 import prefuse.visual.AggregateTable;
 import prefuse.visual.EdgeItem;
 import prefuse.visual.NodeItem;
+import prefuse.visual.expression.VisiblePredicate;
 
 /**
  * Class to execute MSMExplorer, a visualization module for
@@ -611,6 +619,41 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		searchBox.add(search);
 		fpanel.add(searchBox);
 
+		final JToggleButton axisToggle = new JToggleButton("Show Axis", false);
+		axisToggle.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				m_vis.removeAction("axes");
+				m_vis.cancel("lll");
+
+				((DefaultRendererFactory) m_vis.getRendererFactory()).add("ingroup('labels')", new AxisRenderer(Constants.LEFT, Constants.TOP));
+
+				Rectangle2D bounds = m_vis.getDisplay(0).getItemBounds();
+				AxisLayout xaxis = new AxisLayout(nodes, "label", Constants.X_AXIS, VisiblePredicate.TRUE);
+				xaxis.setLayoutBounds(bounds);
+				AxisLayout yaxis = new AxisLayout(nodes, "eqProb", Constants.Y_AXIS, VisiblePredicate.TRUE);
+				yaxis.setLayoutBounds(bounds);
+
+				AxisLabelLayout ylabels = new AxisLabelLayout("labels", yaxis, bounds);
+
+				final ActionList axes = new ActionList();
+				axes.add(xaxis);
+				axes.add(yaxis);
+				axes.add(ylabels);
+				axes.add(new RepaintAction());
+
+				m_vis.putAction("axes", axes);
+				m_vis.run("axes");
+				Rectangle2D lbounds = m_vis.getBounds(graph);
+				GraphicsLib.expand(lbounds, 50 + (int) (1 / display.getScale()));
+				DisplayLib.fitViewToBounds(display, lbounds, 1000);
+			}
+		});
+
+		Box axisBox = new Box(BoxLayout.Y_AXIS);
+		axisBox.setBorder(BorderFactory.createTitledBorder("Axis Control"));
+		axisBox.add(axisToggle);
+		fpanel.add(axisBox);
+
 		zoomSlider = new JSlider(SwingConstants.VERTICAL, 0, 0, 0);
 		zoomSlider.addChangeListener(new ChangeListener() {
 
@@ -658,21 +701,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		overSlider.setSnapToTicks(true);
 		overSlider.setEnabled(false);
 
-		// overview display window
-		Display overview = new Display(m_vis);
-		overview.setSize(290, 290);
-		overview.addItemBoundsListener(new FitOverviewListener());
-		overview.setHighQuality(true);
-
-		JPanel opanel = new JPanel();
-		opanel.setBorder(BorderFactory.createTitledBorder("Overview"));
-		opanel.setBackground(Color.WHITE);
-		opanel.add(overview);
-
-		fpanel.add(opanel);
-
-		fpanel.add(Box.createVerticalGlue());
-
 		JLayeredPane graphPane = new JLayeredPane();
 		graphPane.setLayout(null);
 		graphPane.add(display, new Integer(0));
@@ -684,6 +712,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		overSlider.setBounds(65, 10, 60, 150);
 		overSlider.setVisible(false);
 
+		fpanel.add(Box.createRigidArea(new Dimension(0,200)));
 
 		// create a new JSplitPane to present the interface
 		JSplitPane split = new JSplitPane();
