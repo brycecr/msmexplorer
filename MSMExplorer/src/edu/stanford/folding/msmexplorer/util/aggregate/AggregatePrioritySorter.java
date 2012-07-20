@@ -6,6 +6,7 @@ import prefuse.Visualization;
 import prefuse.visual.AggregateItem;
 import prefuse.visual.DecoratorItem;
 import prefuse.visual.EdgeItem;
+import prefuse.visual.NodeItem;
 import prefuse.visual.VisualItem;
 import prefuse.visual.sort.ItemSorter;
 
@@ -13,7 +14,8 @@ import prefuse.visual.sort.ItemSorter;
  * A stupid copy of ItemSorter to put aggregate priorities
  * above edge priorities. Should be able to just extend, but
  * ItemSorter isn't really written with extension of this sort 
- * in mind.
+ * in mind. Also puts Nodes at top priority, mostly to get them on
+ * top of axis lines.
  * 
  * ItemSorter instances provide an integer score for each VisualItem;
  * these scores are then used to sort the items in ascending order of score.
@@ -28,6 +30,7 @@ public class AggregatePrioritySorter extends ItemSorter {
     protected static final int AGGREGATE = 1;
     protected static final int ITEM      = 2;
     protected static final int DECORATOR = 3;
+    protected static final int NODE = 4;
     
     /**
      * <p>Return an ordering score for an item. The default scoring imparts
@@ -47,7 +50,9 @@ public class AggregatePrioritySorter extends ItemSorter {
      */
     public int score(VisualItem item) {
         int type = ITEM;
-        if ( item instanceof EdgeItem ) {
+	if ( item instanceof NodeItem ) {
+	    type = NODE;
+	} else if ( item instanceof EdgeItem ) {
             type = EDGE;
         } else if ( item instanceof AggregateItem ) {
             type = AGGREGATE;

@@ -111,6 +111,7 @@ import javax.swing.JTextField;
 import prefuse.action.Action;
 import prefuse.action.layout.AxisLabelLayout;
 import prefuse.action.layout.AxisLayout;
+import prefuse.data.expression.OrPredicate;
 import prefuse.render.AxisRenderer;
 import prefuse.render.PolygonRenderer;
 import prefuse.render.Renderer;
@@ -121,6 +122,7 @@ import prefuse.visual.AggregateItem;
 import prefuse.visual.AggregateTable;
 import prefuse.visual.EdgeItem;
 import prefuse.visual.NodeItem;
+import prefuse.visual.expression.InGroupPredicate;
 import prefuse.visual.expression.VisiblePredicate;
 
 /**
@@ -222,10 +224,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		final ImageToggleLabelRenderer tr = new ImageToggleLabelRenderer();
 		tr.setVerticalAlignment(Constants.CENTER);
 		tr.setRoundedCorner(8, 8);
-		// selfref renderer is for self-transitions. However, at this point,
-		// it does not respond to probability color adjustments.
-		m_vis.setRendererFactory(
-			new DefaultRendererFactory(tr, new SelfRefEdgeRenderer()));
+		m_vis.setRendererFactory(new DefaultRendererFactory(tr, new SelfRefEdgeRenderer()));
+			
 
 		// --------------------------------------------------------------------
 		// register the data with a visualization
@@ -321,6 +321,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		display.addControlListener(new WheelZoomControl());
 		display.addControlListener(new ZoomToFitControl());
 		display.addControlListener(new NeighborHighlightControl());
+		display.setItemSorter(new AggregatePrioritySorter());
 
 		// Main control panel
 		JPanel fpanel = new JPanel();
@@ -626,7 +627,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					m_vis.removeAction("axes");
 					m_vis.cancel("lll");
 					
-					((DefaultRendererFactory) m_vis.getRendererFactory()).add("ingroup('labels')", new AxisRenderer(Constants.LEFT, Constants.TOP));
+					((DefaultRendererFactory) m_vis.getRendererFactory()).add(
+						new OrPredicate(new InGroupPredicate("xlabels"), 
+							new InGroupPredicate("ylabels")), 
+						new AxisRenderer(Constants.LEFT, Constants.FAR_BOTTOM));
 					
 					Rectangle2D bounds = m_vis.getDisplay(0).getItemBounds();
 					AxisLayout xaxis = new AxisLayout(nodes, "label", Constants.X_AXIS, VisiblePredicate.TRUE);
@@ -634,12 +638,30 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					AxisLayout yaxis = new AxisLayout(nodes, "eqProb", Constants.Y_AXIS, VisiblePredicate.TRUE);
 					yaxis.setLayoutBounds(bounds);
 					
-					AxisLabelLayout ylabels = new AxisLabelLayout("labels", yaxis, bounds);
+
+					AxisLabelLayout ylabels = new AxisLabelLayout("ylabels", yaxis, bounds);
+					Rectangle2D xbounds = new Rectangle2D.Double(bounds.getX(), bounds.getY()+bounds.getHeight() - 10
+						, bounds.getWidth(), 10);
+					AxisLabelLayout xlabels = new AxisLabelLayout("xlabels", xaxis, xbounds);
+
+					ColorAction yAxisColor = new ColorAction("ylabels", VisualItem.STROKECOLOR, ColorLib.gray(50));
+					ColorAction yLabColor = new ColorAction("ylabels", VisualItem.TEXTCOLOR, ColorLib.gray(50));
+					ColorAction xAxisColor = new ColorAction("xlabels", VisualItem.STROKECOLOR, ColorLib.gray(50));
+					ColorAction xLabColor = new ColorAction("xlabels", VisualItem.TEXTCOLOR, ColorLib.gray(50));
+
+					ActionList axisColor = new ActionList();
+					axisColor.add(yAxisColor);
+					axisColor.add(yLabColor);
+					axisColor.add(xAxisColor);
+					axisColor.add(xLabColor);
+
 					
 					final ActionList axes = new ActionList();
 					axes.add(xaxis);
 					axes.add(yaxis);
 					axes.add(ylabels);
+					axes.add(xlabels);
+					axes.add(axisColor);
 					axes.add(new RepaintAction());
 					
 					m_vis.putAction("axes", axes);
@@ -650,7 +672,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					DisplayLib.fitViewToBounds(display, lbounds, 1000);
 				} else {
 					m_vis.cancel("axes");
-					m_vis.getGroup("labels").clear();
+					m_vis.getGroup("xlabels").clear();
+					m_vis.getGroup("ylabels").clear();
 				}
 			}
 		});
@@ -841,8 +864,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 			ActionList animate = (ActionList)m_vis.getAction("animate");
 			animate.add(aStroke);
-
-			m_vis.getDisplay(0).setItemSorter(new AggregatePrioritySorter());
 
 			final Action aggLayout = new AggregateLayout(aggr, m_vis);
 			m_vis.putAction("aggLayout", aggLayout);
