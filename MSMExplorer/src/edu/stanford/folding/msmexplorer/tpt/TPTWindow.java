@@ -356,13 +356,6 @@ public class TPTWindow extends JFrame {
 			}
 		});
 
-		Rectangle2D rect = new Rectangle2D.Double();
-		Rectangle2D lrect = new Rectangle2D.Double();
-		Insets insets = display.getInsets();
-		rect.setRect(insets.left + AXIS_WIDTH, insets.top, display.getWidth() - insets.right, display.getHeight() - insets.bottom);
-		lrect.setRect(insets.left, insets.top, insets.left + AXIS_WIDTH, display.getHeight() - insets.bottom);
-
-
 		JTextField numPathInput = new JTextField("Num Paths");
 		numPathInput.addActionListener(new ActionListener() {
 

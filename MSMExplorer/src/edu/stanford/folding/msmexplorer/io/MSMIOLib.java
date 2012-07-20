@@ -1,27 +1,22 @@
 package edu.stanford.folding.msmexplorer.io;
 
-import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchySketcher;
 import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
 import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyIOLib;
 import java.awt.Component;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.Hashtable;
 import java.util.Dictionary;
-import java.util.HashMap;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.JOptionPane;
 
 import prefuse.data.Graph;
-import prefuse.data.Table;
 import prefuse.data.io.DataIOException;
 import prefuse.data.io.GraphMLReader;
 import prefuse.data.io.GraphMLWriter;
 import prefuse.data.io.GraphReader;
-import prefuse.util.StringLib;
 import prefuse.util.io.IOLib;
 import prefuse.util.io.SimpleFileFilter;
 
@@ -37,9 +32,9 @@ public class MSMIOLib {
 	private static final String MAPPING = "mapping";
 
 	private MSMIOLib() {
+	 // no instantiation
 	}
 
-	; // no instantiation
 
 	public static Graph getMSMFile(Component c) {
 		return getMSMFile(c, DEFAULT_DIRECTORY);

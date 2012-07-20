@@ -220,7 +220,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		// create a new, empty visualization for our data
 
 		final ImageToggleLabelRenderer tr = new ImageToggleLabelRenderer();
-		tr.setVerticalAlignment(Constants.BOTTOM);
+		tr.setVerticalAlignment(Constants.CENTER);
 		tr.setRoundedCorner(8, 8);
 		// selfref renderer is for self-transitions. However, at this point,
 		// it does not respond to probability color adjustments.
@@ -622,7 +622,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		final JToggleButton axisToggle = new JToggleButton("Show Axis", false);
 		axisToggle.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				
 				if (axisToggle.isSelected()) {
 					m_vis.removeAction("axes");
 					m_vis.cancel("lll");
@@ -647,7 +646,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					m_vis.run("axes");
 					m_vis.run("aggLayout");
 					Rectangle2D lbounds = m_vis.getBounds(graph);
-					GraphicsLib.expand(lbounds, 50 + (int) (1 / display.getScale()));
+					GraphicsLib.expand(lbounds, 100 + (int) (1 / display.getScale()));
 					DisplayLib.fitViewToBounds(display, lbounds, 1000);
 				} else {
 					m_vis.cancel("axes");

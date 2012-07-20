@@ -42,6 +42,10 @@ public class HierarchyIOLib {
 	private static final String DEFAULT_DIRECTORY = "~/Documents";
 	private static final String MAPPING = "mapping";
 
+	private HierarchyIOLib() {
+		//prevent instantiation
+	}
+
 	public static HierarchyBundle openMSMHierarchy(Component c) {
 		return openMSMHierarchy(c, DEFAULT_DIRECTORY);
 	}
