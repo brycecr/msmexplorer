@@ -709,12 +709,11 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 						new AxisRenderer(Constants.FAR_LEFT, Constants.FAR_BOTTOM));
 
 					Rectangle2D bounds = display.getItemBounds();
-					AxisLayout xaxis = new AxisLayout(nodes, "label", Constants.X_AXIS, VisiblePredicate.TRUE);
+					AxisLayout xaxis = new AxisLayout(nodes, (String)xAxisSelector.getSelectedItem(), Constants.X_AXIS, VisiblePredicate.TRUE);
 					xaxis.setLayoutBounds(bounds);
-					String yfield = (axisFields.contains("eqProb")) ? "eqProb" : "label";
-					AxisLayout yaxis = new AxisLayout(nodes, yfield, Constants.Y_AXIS, VisiblePredicate.TRUE);
+					AxisLayout yaxis = new AxisLayout(nodes, (String)yAxisSelector.getSelectedItem(), Constants.Y_AXIS, VisiblePredicate.TRUE);
 					yaxis.setLayoutBounds(bounds);
-					yaxis.setRangeModel(new NumberRangeModel(0.0, DataLib.max(m_vis.getGroup(nodes), "eqProb").getDouble("eqProb"), 0.0, 1.0));
+					//yaxis.setRangeModel(new NumberRangeModel(0.0, DataLib.max(m_vis.getGroup(nodes), "eqProb").getDouble("eqProb"), 0.0, 1.0));
 
 
 					Rectangle2D ybounds = new Rectangle2D.Double(bounds.getX() - 10, bounds.getY(), bounds.getWidth() + 10, bounds.getHeight());
