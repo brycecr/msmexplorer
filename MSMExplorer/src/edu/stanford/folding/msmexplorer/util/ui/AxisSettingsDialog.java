@@ -55,6 +55,9 @@ public class AxisSettingsDialog extends JDialog {
 			public void actionPerformed(ActionEvent ae) {
 				if (okButton.isEnabled()) {
 					auto = autoCheckBox.isSelected();
+					if (!yMin.isVisible() && !xMin.isVisible()) {
+						auto = true;
+					}
 					if (!auto) {
 						if (xMin.isVisible()) {
 							if (xType == double.class || xType == float.class) {

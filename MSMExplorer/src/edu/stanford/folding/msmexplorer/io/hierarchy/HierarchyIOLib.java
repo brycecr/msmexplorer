@@ -76,12 +76,10 @@ public class HierarchyIOLib {
 
 		assert newNode.length > 0;
 
-		GraphReader gr = null;
+		GraphReader gr;
 		if (newNode[0].tProbFilename.endsWith(".mtx")
-			|| newNode[0].tProbFilename.endsWith(".MTX")) {
-
+				|| newNode[0].tProbFilename.endsWith(".MTX")) {
 			gr = new MtxGraphReader();
-
 		} else {
 			gr = new DatGraphReader();
 		}
@@ -109,6 +107,16 @@ public class HierarchyIOLib {
 		return hb;
 	}
 
+	/**
+	 * Generates hierarchy labels for an array of graphs. Returned in the form of
+	 * a Dictionary so that labels can be applied to JSliders, which for
+	 * some reason insist on using the deprecated Dictionary types.
+	 * Labels are just the number of nodes in the corresponding graph. 
+	 * 
+	 * @param gs the array of graphs to generate labels for
+	 * @return a Dictionary containing a mapping of ints (graph indicies)
+	 * to JLabels which contain the mapping for the int key.
+	 */
 	public static Dictionary<Integer, JLabel> getHierarchyLabels(Graph[] gs) {
 		Dictionary<Integer, JLabel> dict = new Hashtable<Integer, JLabel>(gs.length);
 		for (int i = 0; i < gs.length; ++i) {

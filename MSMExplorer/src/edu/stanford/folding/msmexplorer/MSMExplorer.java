@@ -60,7 +60,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JMenuItem;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.JSlider;
@@ -118,15 +117,14 @@ import prefuse.data.query.NumberRangeModel;
 import prefuse.render.AxisRenderer;
 import prefuse.render.PolygonRenderer;
 import prefuse.render.Renderer;
-import prefuse.util.DataLib;
 import prefuse.util.GraphicsLib;
 import prefuse.util.PrefuseLib;
 import prefuse.util.display.DisplayLib;
-import prefuse.util.ui.ValuedRangeModel;
 import prefuse.visual.AggregateItem;
 import prefuse.visual.AggregateTable;
 import prefuse.visual.EdgeItem;
 import prefuse.visual.NodeItem;
+import prefuse.visual.VisualTable;
 import prefuse.visual.expression.InGroupPredicate;
 import prefuse.visual.expression.VisiblePredicate;
 
@@ -706,8 +704,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 
-		final NumberRangeModel xAxisRange = new NumberRangeModel(0.0, 1.0, 0.0, 1.0);
-		final NumberRangeModel yAxisRange = new NumberRangeModel(0.0, 1.0, 0.0, 1.0);
+		final NumberRangeModel xAxisRange = new NumberRangeModel(0, 1, 0, 1);
+		final NumberRangeModel yAxisRange = new NumberRangeModel(0, 1, 0, 1);
 
 		JButton openAxisSettings = new JButton ("Axis Settings");
 		openAxisSettings.addActionListener( new ActionListener() {
@@ -741,8 +739,12 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					AxisLayout yaxis = new AxisLayout(nodes, (String)yAxisSelector.getSelectedItem(), Constants.Y_AXIS, VisiblePredicate.TRUE);
 					yaxis.setLayoutBounds(bounds);
 					if (!autoRange) {
-						xaxis.setRangeModel(xAxisRange);
-						yaxis.setRangeModel(yAxisRange);
+						if (xaxis.getDataType() == Constants.NUMERICAL) {
+							xaxis.setRangeModel(xAxisRange);
+						}
+						if (yaxis.getDataType() == Constants.NUMERICAL) {
+							yaxis.setRangeModel(yAxisRange);
+						}
 					}
 					//yaxis.setRangeModel(new NumberRangeModel(0.0, DataLib.max(m_vis.getGroup(nodes), "eqProb").getDouble("eqProb"), 0.0, 1.0));
 
@@ -834,10 +836,13 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					|| top < 0 || !overSlider.isEnabled()) {
 					return;
 				} else if (top >= bottom) {
+					/*
 					JFrame toDie = MSMExplorer.this.frame;
 					MSMExplorer msme = graphView(hierarchy.graphs[bottom], "label");
 					msme.setHierarchy(hierarchy, bottom);
 					toDie.dispose();
+					* */
+					m_vis.getGroup(aggr).clear();
 					overSlider.setValue(overSlider.getMaximum());
 				} else if (top < hierarchy.graphs.length - 1) {
 					MSMExplorer.this.setAggregates(bottom, top);
@@ -1013,7 +1018,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			ai.addItem((VisualItem) vNode);
 		}
 		m_vis.run("draw");
-		m_vis.run("lll");
+		m_vis.run("aggLayout");
 	}
 
 	/**
