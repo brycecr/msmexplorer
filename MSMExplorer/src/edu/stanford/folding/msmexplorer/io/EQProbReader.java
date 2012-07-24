@@ -1,25 +1,17 @@
 package edu.stanford.folding.msmexplorer.io;
 
+import edu.stanford.folding.msmexplorer.MSMConstants;
 import java.awt.Component;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import prefuse.data.Graph;
 import prefuse.data.Table;
-import prefuse.data.io.AbstractGraphReader;
-import prefuse.data.io.DataIOException;
-import prefuse.util.StringLib;
 import prefuse.util.io.SimpleFileFilter;
 
-public class EQProbReader {
+public class EQProbReader implements MSMConstants {
 
 	public static Graph getEqProbs(Component c, Graph g) {
 		Object[] opts = {"Locate", "Not now"};
@@ -45,13 +37,7 @@ public class EQProbReader {
 			return g;
 
 		File f = jfc.getSelectedFile();
-
-		try {
-			g = addEqProbs(g, f);
-		} catch (DataIOException dioe) {
-			Logger.getLogger(DatGraphReader.class.getName()).log(Level.WARNING, "{0}\n{1}", 
-				new Object[]{dioe.getMessage(), StringLib.getStackTrace(dioe)});
-		}
+		g = addEqProbs(g, f);
 
 		return g;
 	}
@@ -63,15 +49,14 @@ public class EQProbReader {
 	 * @param g
 	 * @param f
 	 * @return
-	 * @throws DataIOException 
 	 */
-	public static Graph addEqProbs(Graph g, File f) throws DataIOException {
+	public static Graph addEqProbs(Graph g, File f) {
 		Object[] probs = NewlineDelimitedReader.read(f);
 		Table nt = g.getNodeTable();
 
 		int ind = 1;
 		if ((ind = nt.getColumnNumber("eqProb")) == -1) {
-			throw new DataIOException("Bad graph; eqProb not present");
+			nt.addColumn(EQPROB, double.class, 1);	
 		}
 
 		for (int row = 0; row < probs.length; ++row) {

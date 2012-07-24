@@ -4,6 +4,7 @@ import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
 import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyIOLib;
 import java.awt.Component;
 import java.io.File;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Dictionary;
@@ -13,6 +14,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.JOptionPane;
 
 import prefuse.data.Graph;
+import prefuse.data.Table;
 import prefuse.data.io.DataIOException;
 import prefuse.data.io.GraphMLReader;
 import prefuse.data.io.GraphMLWriter;
@@ -28,18 +30,133 @@ import prefuse.util.io.SimpleFileFilter;
  */
 public class MSMIOLib {
 
-	private static final String DEFAULT_DIRECTORY = "~/Documents";
-	private static final String MAPPING = "mapping";
+	private static final String DEFAULT_DIRECTORY = "";
 
 	private MSMIOLib() {
-	 // no instantiation
+		// disallow instantiation
 	}
 
+	/**
+	 * Open a newline delimited file and attempt to add the contents
+	 * of that file to the graph g into a new column of name.
+	 * 
+	 * @param g graph to add values to
+	 * @param name name to give the new column
+	 * @return string pathname for the folder where the file was opened
+	 */
+	public static String applyNewlineDelimitedFile(Graph g, String name, Class<?> cls) {
+		return applyNewlineDelimitedFile(null, DEFAULT_DIRECTORY, g, name, cls);
+	}
 
+	/**
+	 * Open a newline delimited file and attempt to add the contents
+	 * of that file to the graph g.
+	 * 
+	 * @param c parent component
+	 * @param g graph to add values to
+	 * @param name name to give the new column
+	 * @param cls type of new column
+	 * @return string pathname for the folder where the file was opened
+	 */
+	public static String applyNewlineDelimitedFile(Component c, Graph g, String name, Class<?> cls) {
+		return applyNewlineDelimitedFile(c, DEFAULT_DIRECTORY, g, name, cls);
+	}
+	
+	/**
+	 * Open a newline delimited file and attempt to add the contents
+	 * of that file to the graph g.
+	 * 
+	 * @param c parent component
+	 * @param path pathname at which to open the JFileChooser
+	 * @param g graph to add values to
+	 * @param name name to give the new column
+	 * @return string pathname for the folder where the file was opened
+	 */
+	public static String applyNewlineDelimitedFile(Component c, String path, Graph g, String name) {
+		return applyNewlineDelimitedFile(c, path, g, name, null);
+	}
+
+	/**
+	 * Open a newline delimited file and attempt to add the contents
+	 * of that file to the graph g into a column of name name and type cls.
+	 * 
+	 * @param c parent component
+	 * @param path pathname at which to open the JFileChooser
+	 * @param g graph to add values to
+	 * @param name name to give the new column
+	 * @param cls type of new column
+	 * @return string pathname for the folder where the file was opened
+	 */
+	public static String applyNewlineDelimitedFile(Component c, String path, Graph g, String name, Class<?> cls) {
+		if (g == null) {
+			JOptionPane.showMessageDialog(c, "Attempting to apply a newline"
+				+ " delimited file to a null graph.", "Newline Delimited IO Error",
+				JOptionPane.ERROR_MESSAGE);
+			return null;
+		} else if (name == null) {
+			JOptionPane.showMessageDialog(c, "Please provide a name for the new data.", 
+				"Nameless Data Error", JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
+		
+		JFileChooser jfc = new JFileChooser(path);
+		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
+		jfc.setDialogTitle("Open newline delimited file...");
+
+		int opt = jfc.showOpenDialog(c);
+		if (opt != JFileChooser.APPROVE_OPTION) {
+			return null; // no file selected and okayed
+		}
+
+		File f = jfc.getSelectedFile();
+		Object[] contents = NewlineDelimitedReader.read(f);
+
+		// if the type is recognized and specified, make a column
+		// of that type
+		if (cls == String.class || cls == int.class || cls == double.class
+			|| cls == float.class || cls == long.class || cls == boolean.class
+			|| cls == Date.class) {
+			g.addColumn(name, cls);
+
+		} else { // else, make a general object column
+			g.addColumn(name, Object.class);
+		}
+
+		if (g.getNodeCount() != contents.length) {
+			JOptionPane.showMessageDialog(c, "Length of newline delmited file "
+				+ "differs from number of nodes in graph; ambiguity in assigning"
+				+ " values to nodes.", "Newline File Length Error", 
+				JOptionPane.ERROR_MESSAGE);
+			return null;
+		}
+
+		Table nt = g.getNodeTable();
+		for (int i = 0; i < contents.length; ++i) {
+			nt.set(i, name, contents[i]);
+		}
+		return f.getParent();
+	}
+
+	/**
+	 * Opens a load dialog to get a new MSM. 
+	 * Starts path at home directory.
+	 * 
+	 * @param c parent component (optional)
+	 * @return the opened graph, or null if no new graph successfully opened
+	 */
 	public static Graph getMSMFile(Component c) {
 		return getMSMFile(c, DEFAULT_DIRECTORY);
 	}
 
+	/**
+	 * Opens a load dialog to get a new MSM. Starts the dialog at location
+	 * specified by path. or the home directory if path doesn't 
+	 * resolve to a directory.
+	 * 
+	 * @param c parent component (optional)
+	 * @param path where to start load dialog
+	 * @return the opened graph, or null if no new graph successfully opened
+	 */
 	public static Graph getMSMFile(Component c, String path) {
 		JFileChooser jfc = new JFileChooser(path);
 		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
@@ -117,21 +234,29 @@ public class MSMIOLib {
 	}
 
 	public static String saveGML(Graph g) {
-		return saveGML(g, DEFAULT_DIRECTORY, null);
-	}
-
-	public static String saveGML(Graph g, Component c) {
-		return saveGML(g, DEFAULT_DIRECTORY, c);
+		return saveGML(null, DEFAULT_DIRECTORY, g);
 	}
 
 	/**
-	 * Saves the current graph as a GraphML file
+	 * Saves the current graph as a GraphML file via a GUI save dialog.
 	 *
 	 * @param g graph to save
-	 * @param path location to save file
 	 * @param c swing component to display notifications to
+	 * @return string of location at which file saved.
 	 */
-	public static String saveGML(Graph g, String path, Component c) {
+	public static String saveGML(Component c, Graph g) {
+		return saveGML(c, DEFAULT_DIRECTORY, g);
+	}
+
+	/**
+	 * Saves the current graph as a GraphML file via a GUI save dialog.
+	 *
+	 * @param g graph to save
+	 * @param path where to start save dialog
+	 * @param c swing component to display notifications to
+	 * @return string of location at which file saved.
+	 */
+	public static String saveGML(Component c, String path, Graph g) {
 		JFileChooser jfc = new JFileChooser(path);
 		jfc.setDialogType(JFileChooser.SAVE_DIALOG);
 		jfc.setDialogTitle("Save MSM as GraphML");

@@ -25,7 +25,7 @@ public class DatGraphReader extends AbstractMSMReader {
 	private void init(int length) {
 		m_nodeTable = new Table(length, 2);
 		m_nodeTable.addColumn(LABEL, int.class, 0);
-		m_nodeTable.addColumn(EQPROB, double.class, 1);
+		m_nodeTable.addColumn(EQPROB, double.class, 1);	
 		for (int i = 1; i < length; ++i)
 			m_nodeTable.setInt(i, 0, i);
 

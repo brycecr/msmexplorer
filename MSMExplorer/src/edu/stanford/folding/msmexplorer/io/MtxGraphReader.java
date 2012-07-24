@@ -1,8 +1,6 @@
 package edu.stanford.folding.msmexplorer.io;
 
-import javax.swing.JOptionPane;
 
-import java.io.File;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +18,7 @@ public class MtxGraphReader extends AbstractMSMReader {
 	private void init(int nodes, int edges) {
 		m_nodeTable = new Table(nodes, 2);
 		m_nodeTable.addColumn(LABEL, int.class, 0);
-		m_nodeTable.addColumn(EQPROB, double.class, 1);
+		m_nodeTable.addColumn(EQPROB, double.class, 1);	
 		for (int i = 0; i < nodes;) {
 			m_nodeTable.setInt(i, 0, ++i);
 		}

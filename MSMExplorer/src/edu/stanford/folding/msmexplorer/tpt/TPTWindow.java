@@ -526,8 +526,8 @@ public class TPTWindow extends JFrame {
 
 			public void stateChanged(ChangeEvent e) {
 				JRangeSlider slider = (JRangeSlider) e.getSource();
-				edgeWeight.setMaximumSize(slider.getHighValue());
 				edgeWeight.setMinimumSize(slider.getLowValue());
+				edgeWeight.setMaximumSize(slider.getHighValue());
 				m_vis.run("color");
 			}
 		});
