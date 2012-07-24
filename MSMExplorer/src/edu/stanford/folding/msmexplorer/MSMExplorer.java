@@ -16,6 +16,7 @@ import edu.stanford.folding.msmexplorer.util.ui.JValueSliderF;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregateLayout;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregatePrioritySorter;
 import edu.stanford.folding.msmexplorer.util.render.ImageToggleLabelRenderer;
+import edu.stanford.folding.msmexplorer.util.ui.AxisSettingsDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -59,6 +60,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JMenuItem;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.JSlider;
@@ -120,6 +122,7 @@ import prefuse.util.DataLib;
 import prefuse.util.GraphicsLib;
 import prefuse.util.PrefuseLib;
 import prefuse.util.display.DisplayLib;
+import prefuse.util.ui.ValuedRangeModel;
 import prefuse.visual.AggregateItem;
 import prefuse.visual.AggregateTable;
 import prefuse.visual.EdgeItem;
@@ -141,19 +144,25 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	// Thresholds for detecting "large" graphs to change some behavior
 	private static final int SIZE_THRESHOLD = 250; //Threshold for "big" graph behavior
 	private static final int DEGREE_THRESHOLD = 30; //Degree threshold for "big" graph
+
 	//Current Version #
 	private static final String version = "v0.03";
+
 	// Visualization group names
 	private static final String aggr = "aggregates";
 	private static final String graph = "graph";
 	private static final String nodes = "graph.nodes";
 	private static final String edges = "graph.edges";
+
 	// The Visualization object.
 	private final Visualization m_vis = new Visualization();
+
 	// The GraphView frame
 	private JFrame frame; //Graph view frame
+	
 	// where to look for images by default
 	private String imageLocation = "'./lib/images'";
+
 	// Hierarchy objects. We keep these as instance variables
 	// so that we can pass them to new MSMExplorer objects, because
 	// we currently do basic graph switching and reseting by making
@@ -161,6 +170,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	// mostly serve the purpose for now (no noticeable performance loss)
 	private HierarchyBundle hierarchy = null; // holds the hierarchy data
 	private JPanel harchPanel = null; // panel with hierarchy gui elements
+
+	private boolean autoRange = true; //whether to set axis ranges automatically
 
 	public MSMExplorer() {
 
@@ -695,6 +706,22 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 
+		final NumberRangeModel xAxisRange = new NumberRangeModel(0.0, 1.0, 0.0, 1.0);
+		final NumberRangeModel yAxisRange = new NumberRangeModel(0.0, 1.0, 0.0, 1.0);
+
+		JButton openAxisSettings = new JButton ("Axis Settings");
+		openAxisSettings.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				Table nt = g.getNodeTable();
+				AxisSettingsDialog asd = new AxisSettingsDialog(frame, 
+					xAxisRange, yAxisRange, 
+					nt.getColumnType((String)xAxisSelector.getSelectedItem()), 
+					nt.getColumnType((String)yAxisSelector.getSelectedItem()), 
+					autoRange);
+				autoRange = asd.showDialog();
+			}
+		});
+
 		final JToggleButton axisToggle = new JToggleButton("Show Axis", false);
 		axisToggle.addActionListener(new ActionListener() {
 
@@ -713,6 +740,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					xaxis.setLayoutBounds(bounds);
 					AxisLayout yaxis = new AxisLayout(nodes, (String)yAxisSelector.getSelectedItem(), Constants.Y_AXIS, VisiblePredicate.TRUE);
 					yaxis.setLayoutBounds(bounds);
+					if (!autoRange) {
+						xaxis.setRangeModel(xAxisRange);
+						yaxis.setRangeModel(yAxisRange);
+					}
 					//yaxis.setRangeModel(new NumberRangeModel(0.0, DataLib.max(m_vis.getGroup(nodes), "eqProb").getDouble("eqProb"), 0.0, 1.0));
 
 
@@ -766,6 +797,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		Box axisBox = new Box(BoxLayout.Y_AXIS);
 		axisBox.setBorder(BorderFactory.createTitledBorder("Axis Control"));
 		axisBox.add(selectorPane);
+		axisBox.add(openAxisSettings);
 		axisBox.add(axisToggle);
 		fpanel.add(axisBox);
 		/* -------------- AXIS GUI ELEMENTS ------------------------ */
@@ -1012,12 +1044,12 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	public void initGraph(Graph g, Visualization vis) {
 
 		// Set up aciton
-		ColorAction fill = new NodeColorAction(nodes);
+		//ColorAction fill = new NodeColorAction(nodes);
 
-		/*ColorAction fill = new ColorAction(nodes,
-		 * VisualItem.FILLCOLOR, ColorLib.rgb(179, 255, 156));
-		 * fill.add(VisualItem.FIXED, ColorLib.rgb(255, 100, 100));
-		 * fill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 200, 125));*/
+		ColorAction fill = new ColorAction(nodes,
+		  VisualItem.FILLCOLOR, ColorLib.rgb(179, 255, 156));
+		  fill.add(VisualItem.FIXED, ColorLib.rgb(255, 100, 100));
+		  fill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 200, 125));
 
 		DataColorAction edgeColor = new DataColorAction(edges, TPROB,
 			Constants.NOMINAL, VisualItem.STROKECOLOR,
@@ -1373,10 +1405,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 * Custom color class to color fill.
 	 */
 	public class NodeColorAction extends ColorAction {
-
 		/*
 		 * Constructor
-		 *
 		 * @param String name of group to affect
 		 */
 		public NodeColorAction(String group) {
