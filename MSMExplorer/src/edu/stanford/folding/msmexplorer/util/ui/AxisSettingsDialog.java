@@ -56,31 +56,35 @@ public class AxisSettingsDialog extends JDialog {
 				if (okButton.isEnabled()) {
 					auto = autoCheckBox.isSelected();
 					if (!auto) {
-						if (xType == double.class || xType == float.class) {
-							x.setLowValue(Double.parseDouble(xMin.getText()));
-							x.setHighValue(Double.parseDouble(xMax.getText()));
-							x.setMinValue(Double.parseDouble(xMin.getText()));
-							x.setMaxValue(Double.parseDouble(xMax.getText()));
-
-						} else if (xType == int.class || xType == long.class) {
-							x.setLowValue(Long.parseLong(xMin.getText()));
-							x.setHighValue(Long.parseLong(xMax.getText()));
-							x.setMinValue(Long.parseLong(xMin.getText()));
-							x.setMaxValue(Long.parseLong(xMax.getText()));
-						} 
-
-						if (yType == double.class || yType == float.class) {
-							y.setLowValue(Double.parseDouble(yMin.getText()));
-							y.setHighValue(Double.parseDouble(yMax.getText()));
-							y.setMinValue(Double.parseDouble(yMin.getText()));
-							y.setMaxValue(Double.parseDouble(yMax.getText()));
-
-						} else if (yType == int.class || yType == long.class) {
-							y.setLowValue(Long.parseLong(yMin.getText()));
-							y.setHighValue(Long.parseLong(yMax.getText()));
-							y.setMinValue(Long.parseLong(yMin.getText()));
-							y.setMaxValue(Long.parseLong(yMax.getText()));
-						} 
+						if (xMin.isVisible()) {
+							if (xType == double.class || xType == float.class) {
+								x.setLowValue(Double.parseDouble(xMin.getText()));
+								x.setHighValue(Double.parseDouble(xMax.getText()));
+								x.setMinValue(Double.parseDouble(xMin.getText()));
+								x.setMaxValue(Double.parseDouble(xMax.getText()));
+								
+							} else if (xType == int.class || xType == long.class) {
+								x.setLowValue(Long.parseLong(xMin.getText()));
+								x.setHighValue(Long.parseLong(xMax.getText()));
+								x.setMinValue(Long.parseLong(xMin.getText()));
+								x.setMaxValue(Long.parseLong(xMax.getText()));
+							}
+						}
+						
+						if (yMin.isVisible()) {
+							if (yType == double.class || yType == float.class) {
+								y.setLowValue(Double.parseDouble(yMin.getText()));
+								y.setHighValue(Double.parseDouble(yMax.getText()));
+								y.setMinValue(Double.parseDouble(yMin.getText()));
+								y.setMaxValue(Double.parseDouble(yMax.getText()));
+								
+							} else if (yType == int.class || yType == long.class) {
+								y.setLowValue(Long.parseLong(yMin.getText()));
+								y.setHighValue(Long.parseLong(yMax.getText()));
+								y.setMinValue(Long.parseLong(yMin.getText()));
+								y.setMaxValue(Long.parseLong(yMax.getText()));
+							}
+						}
 					}
 				}
 				setVisible(false);
@@ -100,6 +104,16 @@ public class AxisSettingsDialog extends JDialog {
 				yMax.setEnabled(enable);
 			}
 		});
+		if (!(xType == double.class || xType == float.class
+			|| xType == int.class || xType == long.class)) {
+			xMin.setVisible(false);
+			xMax.setVisible(false);
+		}
+		if (!(yType == double.class || yType == float.class
+			|| yType == int.class || yType == long.class)) {
+			yMin.setVisible(false);
+			yMax.setVisible(false);
+		}
 		xMin.setEnabled(!auto);
 		xMax.setEnabled(!auto);
 		yMin.setEnabled(!auto);
