@@ -651,12 +651,11 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		/* ------------- END SEARCH GUI ELEMENTS ------------------- */
 
 		/* -------------- AXIS GUI ELEMENTS ------------------------ */
-		final Vector<String> axisFields = new Vector<String>(3);
-		if (g.getNodeTable().getColumnNumber("label") >= 0) {
-			axisFields.add("label");
-		}
-		if (g.getNodeTable().getColumnNumber("eqProb") >= 0) {
-			axisFields.add("eqProb");
+		Table nt = g.getNodeTable();
+		int numCols = nt.getColumnCount();
+		final Vector<String> axisFields = new Vector<String>(numCols);
+		for (int i = 0; i < numCols; ++i) {
+			axisFields.add(nt.getColumnName(i));
 		}
 		axisFields.add ("Load new...");
 
@@ -758,13 +757,19 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 							yaxis.setRangeModel(yAxisRange);
 						}
 					}
-					//yaxis.setRangeModel(new NumberRangeModel(0.0, DataLib.max(m_vis.getGroup(nodes), "eqProb").getDouble("eqProb"), 0.0, 1.0));
-
 
 					Rectangle2D ybounds = new Rectangle2D.Double(bounds.getX() - 10, bounds.getY(), bounds.getWidth() + 10, bounds.getHeight());
 					AxisLabelLayout ylabels = new AxisLabelLayout("ylabels", yaxis, ybounds);
 					Rectangle2D xbounds = new Rectangle2D.Double(bounds.getX(), bounds.getY() + bounds.getHeight() - 11, bounds.getWidth(), 10);
 					AxisLabelLayout xlabels = new AxisLabelLayout("xlabels", xaxis, xbounds);
+					/*
+					if (isIntType(xAxisSelector)) {
+						xlabels.setScale(Constants.NOMINAL);
+					}
+					if (isIntType(yAxisSelector)) {
+						ylabels.setSpacing(Math.ceil(ylabels.getSpacing()));
+					}
+					* */
 
 					ColorAction yAxisColor = new ColorAction("ylabels", VisualItem.STROKECOLOR, ColorLib.gray(100));
 					ColorAction yLabColor = new ColorAction("ylabels", VisualItem.TEXTCOLOR, ColorLib.gray(0));
@@ -814,6 +819,15 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				Class<?> cls = ((Graph)m_vis.getGroup(graph)).getNodeTable().getColumnType(selected);
 				if (cls == double.class || cls == int.class || cls == float.class ||
 						cls == long.class) {
+					return true;	
+				}
+				return false;
+			}
+
+			private boolean isIntType(JComboBox selector) {
+				String selected = (String)selector.getSelectedItem();
+				Class<?> cls = ((Graph)m_vis.getGroup(graph)).getNodeTable().getColumnType(selected);
+				if (cls == int.class || cls == long.class) {
 					return true;	
 				}
 				return false;
@@ -876,6 +890,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					overSlider.setValue(overSlider.getMaximum());
 				} else if (top < hierarchy.graphs.length - 1) {
 					MSMExplorer.this.setAggregates(bottom, top);
+					if (g.getNodeTable().getColumnNumber("mapping") >= 0) {
+						axisFields.insertElementAt("mapping", axisFields.size() - 1);
+					}
 				}
 			}
 		});
@@ -1267,21 +1284,18 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		// The following block is the gui boilerplate for a
 		// currently unimplemented automated PDB concatenation function
-
 		JMenuItem makeMovie = new JMenuItem("Create PDB Movie");
 		makeMovie.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent ae) {
 				PDBFrame pdbf = new PDBFrame(g, view.m_vis);
 			}
 		});
 
-
 		// set up menu
 		JMenu dataMenu = new JMenu("Data");
 		dataMenu.add(forcePanel);
 		dataMenu.add(statsPanel);
-		dataMenu.add(makeMovie);
+		//dataMenu.add(makeMovie); XXX put this back when implemented...
 		dataMenu.add(new OpenMSMAction(view));
 		dataMenu.add(new OpenHierarchyAction());
 		dataMenu.add(new SaveMSMAction(g, view));
