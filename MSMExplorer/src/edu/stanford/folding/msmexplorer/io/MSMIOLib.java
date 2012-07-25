@@ -5,14 +5,13 @@ import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyIOLib;
 import java.awt.Component;
 import java.io.File;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.Dictionary;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.JOptionPane;
-
+import javax.swing.filechooser.FileFilter;
 import prefuse.data.Graph;
 import prefuse.data.Table;
 import prefuse.data.io.DataIOException;
@@ -200,7 +199,7 @@ public class MSMIOLib {
 		try {
 			Graph g = gr.readGraph(IOLib.streamFromString(f.getAbsolutePath()));
 			if (!GraphMLReader.class.isAssignableFrom(gr.getClass())) {
-				g = EQProbReader.getEqProbs(null, g);
+				g = EQProbReader.getEqProbs(null, g, f.getParent());
 			}
 			return g;
 		} catch (Exception e) {

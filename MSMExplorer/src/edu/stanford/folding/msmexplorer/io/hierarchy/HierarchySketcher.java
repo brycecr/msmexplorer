@@ -26,7 +26,7 @@ class FileNode {
  * where each folder that participates in the hierarchy contains:
  *	> a file that starts with the exact characters "tProb" . If this file has the extension ".mtx"
  * 		the sketcher assumes it is a sparse matrix file; otherwise, it assumes it is a dense matrix file.
- *  > a file that starts with the exact cahracters "MacroMapping" which contains a newline-delimited
+ *  > a file that starts with the exact characters "MacroMapping" which contains a newline-delimited
  * 		mapping of each microstate to some macrostate in the model represented by tProb (i.e. in this macrostate model)
  *		The MacroMapping file can not exist in the model in the hierarchy with the largest number of states
  */
@@ -34,7 +34,11 @@ public class HierarchySketcher {
 
 	private static final String mapping_col = "mapping";
 
-	protected static FileNode[] sketch(String pathToHierarchy) {
+	private HierarchySketcher() {
+		//prevent instantiation
+	}
+
+	static FileNode[] sketch(String pathToHierarchy) {
 		File topList[] = new File[0];
 
 		try { 
