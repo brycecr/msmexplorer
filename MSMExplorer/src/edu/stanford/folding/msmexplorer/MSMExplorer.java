@@ -259,6 +259,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			public void tupleSetChanged(TupleSet ts, Tuple[] add, Tuple[] rem) {
 				for (int i = 0; i < add.length; ++i) {
 					if (add[i] instanceof AggregateItem) {
+						ts.removeTuple(add[i]);
+						for (int j = 0; j < rem.length; ++j) {
+							ts.addTuple(rem[j]);
+						}
 						return;
 					}
 				}
