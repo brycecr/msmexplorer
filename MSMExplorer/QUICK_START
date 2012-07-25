@@ -1,0 +1,23 @@
+QUICK INSTRUCTIONS ON BUILDING AND/OR RUNNING
+
+TO RUN (after compilation):
+./run.sh
+(if permission denied)
+chmod 777 run.sh
+(then try again)
+
+Using Netbeans / Eclipse / etc:
+1) Open the project in your favorite IDE. The project is Netbeans 
+format, so any IDE that can open Netbeans projects should work.
+
+To Build without Netbeans:
+1) If you don't have Ant, install it:
+LINUX:
+sudo apt-get install ant
+
+OSX with MACPORTS:
+sudo port install ant
+
+Java SDK SE 6 or above also required.
+
+2) Run "make.sh"
