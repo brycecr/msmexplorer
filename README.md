@@ -84,8 +84,10 @@ BUTTONS AND GUI COMPONENTS:
 			> Opens a panel that contains some simple graph statics about the current graph: the number of nodes, the number of edges, the graph density, average node degree measures, and eigenvector centrality. 
 		Open File:
 			> Open a dialog box to select a new graph to display. After a graph is selected, the user will be prompted to select an equilibrium probability file (recommended) and then the image directory for the new graph (optional). MSMExplorer can open normal dense, space-delimited .dat matrices, .mtx sparse format matrices, and .graphml files. 
+		Open Hierarchy:
+			> Open a dialog to select a folder containing an hierarchical MSM to load. A minimal example of the required format can be browsed in the simple_hierarchy folder. Note that the filenames (tProb, Populations, and MacroMapping) are important for loading correctly, although MSMExplorer attempts to provide some flexibility. In particular, each subfolder participating in the hierarchy must contain a transition probability matrix (called tProb with an extension specifying the format) and a file specifying the mapping from a hierarchy-common base (the most populated MSM in the hierarchy) to the macrostates in the transition probability matrix (mapping file called MacroMapping). These should be MSMBuilder defaults. Equilibrium probabilities may be optionally provided (recommended) 
 		Save File: 
-			> Open a dialog to save the current graph (in its entirety) as a .graphml file.
+			> Open a dialog to save the current graph (in its entirety) as a .graphml file, which are convenient because they package all data loaded into the table (though support for their handling is not complete).
 >	The Control Panel (right) :
 		Press the small arrows at the top of the divider to collapse or expand the panel.
 		Connectivity Filter: The following filters act together, as if they're logical ANDed together.
@@ -108,8 +110,11 @@ BUTTONS AND GUI COMPONENTS:
 			> Open a TPT Selector window to allow selection of source and target sets to run TPT on.
 		Search:
 			> Input a label. Will report if any matches were found and will center the screen on the highlighted matching node (if any).		
-		Overview:
-			A window that shows an overview of the entire graph.
+		Axis Controls:
+			> X-Axis and Y-Axis: select which node data field to use to plot the nodes along the corresponding axis. "Load new..." allows users to add new data files (must be tab delimited, same length as number of nodes in graph) to plot, via a couple dialogs that ask for the new columns name, data type, and file source. 
+			> Axis settings opens a dialog to modify some visual setting for the axis layout. Currently, for numerical column type axis (others are disabled in the dialog), the user can choose whether to set the layout bounds manually or have them calculated automatically to fit.
+			> Show Axis will run the axis layout for the axes specified in the drop-down menus and in Axis Settings. May be necessary to toggle this on an off to cause alterations to the axis settings to take effect.
+			
 
 KEY BINDINGS:
 Note that these bindings apply to when the primary graph display is "in focus." You can cycle between elements by pressing TAB. These bindings will behave the same on the overview window, and are the same regardless of which OS the program is running on.
