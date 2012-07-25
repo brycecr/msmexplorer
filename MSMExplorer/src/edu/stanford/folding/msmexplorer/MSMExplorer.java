@@ -1,29 +1,30 @@
 package edu.stanford.folding.msmexplorer;
 
 import edu.stanford.folding.msmexplorer.io.ColumnChooserDialog;
-import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
 import edu.stanford.folding.msmexplorer.io.MSMIOLib;
+import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
 import edu.stanford.folding.msmexplorer.tpt.TPTSetupBox;
 import edu.stanford.folding.msmexplorer.tpt.TPTWindow;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregateDragControl;
+import edu.stanford.folding.msmexplorer.util.aggregate.AggregateLayout;
+import edu.stanford.folding.msmexplorer.util.aggregate.AggregatePrioritySorter;
+import edu.stanford.folding.msmexplorer.util.movie.*;
+import edu.stanford.folding.msmexplorer.util.render.ImageToggleLabelRenderer;
 import edu.stanford.folding.msmexplorer.util.render.SelfRefEdgeRenderer;
 import edu.stanford.folding.msmexplorer.util.stats.GraphStatsManager;
 import edu.stanford.folding.msmexplorer.util.stats.GraphStatsWindow;
-import edu.stanford.folding.msmexplorer.util.movie.*;
-import edu.stanford.folding.msmexplorer.util.ui.Picture;
+import edu.stanford.folding.msmexplorer.util.ui.AxisSettingsDialog;
 import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
 import edu.stanford.folding.msmexplorer.util.ui.JValueSliderF;
-import edu.stanford.folding.msmexplorer.util.aggregate.AggregateLayout;
-import edu.stanford.folding.msmexplorer.util.aggregate.AggregatePrioritySorter;
-import edu.stanford.folding.msmexplorer.util.render.ImageToggleLabelRenderer;
-import edu.stanford.folding.msmexplorer.util.ui.AxisSettingsDialog;
-
+import edu.stanford.folding.msmexplorer.util.ui.Picture;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Point2D;
@@ -31,100 +32,96 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.awt.GridLayout;
-import java.awt.event.ComponentListener;
-import java.util.HashMap;
-
-import java.util.Vector;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.KeyStroke;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.JToggleButton;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JRadioButton;
-import javax.swing.JMenuItem;
+import javax.swing.GroupLayout.Group;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.JSlider;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JSlider;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
-
-import prefuse.Display;
+import javax.swing.JToggleButton;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import prefuse.Constants;
+import prefuse.Display;
 import prefuse.Visualization;
+import prefuse.action.Action;
 import prefuse.action.ActionList;
 import prefuse.action.RepaintAction;
 import prefuse.action.assignment.ColorAction;
-import prefuse.action.assignment.StrokeAction;
-import prefuse.action.assignment.DataSizeAction;
 import prefuse.action.assignment.DataColorAction;
+import prefuse.action.assignment.DataSizeAction;
+import prefuse.action.assignment.StrokeAction;
 import prefuse.action.filter.GraphDistanceFilter;
+import prefuse.action.layout.AxisLabelLayout;
+import prefuse.action.layout.AxisLayout;
 import prefuse.action.layout.graph.ForceDirectedLayout;
 import prefuse.controls.NeighborHighlightControl;
 import prefuse.controls.PanControl;
 import prefuse.controls.WheelZoomControl;
 import prefuse.controls.ZoomControl;
 import prefuse.controls.ZoomToFitControl;
-import prefuse.data.Node;
 import prefuse.data.Graph;
+import prefuse.data.Node;
 import prefuse.data.Table;
 import prefuse.data.Tuple;
 import prefuse.data.event.TupleSetListener;
+import prefuse.data.expression.OrPredicate;
 import prefuse.data.io.GraphMLReader;
+import prefuse.data.query.NumberRangeModel;
 import prefuse.data.query.SearchQueryBinding;
 import prefuse.data.search.KeywordSearchTupleSet;
 import prefuse.data.search.SearchTupleSet;
-import prefuse.data.tuple.TupleSet;
 import prefuse.data.tuple.DefaultTupleSet;
+import prefuse.data.tuple.TupleSet;
+import prefuse.render.AxisRenderer;
 import prefuse.render.DefaultRendererFactory;
 import prefuse.render.EdgeRenderer;
+import prefuse.render.PolygonRenderer;
+import prefuse.render.Renderer;
 import prefuse.render.ShapeRenderer;
 import prefuse.util.ColorLib;
 import prefuse.util.FontLib;
+import prefuse.util.GraphicsLib;
+import prefuse.util.PrefuseLib;
 import prefuse.util.StrokeLib;
+import prefuse.util.display.DisplayLib;
 import prefuse.util.display.ExportDisplayAction;
 import prefuse.util.force.Force;
 import prefuse.util.force.ForceSimulator;
 import prefuse.util.ui.JForcePanel;
-import prefuse.util.ui.JValueSlider;
 import prefuse.util.ui.JSearchPanel;
-import prefuse.visual.VisualGraph;
-import prefuse.visual.VisualItem;
-import prefuse.action.Action;
-import prefuse.action.layout.AxisLabelLayout;
-import prefuse.action.layout.AxisLayout;
-import prefuse.data.expression.OrPredicate;
-import prefuse.data.query.NumberRangeModel;
-import prefuse.render.AxisRenderer;
-import prefuse.render.PolygonRenderer;
-import prefuse.render.Renderer;
-import prefuse.util.GraphicsLib;
-import prefuse.util.PrefuseLib;
-import prefuse.util.display.DisplayLib;
+import prefuse.util.ui.JValueSlider;
 import prefuse.visual.AggregateItem;
 import prefuse.visual.AggregateTable;
 import prefuse.visual.EdgeItem;
 import prefuse.visual.NodeItem;
-import prefuse.visual.VisualTable;
+import prefuse.visual.VisualGraph;
+import prefuse.visual.VisualItem;
 import prefuse.visual.expression.InGroupPredicate;
 import prefuse.visual.expression.VisiblePredicate;
 
@@ -671,6 +668,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 						axisFields.insertElementAt(name, axisFields.size()-1);
 						xAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
 						yAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
+					} else {
+						xAxisSelector.setSelectedIndex(0);
 					}
 				} else if (!axisFields.contains(selected)) {
 					JOptionPane.showMessageDialog(MSMExplorer.this, 
@@ -693,6 +692,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 						axisFields.insertElementAt(name, axisFields.size()-1);
 						yAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
 						xAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
+					} else {
+						yAxisSelector.setSelectedIndex(0); //so we don't try to graph against "Load new"
 					}
 				} else if (!axisFields.contains(selected)) {
 					JOptionPane.showMessageDialog(MSMExplorer.this, 
@@ -738,11 +739,16 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					xaxis.setLayoutBounds(bounds);
 					AxisLayout yaxis = new AxisLayout(nodes, (String)yAxisSelector.getSelectedItem(), Constants.Y_AXIS, VisiblePredicate.TRUE);
 					yaxis.setLayoutBounds(bounds);
+
+					//Apply custom numerical range, if user asked for it
+					//and the axis in question is in fact numerical
 					if (!autoRange) {
-						if (xaxis.getDataType() == Constants.NUMERICAL) {
+						if (xaxis.getDataType() == Constants.NUMERICAL
+							|| isNumerical(xAxisSelector)) {
 							xaxis.setRangeModel(xAxisRange);
 						}
-						if (yaxis.getDataType() == Constants.NUMERICAL) {
+						if (yaxis.getDataType() == Constants.NUMERICAL
+							|| isNumerical(yAxisSelector)) {
 							yaxis.setRangeModel(yAxisRange);
 						}
 					}
@@ -786,22 +792,40 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					m_vis.getGroup("ylabels").clear();
 				}
 			}
+
+			/**
+			 * Determines whether the selected data column in selector
+			 * is of a numerical type. This is sometimes necessary instead of 
+			 * AxisLayout.getDataType() because the type isn't initialized until
+			 * after the first run, or something like that. This is a pretty
+			 * foolproof way to check.
+			 * 
+			 * @param selector to get field from
+			 * @return whether field selected in selector is numerical in graph
+			 */
+			private boolean isNumerical(JComboBox selector) {
+				String selected = (String)selector.getSelectedItem();
+				Class<?> cls = ((Graph)m_vis.getGroup(graph)).getNodeTable().getColumnType(selected);
+				if (cls == double.class || cls == int.class || cls == float.class ||
+						cls == long.class) {
+					return true;	
+				}
+				return false;
+			}
 		});
 
-		JPanel selectorPane = new JPanel();
-		selectorPane.setLayout(new GridLayout(0,2));
-		selectorPane.add(new JLabel("X Axis"));
-		selectorPane.add(xAxisSelector);
-		selectorPane.add(new JLabel("Y Axis"));
-		selectorPane.add(yAxisSelector);
-		selectorPane.setOpaque(false);
+		JPanel axisPane = new JPanel();
+		axisPane.setLayout(new GridLayout(0,2));
+		axisPane.add(new JLabel("X Axis"));
+		axisPane.add(xAxisSelector);
+		axisPane.add(new JLabel("Y Axis"));
+		axisPane.add(yAxisSelector);
+		axisPane.add(openAxisSettings);
+		axisPane.add(axisToggle);
+		axisPane.setOpaque(false);
+		axisPane.setBorder(BorderFactory.createTitledBorder("Axis Control"));
 
-		Box axisBox = new Box(BoxLayout.Y_AXIS);
-		axisBox.setBorder(BorderFactory.createTitledBorder("Axis Control"));
-		axisBox.add(selectorPane);
-		axisBox.add(openAxisSettings);
-		axisBox.add(axisToggle);
-		fpanel.add(axisBox);
+		fpanel.add(axisPane);
 		/* -------------- AXIS GUI ELEMENTS ------------------------ */
 
 		/* ----------- HIERARCHY GUI ELEMENTS ------------ */

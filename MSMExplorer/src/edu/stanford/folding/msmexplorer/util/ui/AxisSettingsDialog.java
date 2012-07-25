@@ -12,6 +12,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import prefuse.data.query.NumberRangeModel;
+import prefuse.util.FontLib;
 
 /**
  * Dialog to allow users to control various aspects of the axis layout, including
@@ -125,8 +126,12 @@ public class AxisSettingsDialog extends JDialog {
 		setLayout(new GridLayout(0,4));
 		add(autoCheckBox);
 		add(new JLabel());
-		add(new JLabel());
-		add(new JLabel());
+		JLabel lab1 = new JLabel("Note: Limits for non-numerical");
+		lab1.setFont(FontLib.getFont("Tahoma", 11));
+		JLabel lab2 = new JLabel(" datatypes not shown.");
+		lab2.setFont(FontLib.getFont("Tahoma", 11));
+		add(lab1);
+		add(lab2);
 		add(new JLabel("X Min:"));
 		add(xMin);
 		add(new JLabel("X Max:"));
