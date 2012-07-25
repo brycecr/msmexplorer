@@ -44,7 +44,6 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.GroupLayout.Group;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -502,9 +501,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			public void actionPerformed(ActionEvent ae) {
 				JRadioButton circleRB = (JRadioButton) ae.getSource();
 				if (circleRB.isSelected()) {
-					m_vis.setRendererFactory(new DefaultRendererFactory(new ShapeRenderer()/*, new SelfRefEdgeRenderer()*/));
-					((DefaultRendererFactory) m_vis.getRendererFactory()).add("ingroup('aggregates')", new PolygonRenderer(Constants.POLY_TYPE_CURVE));
+					DefaultRendererFactory drf = (DefaultRendererFactory)m_vis.getRendererFactory();
+					drf.setDefaultRenderer(new ShapeRenderer());
 					m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
+					m_vis.run("draw");
 				}
 			}
 		});
@@ -516,7 +516,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			public void actionPerformed(ActionEvent ae) {
 				JRadioButton labelRB = (JRadioButton) ae.getSource();
 				if (labelRB.isSelected()) {
-					m_vis.setRendererFactory(new DefaultRendererFactory(tr/*, new SelfRefEdgeRenderer()*/));
+					DefaultRendererFactory drf = (DefaultRendererFactory)m_vis.getRendererFactory();
+					drf.setDefaultRenderer(tr);
+					m_vis.run("draw");
 				}
 			}
 		});
