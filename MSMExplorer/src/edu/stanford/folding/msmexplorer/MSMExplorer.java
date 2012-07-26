@@ -782,7 +782,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					axisColor.add(xAxisColor);
 					axisColor.add(xLabColor);
 
-
 					final ActionList axes = new ActionList();
 					axes.add(xaxis);
 					axes.add(yaxis);
