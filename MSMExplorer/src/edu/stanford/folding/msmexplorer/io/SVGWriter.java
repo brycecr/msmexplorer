@@ -16,7 +16,9 @@ import prefuse.Display;
 /**
  * A nifty class to output SVG files.
  * 
- * @author gestalt
+ * Adapted from Luis Miguel Rodriguez's code 
+ * on the Prefuse Sourceforge forums.
+ * @author Luis Miguel Rodriguez with adaptations to MSMExplorer by brycecr
  */
 public class SVGWriter {
 
