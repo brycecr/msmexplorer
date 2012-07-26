@@ -126,7 +126,8 @@ Note that these bindings apply to when the primary graph display is "in focus." 
 >	Ctrl-E: Export display to a raster image file. You have a choice between several resolutions and file formats. This should have the same functionality as the "Save Image" button.
 >	Ctrl-H: Toggle between high and low rendering quality. The default is high. Low quality looks worse but renders more quickly, and thus make interacting with the graph a much smoother process with relatively large graphs. This should have the same effect as the "Picture Mode" toggle button.
 >	Ctrl-D: Displays various Debug information, including frame rate and memory usage.
->	Ctrl-O: Opens a dialog to select a new graph to load. Note that loading a new graph discards the current graph. 
+>	Ctrl-O: Opens a dialog to select a new graph to load. Note that loading a new graph discards the current graph.
+>	Ctrl-Shift-O: Opens a dialog to select a new MSM hierarchy to load. Discards any currently loaded graphs.
 >	Ctrl-S: Opens a dialog to save the current graph (in its entirety) in graphml format. 
 
 
