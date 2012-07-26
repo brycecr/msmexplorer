@@ -2,6 +2,7 @@ package edu.stanford.folding.msmexplorer;
 
 import edu.stanford.folding.msmexplorer.io.ColumnChooserDialog;
 import edu.stanford.folding.msmexplorer.io.MSMIOLib;
+import edu.stanford.folding.msmexplorer.io.SVGWriter;
 import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
 import edu.stanford.folding.msmexplorer.tpt.TPTSetupBox;
 import edu.stanford.folding.msmexplorer.tpt.TPTWindow;
@@ -1290,6 +1291,13 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 
+		JMenuItem saveSVG = new JMenuItem("Save SVG...");
+		saveSVG.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				SVGWriter.saveSVG(view.m_vis.getDisplay(0));
+			}
+		});
+
 		// set up menu
 		JMenu dataMenu = new JMenu("Data");
 		dataMenu.add(forcePanel);
@@ -1297,6 +1305,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		//dataMenu.add(makeMovie); XXX put this back when implemented...
 		dataMenu.add(new OpenMSMAction(view));
 		dataMenu.add(new OpenHierarchyAction());
+		dataMenu.add(saveSVG);
 		dataMenu.add(new SaveMSMAction(g, view));
 
 		JMenuBar menubar = new JMenuBar();
