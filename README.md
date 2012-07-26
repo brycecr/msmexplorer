@@ -185,6 +185,7 @@ ownlife (PAP forums)
 Robert Sedgwick and Kevin Wayne
 34all (PAP forums) 
 Nazri and Ashwin (sourceforge prefuse forums)
+Luis Miguel Rodriguez (sourceforge prefuse forums)
 
 MSMExplorer was developed on the Java Development Kit version 6 using The Prefuse Visualization Kit beta version 2007.10.21 (prefuse.org) and Netbeans versions 6.8 through 7.0.
 
