@@ -5,16 +5,20 @@ import java.awt.geom.Point2D;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
-import org.apache.batik.svggen.SVGGraphics2DIOException;
 import org.apache.batik.swing.svg.SVGFileFilter;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import prefuse.Display;
 
 /**
- * A nifty class to output SVG files.
+ * A nifty class to output SVG files of prefuse graphs.
+ * The annoying part is that we have to pull in 8 Batik jars
+ * to do this, but that's probably the way to go.
+ * For the record, requires batik jars:
+ * codec, awt-util, dom, svggen, swing, util, ext, and xml
  * 
  * Adapted from Luis Miguel Rodriguez's code 
  * on the Prefuse Sourceforge forums.
@@ -26,6 +30,12 @@ public class SVGWriter {
 		//prevent instantiation
 	}
 
+	/**
+	 * Displays a dialog to save contents of display as .svg file
+	 * 
+	 * @param display to output as SVG
+	 * @return success or failure of operation
+	 */
 	public static boolean saveSVG(Display display) {
 		try {
 			double scale = display.getScale();
@@ -62,10 +72,16 @@ public class SVGWriter {
 			int ret = jfc.showSaveDialog(null);
 			if (ret == JFileChooser.APPROVE_OPTION) {
 				String saveLoc = jfc.getSelectedFile().getAbsolutePath();
+				if (!(saveLoc.endsWith(".svg") || saveLoc.endsWith(".svgz"))) {
+					saveLoc = saveLoc + ".svg";
+				}
 				svgG.stream(saveLoc, useCSS);
 				return true;
 			}
-		} catch (SVGGraphics2DIOException ex) {
+		} catch (Exception ex) {
+			JOptionPane.showMessageDialog(null, "Could not save SVG file, exception: "
+				+ex.getCause().toString()+" "+ex.toString(), "SVG save error", 
+				JOptionPane.ERROR_MESSAGE);
 			Logger.getLogger(SVGWriter.class.getName()).log(Level.SEVERE, null, ex);
 		}		return false;
 	}
