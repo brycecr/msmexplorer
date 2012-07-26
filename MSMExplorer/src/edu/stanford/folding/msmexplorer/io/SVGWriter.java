@@ -19,6 +19,7 @@ import prefuse.Display;
  * to do this, but that's probably the way to go.
  * For the record, requires batik jars:
  * codec, awt-util, dom, svggen, swing, util, ext, and xml
+ * Auto-appends .svg extension.
  * 
  * Adapted from Luis Miguel Rodriguez's code 
  * on the Prefuse Sourceforge forums.
@@ -66,15 +67,20 @@ public class SVGWriter {
 			// UTF-8 encoding.
 			boolean useCSS = true; // we want to use CSS style attributes
 
+			//get filename/location to save under
 			JFileChooser jfc = new JFileChooser();
 			jfc.setDialogTitle("Save SVG file...");
 			jfc.setFileFilter(new SVGFileFilter());
 			int ret = jfc.showSaveDialog(null);
 			if (ret == JFileChooser.APPROVE_OPTION) {
 				String saveLoc = jfc.getSelectedFile().getAbsolutePath();
+
+				//append extension
 				if (!(saveLoc.endsWith(".svg") || saveLoc.endsWith(".svgz"))) {
 					saveLoc = saveLoc + ".svg";
 				}
+
+				//save!
 				svgG.stream(saveLoc, useCSS);
 				return true;
 			}

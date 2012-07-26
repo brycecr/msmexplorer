@@ -1,0 +1,120 @@
+/**
+ * A simple pair class representing an edge by a pair
+ * of source, target indicies into the flux matrix.
+ *
+ * The instance vars are public because java syntax
+ * is annoying and long winded.
+ */
+private static class DijkstraEdge {
+    public int row;
+    public int col;
+
+    public DijkstraEdge (int r, int c) {
+        row = r;
+        col = c;
+    }
+
+    public setRow (int r) {
+        row = r;
+    }
+
+    public setCol (int c) {
+        col = c;
+    }
+
+    public set (int r, int c) {
+        row = r;
+        col = c;
+    }
+}
+
+/**
+ * Yet another path extraction algorithm. This one basically follows
+ * Dijkstra's algorithm, which is nifty because it's pretty fast
+ * and is not greedy. The paths returned here should be optimal.
+ */
+private ArrayList<Edge> GetHighFluxPathV3() {
+
+    ArrayDeque<DijkstraEdge> path;
+    PriortyQueue< ArrayDeque<DijkstraEdge> > queue;
+    HashMap<Integer, Double> fixed;
+    int index;
+
+    while (!target.contains(index)) {
+        if (!fixed.containsKey(index)) {
+            fixed.put(index, getCost(path));
+
+            //For each edge leaving from index
+            OpenMapRealMatrix outedges = fluxes.getRowMatrix(index);
+            DijkstraRowVisitor drv = new DijkstraRowVisitor();
+            drv.path = path;
+            drv.queue = queue;
+            drv.fixed = fixed;
+            drv.index = index;
+            outedges.walkInOptimizedOrder(drv);
+        }
+        if (queue.isEmpty()) {
+            return new ArrayList<DijkstraEdge>();
+        }
+
+        path = queue.dequeue();
+        index = path.peekLast().col; 
+    }
+
+    ArrayList<Edge> edgeList = new ArrayList<Edge>();
+    double cost = getPathCost(path);
+    for (DijkstraEdge de : path) {
+
+        this.m_fFluxes.setEntry(de.row, de.col, Math.min (0.0d, 
+                    this.mfFluxes.getEntry(de.row, de.col) - cost));
+
+        Node source = m_graph.getNode(de.row);
+        Node target = m_graph.getNode(de.col);
+        Edge e = m_graph.getEdge(source, target);
+
+        source.setDouble("flux", source.getDouble("flux") + f);
+        target.setDouble("flux", target.getDouble("flux") + f);
+        e.setDouble("flux", e.getDouble("flux") + f);
+
+        edgeList.add(e);
+    }
+
+    return edgeList;
+} 
+
+/**
+ * Should return the reciprocal of the minimum flux along the path
+ * passed as parameter.
+ *
+ * @param ArrayDeque representing the path to extract cost from
+ */
+private double getCost (ArrayDeque<DijkstraEdge> path) {
+    DijkstraEdge first = path.peekFirst();
+    double cost = m_fFluxes.getEntry(first.row, first.col);
+    assert (cost > 0.0d);
+    for (DijkstraEdge de : path) {
+        double edgeFlux = m_fFluxes.getEntry(de.row, de.col);
+        if (edgeFlux < cost) {
+            cost = edgeFlux;
+        }
+    }
+    return 1.0d / cost;
+}
+
+private class DijkstraRowVisitor extends DefaultRealMatrixPreservingRowVisitor {
+    ArrayDeque<DijkstraEdge> path;
+    PriortyQueue< ArrayDeque<DijkstraEdge> > queue;
+    Map<String, Double> fixed;
+    int index; //The row this visitor is traversing
+
+    @Override
+        public void visit (int row, int column, double value) {
+            if (!fixed.containsKey(column)) {
+                path.addFirst(new DijkstraEdge(index, column));
+                queue.enqueue(path, getCost(path));
+                path.removeLast();
+            }
+        }
+}
+
+
