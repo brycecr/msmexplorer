@@ -114,7 +114,12 @@ BUTTONS AND GUI COMPONENTS:
 			> X-Axis and Y-Axis: select which node data field to use to plot the nodes along the corresponding axis. "Load new..." allows users to add new data files (must be tab delimited, same length as number of nodes in graph) to plot, via a couple dialogs that ask for the new columns name, data type, and file source. 
 			> Axis settings opens a dialog to modify some visual setting for the axis layout. Currently, for numerical column type axis (others are disabled in the dialog), the user can choose whether to set the layout bounds manually or have them calculated automatically to fit.
 			> Show Axis will run the axis layout for the axes specified in the drop-down menus and in Axis Settings. May be necessary to toggle this on an off to cause alterations to the axis settings to take effect.
-			
+Hierarchy Controls (Upper left, visible only when hierarchy loaded):
+		Level Slider: 
+			> Indicates which level of the hierarchy is viewed as the current graph.
+		Overlay Slider: 
+			> Indicates which level of the hierarchy is overlayed on the graph indicated by level to show membership of the "level-indicated" graph in the overlaid graph.
+
 
 KEY BINDINGS:
 Note that these bindings apply to when the primary graph display is "in focus." You can cycle between elements by pressing TAB. These bindings will behave the same on the overview window, and are the same regardless of which OS the program is running on.
