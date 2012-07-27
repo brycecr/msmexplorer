@@ -18,7 +18,10 @@ import prefuse.util.io.IOLib;
 import prefuse.util.io.SimpleFileFilter;
 
 /**
- *
+ * A copy of ExportDisplayAction that adds support for SVG writing via SVGWriter.saveSVG.
+ * Because a subclass of ExportDisplayAction can't splice into the SVG stuff at the right point,
+ * we make a copy ourselves. 
+ * 
  * @author gestalt
  */
 public class ExportMSMImageAction extends AbstractAction {

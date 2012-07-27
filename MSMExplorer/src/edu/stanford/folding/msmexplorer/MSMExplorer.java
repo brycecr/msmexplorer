@@ -572,7 +572,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		// Open full-size image of selected node
 		JButton openImg = new JButton("Open Image");
 		openImg.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent ae) {
 				Tuple focus = (Tuple) m_vis.getGroup(Visualization.FOCUS_ITEMS).tuples().next();
 				Picture imgFrame = new Picture((String) focus.get("image"));
@@ -1279,7 +1278,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		JMenuItem statsPanel = new JMenuItem("Stats Panel");
 		statsPanel.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent ae) {
 				GraphStatsWindow gsw = new GraphStatsWindow(g);
 				gsw.setVisible(true);
@@ -1295,12 +1293,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 
-		JMenuItem saveSVG = new JMenuItem("Save SVG...");
-		saveSVG.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				SVGWriter.saveSVG(view.m_vis.getDisplay(0));
-			}
-		});
+		JMenuItem saveSVG = new JMenuItem("Save Image...");
+		saveSVG.addActionListener(new ExportMSMImageAction(view.m_vis.getDisplay(0)));
 		saveSVG.setAccelerator(KeyStroke.getKeyStroke("ctrl shift S"));
 
 		// set up menu
