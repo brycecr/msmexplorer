@@ -16,7 +16,7 @@ import edu.stanford.folding.msmexplorer.util.stats.GraphStatsManager;
 import edu.stanford.folding.msmexplorer.util.stats.GraphStatsWindow;
 import edu.stanford.folding.msmexplorer.util.ui.AxisSettingsDialog;
 import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
-import edu.stanford.folding.msmexplorer.util.ui.JValueSliderF;
+import edu.stanford.folding.msmexplorer.util.ui.JValueSliderFlammable;
 import edu.stanford.folding.msmexplorer.util.ui.Picture;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -141,7 +141,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	private static final int DEGREE_THRESHOLD = 30; //Degree threshold for "big" graph
 
 	//Current Version #
-	private static final String version = "v0.03";
+	private static final String version = "v0.04";
 
 	// Visualization group names
 	private static final String aggr = "aggregates";
@@ -168,6 +168,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 	private boolean autoRange = true; //whether to set axis ranges automatically
 
+	/**
+	 * Initial program constructor; creates the initial splash screen
+	 * and all that good stuff.
+	 */
 	public MSMExplorer() {
 
 		//Selector window
@@ -210,8 +214,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		try {
 			image = ImageIO.read(new File("./lib/splash.jpg"));
 		} catch (IOException ex) {
-			System.err.println("Could not find splash image");
-			image = new BufferedImage(500, 300, BufferedImage.TYPE_INT_RGB);
+			Logger.getLogger(MSMExplorer.class.getName()).log(Level.WARNING, null, ex);
+			image = new BufferedImage(0, 0, BufferedImage.TYPE_INT_RGB);
 		}
 		ImageIcon splash = new ImageIcon(image);
 		selector.add(new JLabel(splash), BorderLayout.CENTER);
@@ -227,7 +231,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 * Constructor, initializes controls and gui elements.
 	 *
 	 * @param g graph to visualize
-	 * @param label
+	 * @param label field in graph for node labels. Usually "label"
 	 */
 	public MSMExplorer(final Graph g, String label) {
 		super(new BorderLayout());
@@ -258,6 +262,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		focusGroup.addTupleSetListener(new TupleSetListener() {
 
 			public void tupleSetChanged(TupleSet ts, Tuple[] add, Tuple[] rem) {
+				//We backpedal if we're trying to focus to a 
+				//aggregate item because we don't want to loose
+				//focus on a node (if we do, this causes weird
+				//behavior with the distance slider)
 				for (int i = 0; i < add.length; ++i) {
 					if (add[i] instanceof AggregateItem) {
 						ts.removeTuple(add[i]);
@@ -325,7 +333,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		});
 
 		initGraph(g, m_vis);
-		//tr.getImageFactory().preloadImages(g.nodes(), "image");
 
 		// --------------------------------------------------------------------
 		// set up a display to show the visualization
@@ -375,9 +382,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		});
 
 
-		//the F lets other code fire without a value change.
+		//the 'Flammable' lets other code fire without a value change.
 		//note that currently this orchestrates the behavior of both filters
-		final JValueSliderF eqProbSlider = new JValueSliderF("EqProb Cutoff", 0., 1., 0.);
+		final JValueSliderFlammable eqProbSlider = new JValueSliderFlammable("EqProb Cutoff", 0., 1., 0.);
 		eqProbSlider.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent e) {
@@ -1235,14 +1242,16 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 * @return JFrame with new MSMExplorer
 	 */
 	public MSMExplorer graphView(String datafile, String label) {
-		Graph g = null;
+		Graph g;
 
 		try {
 			g = new GraphMLReader().readGraph(datafile);
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
-			System.err.println(e.getCause());
-			System.exit(1);
+			Logger.getLogger(MSMExplorer.class.getName()).log(Level.WARNING, null, e);
+			JOptionPane.showMessageDialog(null, "Could not open graph at "+datafile
+				+"\nWill now present you with a dialog to open a different graph.", 
+				"Could not open default graph", JOptionPane.WARNING_MESSAGE);
+			g = MSMIOLib.getMSMFile(null);
 		}
 		return graphView(g, label);
 	} // end of class graphView(String, String)
