@@ -16,12 +16,22 @@ public class EQProbReader implements MSMConstants {
 	}
 
 	/**
-	 * This version of 
+	 * This version of getEqProbs attempts to automatically find an
+	 * equilibrium probabilities file for the graph g by looking for
+	 * likely equilibrium probabilities filenames in the directory pointed to
+	 * by path. All else created equal, we recommend titling your eqProb
+	 * files "Populations.dat" as per the MSMBuilder 2 default.
+	 * Prompts the user to make sure that the auto-found should be
+	 * added to the graph, and will ask the user once for each likely
+	 * file found in the directory at path.
+	 * If no files are automatically found, calls getEqProbs(Component, Graph)
+	 * to ask for the eqProb file from the user.
 	 * 
-	 * @param c
-	 * @param g
-	 * @param path
-	 * @return 
+	 * @param c parent component
+	 * @param g graph to add eqProbs to
+	 * @param path string denoting directory to search for eqProb files
+	 * @return on success, the graph g with equilibrium probabiliites,
+	 * on failure, the original unmodified graph g
 	 */
 	public static Graph getEqProbs(Component c, Graph g, String path) {
 		File topList[];
@@ -56,6 +66,16 @@ public class EQProbReader implements MSMConstants {
 		return getEqProbs(c, g);
 	}
 	
+	/**
+	 * Prompt the user whether an eqprob file is desired, and, if so,
+	 * present user with an open dialog to select the equilibrium  probabilities
+	 * file.
+	 * 
+	 * @param c parent component (or null)
+	 * @param g graph to add eqprobs to
+	 * @return on success, g with added eqprobs; on failure, original
+	 * graph g
+	 */
 	public static Graph getEqProbs(Component c, Graph g) {
 		Object[] opts = {"Locate", "Not now"};
 		int opt = JOptionPane.showOptionDialog(c, 

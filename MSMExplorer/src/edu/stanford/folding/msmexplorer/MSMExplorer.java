@@ -1122,7 +1122,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			StrokeLib.getStroke(1.0f));
 		nodeWeight.add(VisualItem.HIGHLIGHT, StrokeLib.getStroke(2.0f));
 
-		DataSizeAction nodeSize = new DataSizeAction(nodes,
+		final DataSizeAction nodeSize = new DataSizeAction(nodes,
 			EQPROB, 50, Constants.LOG_SCALE);
 		nodeSize.setMaximumSize(50.0);
 
