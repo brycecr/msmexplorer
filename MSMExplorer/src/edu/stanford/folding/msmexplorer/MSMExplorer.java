@@ -47,6 +47,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -845,6 +846,20 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		fpanel.add(axisPane);
 		/* -------------- AXIS GUI ELEMENTS ------------------------ */
+
+		JButton showColorChooser = new JButton("Node Color"); 
+		showColorChooser.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				try {
+					ColorAction fill = (ColorAction)((ActionList)m_vis.getAction("animate")).get(2);
+					fill.setDefaultColor(JColorChooser.showDialog(frame, "Choose Node Color", new Color(fill.getDefaultColor())).getRGB());
+				} catch (Exception e) {
+					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
+				}
+			}
+		});
+		fpanel.add(showColorChooser);
+
 
 		/* ----------- HIERARCHY GUI ELEMENTS ------------ */
 		final JSlider zoomSlider = new JSlider(SwingConstants.VERTICAL, 0, 0, 0);

@@ -117,9 +117,9 @@ public class EQProbReader implements MSMConstants {
 	 * Processes data from a newline-delimited file and insets the information
 	 * into the eqProb column that should already be in the graph.
 	 * 
-	 * @param g
-	 * @param f
-	 * @return
+	 * @param g graph to add eqprobs to
+	 * @param f file with eqprob data
+	 * @return graph with added eqprobs
 	 */
 	public static Graph addEqProbs(Graph g, File f) {
 		if (g == null || f == null) {
