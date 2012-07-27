@@ -122,6 +122,7 @@ import prefuse.visual.EdgeItem;
 import prefuse.visual.NodeItem;
 import prefuse.visual.VisualGraph;
 import prefuse.visual.VisualItem;
+import prefuse.visual.VisualTable;
 import prefuse.visual.expression.InGroupPredicate;
 import prefuse.visual.expression.VisiblePredicate;
 
@@ -859,14 +860,17 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 
-		final JToggleButton hideEdges = new JToggleButton("Hide Edges");
+		final JButton showEdges = new JButton("Show Edges");
+		showEdges.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				m_vis.setVisible(edges, null, true);
+			}
+		});
+
+		final JButton hideEdges = new JButton("Hide Edges");
 		hideEdges.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				boolean visible = true;
-				if (hideEdges.isSelected()) {
-					visible = false;
-				} 
-				m_vis.setVisible(edges, null, visible);
+				m_vis.setVisible(edges, null, false);
 				m_vis.cancel("lll");
 			}
 		});
@@ -874,8 +878,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		JPanel aesPane = new JPanel();
 		aesPane.setBorder(BorderFactory.createTitledBorder("Aesthetic"));
 		aesPane.setLayout(new GridLayout(0,2));
-		aesPane.add(showColorChooser);
+		aesPane.add(showEdges);
 		aesPane.add(hideEdges);
+		aesPane.add(showColorChooser);
 		aesPane.setOpaque(false);
 
 		fpanel.add(aesPane);
@@ -1220,9 +1225,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		NBodyForce.setParameter(1, -1);
 
 		SpringForce.setMinValue(0, .00000099f);
-		SpringForce.setParameter(0, .000001f);
-		SpringForce.setMaxValue(1, 1600f);
-		SpringForce.setParameter(1, 300f);
+		SpringForce.setParameter(0, .00001f);
+		SpringForce.setMaxValue(1, 3200f);
+		SpringForce.setParameter(1, 600f);
 	}
 
 	/**
