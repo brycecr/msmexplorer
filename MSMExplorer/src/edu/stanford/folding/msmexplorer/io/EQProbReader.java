@@ -129,9 +129,12 @@ public class EQProbReader implements MSMConstants {
 		Object[] probs = NewlineDelimitedReader.read(f);
 		Table nt = g.getNodeTable();
 
+
 		if (nt == null || probs == null) {
 			return null;
 		}
+
+		assert Double.class.isAssignableFrom(probs[0].getClass());
 
 		if (nt.getRowCount() != probs.length) {
 			JOptionPane.showMessageDialog(null, "Equilibrium Probabilities file is"
@@ -147,8 +150,12 @@ public class EQProbReader implements MSMConstants {
 			ind = nt.getColumnNumber("eqProb");
 		}
 
+		double sum = 0.0;
 		for (int row = 0; row < probs.length; ++row) {
-			nt.setDouble(row, ind, (Double)probs[row]);
+			sum += (Double)probs[row];
+		}
+		for (int row = 0; row < probs.length; ++row) {
+			nt.setDouble(row, EQPROB, (Double)probs[row] / sum);
 		}
 
 		return g;

@@ -3,7 +3,6 @@ package edu.stanford.folding.msmexplorer;
 import edu.stanford.folding.msmexplorer.io.ColumnChooserDialog;
 import edu.stanford.folding.msmexplorer.io.ExportMSMImageAction;
 import edu.stanford.folding.msmexplorer.io.MSMIOLib;
-import edu.stanford.folding.msmexplorer.io.SVGWriter;
 import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
 import edu.stanford.folding.msmexplorer.tpt.TPTSetupBox;
 import edu.stanford.folding.msmexplorer.tpt.TPTWindow;
@@ -396,8 +395,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				double val = eqProbSlider.getValue().doubleValue();
-				//Iterator itr = m_vis.items(ExpressionParser.predicate("ISNODE()"));
-				//Iterator itr = m_vis.items(nodes);
+
 				Iterator itr = m_vis.visibleItems(nodes);
 				while (itr.hasNext()) {
 					VisualItem i = (VisualItem) itr.next();
@@ -430,7 +428,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				}
 			}
 		});
-		//eqProbSlider.setLayout(new BoxLayout(eqProbSlider, BoxLayout.Y_AXIS));
 		eqProbSlider.setLayout(new GridLayout(0, 2));
 
 		final JTextField eqProbText = new JTextField("EqProb Thresh");
