@@ -2,6 +2,7 @@ package edu.stanford.folding.msmexplorer.io;
 
 import java.awt.Dimension;
 import java.awt.geom.Point2D;
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -31,13 +32,17 @@ public class SVGWriter {
 		//prevent instantiation
 	}
 
+	public static boolean saveSVG(Display display) {
+		return saveSVG(display, null);
+	}
+
 	/**
 	 * Displays a dialog to save contents of display as .svg file
 	 * 
 	 * @param display to output as SVG
 	 * @return success or failure of operation
 	 */
-	public static boolean saveSVG(Display display) {
+	public static boolean saveSVG(Display display, File f) {
 		try {
 			double scale = display.getScale();
 
@@ -68,12 +73,18 @@ public class SVGWriter {
 			boolean useCSS = true; // we want to use CSS style attributes
 
 			//get filename/location to save under
-			JFileChooser jfc = new JFileChooser();
-			jfc.setDialogTitle("Save SVG file...");
-			jfc.setFileFilter(new SVGFileFilter());
-			int ret = jfc.showSaveDialog(null);
+			int ret;
+			if (f == null) {
+				JFileChooser jfc = new JFileChooser();
+				jfc.setDialogTitle("Save SVG file...");
+				jfc.setFileFilter(new SVGFileFilter());
+				ret = jfc.showSaveDialog(null);
+				f = jfc.getSelectedFile();
+			} else {
+				ret = JFileChooser.APPROVE_OPTION;
+			}
 			if (ret == JFileChooser.APPROVE_OPTION) {
-				String saveLoc = jfc.getSelectedFile().getAbsolutePath();
+				String saveLoc = f.getAbsolutePath();
 
 				//append extension
 				if (!(saveLoc.endsWith(".svg") || saveLoc.endsWith(".svgz"))) {

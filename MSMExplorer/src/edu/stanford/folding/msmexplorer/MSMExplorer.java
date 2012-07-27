@@ -1,6 +1,7 @@
 package edu.stanford.folding.msmexplorer;
 
 import edu.stanford.folding.msmexplorer.io.ColumnChooserDialog;
+import edu.stanford.folding.msmexplorer.io.ExportMSMImageAction;
 import edu.stanford.folding.msmexplorer.io.MSMIOLib;
 import edu.stanford.folding.msmexplorer.io.SVGWriter;
 import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
@@ -110,7 +111,6 @@ import prefuse.util.GraphicsLib;
 import prefuse.util.PrefuseLib;
 import prefuse.util.StrokeLib;
 import prefuse.util.display.DisplayLib;
-import prefuse.util.display.ExportDisplayAction;
 import prefuse.util.force.Force;
 import prefuse.util.force.ForceSimulator;
 import prefuse.util.ui.JForcePanel;
@@ -235,9 +235,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 */
 	public MSMExplorer(final Graph g, String label) {
 		super(new BorderLayout());
-
-		GraphStatsManager gsm = new GraphStatsManager(g); //TODO: remove. Only for testing
-		gsm.printStats();
 
 		// boolean used to sacrifice fancy functionality for speed
 		// wheen dealing with big graphs.
@@ -580,14 +577,12 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				Tuple focus = (Tuple) m_vis.getGroup(Visualization.FOCUS_ITEMS).tuples().next();
 				Picture imgFrame = new Picture((String) focus.get("image"));
 				imgFrame.show();
-
-
 			}
 		});
 
 		//Save raster image file
 		JButton exportDisplay = new JButton("Save Image");
-		exportDisplay.addActionListener(new ExportDisplayAction(display));
+		exportDisplay.addActionListener(new ExportMSMImageAction(display));
 
 		Box imgControls = new Box(BoxLayout.X_AXIS);
 		imgControls.setBorder(BorderFactory.createTitledBorder("Image Controls"));
@@ -1375,22 +1370,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				imageLocation = chooser.getSelectedFile().getAbsolutePath();
 			}
-			/*
-			 * String s = (String)JOptionPane.showInputDialog(
-			 * frame,
-			 * "Enter the complete filename of the image for "
-			 * + "state 1, \n"
-			 * + " e.g. \"macro1.png\"",
-			 * "Image name format",
-			 * JOptionPane.QUESTION_MESSAGE,
-			 * null, null, "macro1.png");
-			 *
-			 * //			If a string was returned, say so.
-			 * if ((s != null) && (s.length() > 0)) {
-			 * //setLabel("image format: " + s);
-			 * }
-			 *
-			 */
 		}
 	}
 
@@ -1427,7 +1406,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		private MSMExplorer m_view;
 
 		/**
-		 * Constructor, initializes action.
+		 * Constructor, initializes name, accelkey, vis
 		 * @param the MSMExplorer instance to affect
 		 */
 		public OpenMSMAction(MSMExplorer view) {
@@ -1467,31 +1446,5 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		}
 	}
-
-	/**
-	 * Custom color class to color fill.
-	 */
-	public class NodeColorAction extends ColorAction {
-		/*
-		 * Constructor
-		 * @param String name of group to affect
-		 */
-		public NodeColorAction(String group) {
-			super(group, VisualItem.FILLCOLOR);
-		}
-
-		@Override
-		public int getColor(VisualItem item) {
-			if (m_vis.isInGroup(item, Visualization.SEARCH_ITEMS)) {
-				return ColorLib.rgb(255, 120, 120);
-			} else if (item.isFixed()) {
-				return ColorLib.rgb(245, 150, 50);
-			} else if (item.isHighlighted()) {
-				return ColorLib.rgb(245, 200, 100);
-			} else {
-				return ColorLib.rgb(245, 230, 210);
-			}
-		}
-	} // end of inner class NodeColorAction
 } // end of class GraphView
 
