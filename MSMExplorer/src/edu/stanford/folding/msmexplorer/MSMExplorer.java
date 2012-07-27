@@ -858,13 +858,31 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				}
 			}
 		});
-		fpanel.add(showColorChooser);
 
+		final JToggleButton hideEdges = new JToggleButton("Hide Edges");
+		hideEdges.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				boolean visible = true;
+				if (hideEdges.isSelected()) {
+					visible = false;
+				} 
+				m_vis.setVisible(edges, null, visible);
+				m_vis.cancel("lll");
+			}
+		});
+
+		JPanel aesPane = new JPanel();
+		aesPane.setBorder(BorderFactory.createTitledBorder("Aesthetic"));
+		aesPane.setLayout(new GridLayout(0,2));
+		aesPane.add(showColorChooser);
+		aesPane.add(hideEdges);
+		aesPane.setOpaque(false);
+
+		fpanel.add(aesPane);
 
 		/* ----------- HIERARCHY GUI ELEMENTS ------------ */
 		final JSlider zoomSlider = new JSlider(SwingConstants.VERTICAL, 0, 0, 0);
 		zoomSlider.addChangeListener(new ChangeListener() {
-
 			public void stateChanged(ChangeEvent ae) {
 				int pos = zoomSlider.getValue();
 				if (zoomSlider.isEnabled() && !zoomSlider.getValueIsAdjusting()) {
