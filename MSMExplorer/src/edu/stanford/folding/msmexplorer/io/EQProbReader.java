@@ -9,6 +9,12 @@ import prefuse.data.Graph;
 import prefuse.data.Table;
 import prefuse.util.io.SimpleFileFilter;
 
+/**
+ * Small class to assist with the common task of importing Equilibrium Probabilities
+ * files.
+ * 
+ * @author brycecr
+ */
 public class EQProbReader implements MSMConstants {
 
 	private EQProbReader() {

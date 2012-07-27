@@ -1297,6 +1297,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				SVGWriter.saveSVG(view.m_vis.getDisplay(0));
 			}
 		});
+		saveSVG.setAccelerator(KeyStroke.getKeyStroke("ctrl shift S"));
 
 		// set up menu
 		JMenu dataMenu = new JMenu("Data");
