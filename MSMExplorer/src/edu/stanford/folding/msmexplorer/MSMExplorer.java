@@ -122,7 +122,6 @@ import prefuse.visual.EdgeItem;
 import prefuse.visual.NodeItem;
 import prefuse.visual.VisualGraph;
 import prefuse.visual.VisualItem;
-import prefuse.visual.VisualTable;
 import prefuse.visual.expression.InGroupPredicate;
 import prefuse.visual.expression.VisiblePredicate;
 
@@ -385,7 +384,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		final JValueSliderFlammable eqProbSlider = new JValueSliderFlammable("EqProb Cutoff", 0., 1., 0.);
 		eqProbSlider.addChangeListener(new ChangeListener() {
 
-			public void stateChanged(ChangeEvent e) {
+			public void stateChanged(ChangeEvent ce) {
 				//This disgusting bit of code is all to force execution of the graph
 				//distance filter before filtering on eqProb. It should be changed
 				//probably by building a new class that takes flexible predicates
@@ -445,7 +444,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		// Graph Distance slider
 		final JValueSlider distSlider = new JValueSlider("Distance", 0, 40, 37);
 		distSlider.addChangeListener(new ChangeListener() {
-
 			public void stateChanged(ChangeEvent e) {
 				((GraphDistanceFilter) ((ActionList) m_vis.getAction("draw")).get(0)).setDistance(distSlider.getValue().intValue());
 				eqProbSlider.fire();
@@ -1047,7 +1045,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		TupleSet vg = m_vis.getGroup(nodes);
 		Iterator<VisualItem> vNodes = vg.tuples();
 
-		AggregateTable at = null;
+		AggregateTable at;
 		if (m_vis.getGroup(aggr) == null) {
 			at = m_vis.addAggregates(aggr);
 			at.addColumn(VisualItem.POLYGON, float[].class);
@@ -1089,7 +1087,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			Node vNode = (Node) vNodes.next();
 			assert vNode != null;
 			int mapping = vNode.getInt("mapping");
-			AggregateItem ai = null;
+			AggregateItem ai;
 			if (!aggs.containsKey(mapping)) {
 				ai = (AggregateItem) at.addItem();
 				ai.setInt("id", mapping);
@@ -1227,7 +1225,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		SpringForce.setMinValue(0, .00000099f);
 		SpringForce.setParameter(0, .00001f);
 		SpringForce.setMaxValue(1, 3200f);
-		SpringForce.setParameter(1, 600f);
+		SpringForce.setParameter(1, 400f);
 	}
 
 	/**
@@ -1258,9 +1256,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
 		MSMExplorer msme = new MSMExplorer();
-
 	}   // end of main
 
 	/**
@@ -1455,7 +1451,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 
 		}
-	} // end of class
+	} 
 
 	public class SaveMSMAction extends AbstractAction {
 
@@ -1475,5 +1471,5 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		}
 	}
-} // end of class GraphView
+} // end of class MSMExplorer
 
