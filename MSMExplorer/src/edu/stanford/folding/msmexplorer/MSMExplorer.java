@@ -20,6 +20,7 @@ import edu.stanford.folding.msmexplorer.util.ui.JValueSliderFlammable;
 import edu.stanford.folding.msmexplorer.util.ui.Picture;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -49,6 +50,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -138,7 +140,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 	// Thresholds for detecting "large" graphs to change some behavior
 	private static final int SIZE_THRESHOLD = 250; //Threshold for "big" graph behavior
-	private static final int DEGREE_THRESHOLD = 30; //Degree threshold for "big" graph
+	private static final int DEGREE_THRESHOLD = 60; //Degree threshold for "big" graph
 
 	//Current Version #
 	private static final String version = "v0.04";
@@ -188,6 +190,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				graphView("./lib/5macro.xml", "label"); //HERE
 			}
 		});
+		graphButton.setToolTipText("Visualize a Markov State Model");
 
 		//Perform TPT without proceeding through Graph View
 		JButton tptButton = new JButton("Just TPT");
@@ -197,6 +200,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				preemptiveTPT(selector);
 			}
 		});
+		tptButton.setToolTipText("Run Transition Path Theory without visualizing the whole graph first.");
 
 		Box container = new Box(BoxLayout.X_AXIS);
 		container.add(Box.createHorizontalStrut(130));
@@ -355,6 +359,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		JPanel fpanel = new JPanel();
 		fpanel.setLayout(new BoxLayout(fpanel, BoxLayout.Y_AXIS));
 		fpanel.setBackground(Color.WHITE);
+		fpanel.setToolTipText("Collapse this panel with the small arrows on the divider.");
 
 		//we used absolute (i.e. null) layout so we could get the hierarchy sliders
 		//to overlay on the visualization; thus, because no layout is doing it for
@@ -430,6 +435,12 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 		eqProbSlider.setLayout(new GridLayout(0, 2));
+		String eqProbSliderToolTip = "Only show states above the equilibrium probability "
+			+"shown on this slider.";
+		Component[] esjc = eqProbSlider.getComponents();
+		for (int i = 0; i < esjc.length; ++i) {
+			((JComponent)esjc[i]).setToolTipText(eqProbSliderToolTip);
+		}
 
 		final JTextField eqProbText = new JTextField("EqProb Thresh");
 		eqProbText.addActionListener(new ActionListener() {
@@ -440,6 +451,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 		eqProbSlider.add(eqProbText);
+		eqProbText.setToolTipText("Only show states above the equilibrium probability "
+			+"shown in this field");
 
 		// Graph Distance slider
 		final JValueSlider distSlider = new JValueSlider("Distance", 0, 40, 37);
@@ -453,9 +466,14 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		distSlider.setBackground(Color.WHITE);
 		distSlider.setPreferredSize(new Dimension(300, 30));
 		distSlider.setMaximumSize(new Dimension(300, 30));
+		String distSliderToolTip = "<html>Only show states within the number of hops "
+			+ "<br>indicated on this slider from the currently selected state.</html>";
+		Component[] dsjc = distSlider.getComponents();
+		for (int i = 0; i < dsjc.length; ++i) {
+			((JComponent)dsjc[i]).setToolTipText(distSliderToolTip);
+		}
 
 		Box eqBox = new Box(BoxLayout.Y_AXIS);
-		//eqBox.add(eqProbText);
 		eqBox.add(eqProbSlider);
 		eqBox.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 
@@ -475,11 +493,12 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 		togglePM.setSelected(true);
+		togglePM.setToolTipText("<html>Toggle between aliased (toggled off) and anti-aliased (toggled on) rendering. "
+		+"<br>On looks much better but will slow down graph interactivity.</html>");
 
 		// Toggle between curve and straight lines
 		JToggleButton curveBtn = new JToggleButton("Edge Type", false);
 		curveBtn.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent ae) {
 				if (((JToggleButton) ae.getSource()).isSelected()) {
 					((EdgeRenderer) ((DefaultRendererFactory) m_vis.getRendererFactory()).getDefaultEdgeRenderer()).setEdgeType(Constants.EDGE_TYPE_CURVE);
@@ -490,6 +509,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				m_vis.run("draw");
 			}
 		});
+		curveBtn.setToolTipText("<html>Alternate between straight edges and curved edges. "
+			+"<br>Straight is more space effecient, but curved allows one to see the"
+			+ "<br> different colors (i.e. transition probabilities) of the incoming"
+			+ "<br> and outgoing edges, and curved gives a different look.</html>");
 
 		Box rendBox = new Box(BoxLayout.X_AXIS);
 		rendBox.setBorder(BorderFactory.createTitledBorder("Gen. Renderer"));
@@ -503,7 +526,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		JRadioButton circleRB = new JRadioButton("Circle", false);
 		circleRB.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent ae) {
 				JRadioButton circleRB = (JRadioButton) ae.getSource();
 				if (circleRB.isSelected()) {
@@ -514,11 +536,11 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				}
 			}
 		});
+		circleRB.setToolTipText("Render nodes as circles without labels.");
 		nodeRenderers.add(circleRB);
 
 		JRadioButton labelRB = new JRadioButton("Label", false);
 		labelRB.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent ae) {
 				JRadioButton labelRB = (JRadioButton) ae.getSource();
 				if (labelRB.isSelected()) {
@@ -528,6 +550,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				}
 			}
 		});
+		labelRB.setToolTipText("Render nodes as rounded rectangles with labels");
 		nodeRenderers.add(labelRB);
 
 		Box nrBox = new Box(BoxLayout.X_AXIS);
@@ -540,12 +563,14 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 		final JButton pause = new JButton("Stop Layout");
 		pause.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent e) {
 				Action layoutAction = m_vis.getAction("lll");
 				layoutAction.cancel();
 			}
 		});
+		pause.setToolTipText("<html>Pause the layout animation. "
+			+"<br>Useful for speeding up interactivity, or positioning"
+			+ "<br> nodes by hand.</html>");
 
 		JButton start = new JButton("Run Layout");
 		start.addActionListener(new ActionListener() {
@@ -557,6 +582,12 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				}
 			}
 		});
+		start.setToolTipText("<html>Run the physics-based layout animation, which"
+			+ "<br>attempts to automatically layout the graph in a useful manner"
+			+ "<br>by finding the local energy minima for graph layout, where"
+			+ "<br>edges are springs and nodes are masses. Note that for \"large\""
+			+ "<br>graphs this will cause the layout to run once in the background"
+			+ "<br>instead of constant animation.</html>");
 
 		// Run or stop layout
 		Box runControls = new Box(BoxLayout.X_AXIS);
@@ -575,10 +606,15 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				imgFrame.show();
 			}
 		});
+		openImg.setToolTipText("<html>Open a window with a full-size rendering of the image"
+			+ "<br>corresponding to this node. Only works correctly if the location"
+			+ "<br>of that image has been correctly specified.</html>");
 
 		//Save raster image file
 		JButton exportDisplay = new JButton("Save Image");
 		exportDisplay.addActionListener(new ExportMSMImageAction(display));
+		exportDisplay.setToolTipText("<html>Save the current visualization as an"
+			+ "<br>image file. Vector (svg) and various raster formats available.</html>");
 
 		Box imgControls = new Box(BoxLayout.X_AXIS);
 		imgControls.setBorder(BorderFactory.createTitledBorder("Image Controls"));
@@ -606,6 +642,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				m_vis.run("draw");
 			}
 		});
+		togglePics.setToolTipText("<html>Show images on top of nodes. Only works if the location and "
+			+ "<br>format of the images is correctly specified. If some nodes do not have corresponding"
+			+ "<br>images, they will apppear without them.</html>");
 
 		// Open selector window to select start and end states for TPT
 		JButton runTPT = new JButton("TPT Selector");
@@ -615,6 +654,13 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				TPTSetupBox tsb = new TPTSetupBox(g, true, m_vis);
 			}
 		});
+		runTPT.setToolTipText("<html>Open a dialog to select the start and end sets for"
+			+ "<br>transition path theory calculations. Note that TPT between two nodes"
+			+ "<br>can also be initiated by selecting the start node and then ctrl-clicking"
+			+ "<br>on the destination node. Currently, only source & target sets of size"
+			+ "<br>one are fully supported.</html>");
+
+		
 		Box renderControls = new Box(BoxLayout.X_AXIS);
 		renderControls.setBorder(BorderFactory.createTitledBorder("Function Control"));
 		renderControls.add(togglePics);
@@ -642,6 +688,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		final JSearchPanel search = sq.createSearchPanel(false);
 		search.setShowResultCount(true);
 		search.setBorder(BorderFactory.createEmptyBorder(5, 5, 4, 0));
+		search.setToolTipText("<html>Search for a node by label. "
+			+ "<br>If found, focus the display on that node."
+			+ "<br>Note that the found node is not"
+			+ "<br>automatically selected.</html>");
 
 		Box searchBox = new Box(BoxLayout.X_AXIS);
 		searchBox.setBorder(BorderFactory.createTitledBorder("Search"));
@@ -684,6 +734,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				}
 			}
 		});
+		String xAxisToolTip = "<html>Select the node data field to use "
+			+ "<br>to layout the nodes along the X axis."
+			+ "<br>Toggle SHOW AXIS to apply changes to this field/menu.</html>";
+		xAxisSelector.setToolTipText(xAxisToolTip);
 
 		yAxisSelector.setSelectedIndex(0);
 		yAxisSelector.addActionListener( new ActionListener() {
@@ -708,6 +762,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				}
 			}
 		});
+		String yAxisToolTip = "<html>Select the node data field to use "
+			+ "<br>to layout the nodes along the Y axis."
+			+ "<br>Toggle SHOW AXIS to apply changes to this field/menu.</html>";
+		yAxisSelector.setToolTipText(yAxisToolTip);
 
 		final NumberRangeModel xAxisRange = new NumberRangeModel(0, 1, 0, 1);
 		final NumberRangeModel yAxisRange = new NumberRangeModel(0, 1, 0, 1);
@@ -724,10 +782,12 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				autoRange = asd.showDialog();
 			}
 		});
+		openAxisSettings.setToolTipText("<html>Open a dialog to modify axis layout parameters."
+			+ "<br>Currently supports changing the axis layout range for "
+			+ "<br>numerical data fields. Toggle SHOW AXIS to apply changes.</html>");
 
 		final JToggleButton axisToggle = new JToggleButton("Show Axis", false);
 		axisToggle.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent ae) {
 				if (axisToggle.isSelected()) {
 					m_vis.removeAction("axes");
@@ -831,6 +891,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				return false;
 			}
 		});
+		axisToggle.setToolTipText("<html>Hide or show axes. "
+			+ "<br>Also, toggle this on and off to affect any changes"
+			+ "<br>made in AXIS SETTINGS or the axis LABEL fields.</html>");
 
 		JPanel axisPane = new JPanel();
 		axisPane.setLayout(new GridLayout(0,2));
@@ -846,6 +909,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		fpanel.add(axisPane);
 		/* -------------- AXIS GUI ELEMENTS ------------------------ */
 
+		/* -------------- AESTHETIC ADJUST ELEMENTS ---------------- */
+
 		JButton showColorChooser = new JButton("Node Color"); 
 		showColorChooser.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -857,6 +922,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				}
 			}
 		});
+		showColorChooser.setToolTipText("Open a dialog to select a new node color.");
 
 		final JButton showEdges = new JButton("Show Edges");
 		showEdges.addActionListener( new ActionListener() {
@@ -864,6 +930,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				m_vis.setVisible(edges, null, true);
 			}
 		});
+		showEdges.setToolTipText("Re-show edges if they hidden.");
 
 		final JButton hideEdges = new JButton("Hide Edges");
 		hideEdges.addActionListener( new ActionListener() {
@@ -872,6 +939,23 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				m_vis.cancel("lll");
 			}
 		});
+		hideEdges.setToolTipText("Hide edges. Useful for making graphs on axes cleaner.");
+
+		final JButton openForcePanel = new JButton("Force Panel");
+		openForcePanel.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				JFrame forceFrame = new JFrame("Force Panel");
+				ForceSimulator fsim = ((ForceDirectedLayout) ((ActionList) m_vis.getAction("lll")).get(0)).getForceSimulator();
+				JForcePanel fPanel = new JForcePanel(fsim);
+				forceFrame.add(fPanel);
+				forceFrame.pack();
+				forceFrame.setVisible(true);
+				forceFrame.setAlwaysOnTop(true);
+			}
+		});
+		openForcePanel.setToolTipText("<html>Open a panel to adjust the force parameters of the layout. "
+			+ "<br>Can be useful to spread out a crowded graph or get different interaction behavior."
+			+ "<br>It's also physicy phun.</html>");
 
 		JPanel aesPane = new JPanel();
 		aesPane.setBorder(BorderFactory.createTitledBorder("Aesthetic"));
@@ -879,6 +963,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		aesPane.add(showEdges);
 		aesPane.add(hideEdges);
 		aesPane.add(showColorChooser);
+		aesPane.add(openForcePanel);
 		aesPane.setOpaque(false);
 
 		fpanel.add(aesPane);
@@ -925,6 +1010,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				} else if (top < hierarchy.graphs.length - 1) {
 					MSMExplorer.this.setAggregates(bottom, top);
 					if (g.getNodeTable().getColumnNumber("mapping") >= 0) {
+						axisFields.remove("mapping");
 						axisFields.insertElementAt("mapping", axisFields.size() - 1);
 					}
 				}
@@ -1129,13 +1215,12 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 */
 	public void initGraph(Graph g, Visualization vis) {
 
-		// Set up aciton
-		//ColorAction fill = new NodeColorAction(nodes);
-
 		ColorAction fill = new ColorAction(nodes,
 		  VisualItem.FILLCOLOR, ColorLib.rgb(179, 255, 156));
 		  fill.add(VisualItem.FIXED, ColorLib.rgb(255, 100, 100));
 		  fill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 200, 125));
+		  fill.add(new InGroupPredicate(Visualization.SEARCH_ITEMS), 
+			  ColorLib.rgb(200, 40, 55));
 
 		DataColorAction edgeColor = new DataColorAction(edges, TPROB,
 			Constants.NOMINAL, VisualItem.STROKECOLOR,
@@ -1328,17 +1413,20 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		saveSVG.addActionListener(new ExportMSMImageAction(view.m_vis.getDisplay(0)));
 		saveSVG.setAccelerator(KeyStroke.getKeyStroke("ctrl shift S"));
 
+		JMenu fileMenu = new JMenu("File");
+		fileMenu.add(new OpenMSMAction(view));
+		fileMenu.add(new OpenHierarchyAction());
+		fileMenu.add(new SaveMSMAction(g, view));
+		fileMenu.add(saveSVG);
+		
 		// set up menu
-		JMenu dataMenu = new JMenu("Data");
+		JMenu dataMenu = new JMenu("Panels");
 		dataMenu.add(forcePanel);
 		dataMenu.add(statsPanel);
 		//dataMenu.add(makeMovie); XXX put this back when implemented...
-		dataMenu.add(new OpenMSMAction(view));
-		dataMenu.add(new OpenHierarchyAction());
-		dataMenu.add(saveSVG);
-		dataMenu.add(new SaveMSMAction(g, view));
 
 		JMenuBar menubar = new JMenuBar();
+		menubar.add(fileMenu);
 		menubar.add(dataMenu);
 
 		// launch window
