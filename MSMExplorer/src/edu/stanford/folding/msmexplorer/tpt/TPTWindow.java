@@ -1,6 +1,7 @@
 package edu.stanford.folding.msmexplorer.tpt;
 
 import edu.stanford.folding.msmexplorer.util.render.ImageToggleLabelRenderer;
+import edu.stanford.folding.msmexplorer.io.ExportMSMImageAction;
 import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -380,6 +381,9 @@ public class TPTWindow extends JFrame {
 				m_vis.run("nodeStroke");
 			}
 		});
+		numPathInput.setToolTipText("<html>Enter maximum number of paths to display. "
+				+"<br>The most popular paths are displayed first. When paths are"
+				+"<br>exhausted, all paths will be displayed.</html>");
 
 		final DefaultTupleSet holder = new DefaultTupleSet();
 		final TupleSet focusGroup = m_vis.getGroup(Visualization.FOCUS_ITEMS);
@@ -407,6 +411,11 @@ public class TPTWindow extends JFrame {
 		});
 		fixedBtn.setSelected(false);
 		fixedBtn.setEnabled(false);
+		fixedBtn.setToolTipText("<html>Toggle whether the the currently "
+				+"<br>selected node's position is fixed. "
+				+"<br>All node positions are fixed by default and after"
+				+"<br>SHOW AXIS is re-run. Non-fixed nodes are positioned"
+				+"<br>according to a force-directed layout.</html>");
 
 		JToggleButton axisMode = new JToggleButton("Show Axis", true);
 		axisMode.addActionListener(new ActionListener() {
@@ -426,11 +435,11 @@ public class TPTWindow extends JFrame {
 					holder.addTuple((Tuple) t);
 					t.setFixed(true);
 				}
-				//m_vis.run("tptLayout");
-				//m_vis.run("color");
-				//m_vis.run("nodeSize");
 			}
 		});
+		axisMode.setToolTipText("<html>Hide or show the axis. "
+				+"<br>Toggle on and off to redraw to fit into"
+				+"<br>the current display window.</html>");
 
 		JToggleButton colorMode = new JToggleButton("Color Mode", false);
 		colorMode.addActionListener(new ActionListener() {
@@ -455,6 +464,11 @@ public class TPTWindow extends JFrame {
 				m_vis.run("color");
 			}
 		});
+		colorMode.setToolTipText("<html>Switch between the two color modes:"
+				+"<br>Default, where nodes are colored according to whether"
+				+"<br>their position is fixed, or Presentation, where"
+				+"<br>nodes are color according to whether they are"
+				+"<br>source, sink, or in-between.</html>");
 
 		final JToggleButton nodeMode = new JToggleButton("Node Labels");
 		nodeMode.addActionListener(new ActionListener() {
@@ -480,14 +494,14 @@ public class TPTWindow extends JFrame {
 			}
 		});
 		nodeMode.setSelected(true);
-
-
+		nodeMode.setToolTipText("<html>Switch between two node rendering modes, "
+				+"<br>rounded rectangles with labels or circles without labels.</html>");
 
 		JButton exportDisplay = new JButton("Save Image");
-		exportDisplay.addActionListener(new ExportDisplayAction(display));
+		exportDisplay.addActionListener(new ExportMSMImageAction(display));
 
-
-
+		//manage button enables/accessible according to properties
+		//of node selected
 		focusGroup.addTupleSetListener(new TupleSetListener() {
 
 			public void tupleSetChanged(TupleSet ts, Tuple[] add, Tuple[] rem) {
@@ -504,6 +518,8 @@ public class TPTWindow extends JFrame {
 				m_vis.run("nodeStroke");
 			}
 		});
+		exportDisplay.setToolTipText("<html>Export the current visualization display as an image,"
+					+"<br>in vector (svg) or various raster formats.</html>");
 
 		JButton openAdj = new JButton("Force Panel");
 		openAdj.addActionListener(new ActionListener() {
@@ -516,10 +532,11 @@ public class TPTWindow extends JFrame {
 				forceFrame.add(fPanel);
 				forceFrame.pack();
 				forceFrame.setVisible(true);
+				forceFrame.setAlwaysOnTop(true);
 			}
 		});
-
-
+		openAdj.setToolTipText("<html>Display a panel to adjust the "
+				+"<br>force parameters for automatic layout of non-fixed nodes.</html>");
 
 		JRangeSlider edgeWeightSlider = new JRangeSlider(1, 800, 1, 400, Constants.ORIENT_TOP_BOTTOM);
 		edgeWeightSlider.addChangeListener(new ChangeListener() {
@@ -531,6 +548,7 @@ public class TPTWindow extends JFrame {
 				m_vis.run("color");
 			}
 		});
+		edgeWeightSlider.setToolTipText("Set the range for edge thickness.");
 
 		final JRangeSlider nodeSizeSlider = new JRangeSlider(1, 300, 1, 5, Constants.ORIENT_TOP_BOTTOM);
 		nodeSizeSlider.addChangeListener(new ChangeListener() {
@@ -580,6 +598,7 @@ public class TPTWindow extends JFrame {
 				m_vis.repaint();
 			}
 		});
+		nodeSizeSlider.setToolTipText("Set the range for node size.");
 
 		final JToggleButton togglePics = new JToggleButton("Show Images", false);
 		togglePics.addActionListener(new ActionListener() {
@@ -646,6 +665,12 @@ public class TPTWindow extends JFrame {
 				m_vis.repaint();
 			}
 		});
+		togglePics.setToolTipText("<html>Show or hide images on top of nodes."
+				+"<br>Image location must already have been deterimined"
+				+"<br>upon loading the MSM in graphview. Images attempt"
+				+"<br>to scale appropriately for the current zoom level,"	
+				+"<br>so image resolution can be changed by zooming in or"
+				+"<br>out and toggling this on and off.</html>");
 
 		Box buttonPanel = new Box(BoxLayout.X_AXIS);
 		buttonPanel.add(fixedBtn);
