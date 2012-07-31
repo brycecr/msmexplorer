@@ -21,3 +21,6 @@ sudo port install ant
 Java SDK SE 6 or above also required.
 
 2) Run "make.sh"
+
+TO RUN ON WINDOWS / ANY OS GUI OPERATION:
+Open folder "dist". Double-click on MSMExplorer.jar file. 
