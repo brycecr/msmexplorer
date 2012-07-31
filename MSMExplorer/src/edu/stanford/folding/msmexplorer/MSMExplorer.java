@@ -988,6 +988,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		zoomSlider.setPaintLabels(true);
 		zoomSlider.setSnapToTicks(true);
 		zoomSlider.setEnabled(false);
+		zoomSlider.setToolTipText("<html>Select the level of the hierarchy to display."
+			+ "<br>The labels indicate the number of states in the model at that "
+			+ "level.</html>");
 
 		final JSlider overSlider = new JSlider(SwingConstants.VERTICAL, -1, -1, -1);
 		overSlider.addChangeListener(new ChangeListener() {
@@ -997,7 +1000,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 				int bottom = zoomSlider.getValue();
 				if (overSlider.getValueIsAdjusting()
 					|| top < 0 || !overSlider.isEnabled()) {
-					return;
+					//return
 				} else if (top >= bottom) {
 					/*
 					JFrame toDie = MSMExplorer.this.frame;
@@ -1021,6 +1024,12 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		overSlider.setPaintLabels(true);
 		overSlider.setSnapToTicks(true);
 		overSlider.setEnabled(false);
+		overSlider.setToolTipText("<html>Set the model to overlay on the current graph,"
+			+ "<br>indicating the membership of the nodes in the graph"
+			+ "<br>indicated by the LEVEL slider in the graph"
+			+ "<br>selected by this slider. Only graphs of fewer"
+			+ "<br>nodes than the underlying graph may be overlaid."
+			+ "<br>Other selections will snap back to None (no overlay)</html>");
 
 		JLabel harchLabel = new JLabel("Level");
 		harchLabel.setFont(FontLib.getFont("Tahoma", 11));

@@ -36,6 +36,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import javax.swing.JOptionPane;
 
 /**
  *  This class provides methods for manipulating individual pixels of
@@ -59,6 +60,7 @@ public final class Picture implements ActionListener {
 	private String filename;                   // name of file
 	private boolean isOriginUpperLeft = true;  // location of origin
 	private int width, height;                 // width and height
+	protected boolean found = true;
 
 	/**
 	 * Create a blank w-by-h picture, where each pixel is black.
@@ -93,15 +95,18 @@ public final class Picture implements ActionListener {
 			width = image.getWidth(null);
 			height = image.getHeight(null);
 		} catch (IOException e) {
-			// e.printStackTrace();
-//            throw new RuntimeException("Could not open file: " + filename);
-			System.err.println("Could not open file: " + filename);
+			JOptionPane.showMessageDialog(null, "No image for this node found. "
+				+ "Tried to find image at "+filename, 
+				"No Image Found", JOptionPane.ERROR_MESSAGE);
+			found = false;
 		}
 
 		// check that image was read in
-		if (image == null) {
-//            throw new RuntimeException("Invalid image file: " + filename);
-			System.err.println("Invalid image file: " + filename);
+		if (image == null && found) {
+			JOptionPane.showMessageDialog(null, "No image for this node found. "
+				+ "Tried to find image at "+filename, 
+				"No Image Found", JOptionPane.ERROR_MESSAGE);
+			found = false;
 		}
 	}
 
@@ -151,6 +156,9 @@ public final class Picture implements ActionListener {
 	 */
 	public void show() {
 
+		if (found == false) {
+			return;
+		}
 		// create the GUI for viewing the image if needed
 		if (frame == null) {
 			frame = new JFrame();
