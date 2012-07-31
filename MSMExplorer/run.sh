@@ -1,3 +1,3 @@
 #!/bin/sh
 
-java -jar ./MSMExplorer.jar
+java -jar ./dist/MSMExplorer.jar
