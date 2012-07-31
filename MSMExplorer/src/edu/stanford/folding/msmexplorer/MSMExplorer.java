@@ -118,6 +118,7 @@ import prefuse.util.force.ForceSimulator;
 import prefuse.util.ui.JForcePanel;
 import prefuse.util.ui.JSearchPanel;
 import prefuse.util.ui.JValueSlider;
+import prefuse.util.ui.UILib;
 import prefuse.visual.AggregateItem;
 import prefuse.visual.AggregateTable;
 import prefuse.visual.EdgeItem;
@@ -175,6 +176,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 * and all that good stuff.
 	 */
 	public MSMExplorer() {
+
+		UILib.setPlatformLookAndFeel();
 
 		//Selector window
 		final JFrame selector = new JFrame("W e l c o m e  |  M S M E x p// l o r e r");
@@ -625,7 +628,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		//Show images on node
 		JToggleButton togglePics = new JToggleButton("Show Images", false);
 		togglePics.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent ae) {
 				JToggleButton tp = (JToggleButton) ae.getSource();
 				if (!tp.isSelected()) {
@@ -988,6 +990,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		zoomSlider.setPaintLabels(true);
 		zoomSlider.setSnapToTicks(true);
 		zoomSlider.setEnabled(false);
+		zoomSlider.setOpaque(false);
 		zoomSlider.setToolTipText("<html>Select the level of the hierarchy to display."
 			+ "<br>The labels indicate the number of states in the model at that "
 			+ "level.</html>");
@@ -1024,6 +1027,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		overSlider.setPaintLabels(true);
 		overSlider.setSnapToTicks(true);
 		overSlider.setEnabled(false);
+		overSlider.setOpaque(false);
 		overSlider.setToolTipText("<html>Set the model to overlay on the current graph,"
 			+ "<br>indicating the membership of the nodes in the graph"
 			+ "<br>indicated by the LEVEL slider in the graph"
@@ -1219,8 +1223,8 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	/**
 	 * Initializes visualization parameters, behavior, and actions.
 	 *
-	 * @param g
-	 * @param vis
+	 * @param g graph to display
+	 * @param vis visualization object to display graph with
 	 */
 	public void initGraph(Graph g, Visualization vis) {
 

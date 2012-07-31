@@ -101,9 +101,11 @@ public class HierarchySketcher {
 		FileNode nodeArray[] = nodes.toArray(new FileNode[nodes.size()]);
 		Arrays.sort(nodeArray, new FileNodeComparator());
 
-		String agg = "";
+		String agg = "MSMExplorer found these files to construct the hierarchy:\n\n";
 		for (FileNode fn : nodeArray) {
-			agg = agg + fn.numStates + " states" + '\n' + fn.tProbFilename + '\n' + fn.mmapFilename + '\n';
+			agg = agg + "Model with " + fn.numStates + " states" + "\n\t" 
+				+ "tProb Matrix File: " + fn.tProbFilename + "\n\t" 
+				+ "Mapping file: " + fn.mmapFilename + '\n';
 		}
 
 		JOptionPane.showMessageDialog(null, agg);
