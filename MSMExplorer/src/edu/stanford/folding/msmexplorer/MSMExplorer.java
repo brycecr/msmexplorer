@@ -67,6 +67,7 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import prefuse.Constants;
@@ -118,7 +119,6 @@ import prefuse.util.force.ForceSimulator;
 import prefuse.util.ui.JForcePanel;
 import prefuse.util.ui.JSearchPanel;
 import prefuse.util.ui.JValueSlider;
-import prefuse.util.ui.UILib;
 import prefuse.visual.AggregateItem;
 import prefuse.visual.AggregateTable;
 import prefuse.visual.EdgeItem;
@@ -177,7 +177,14 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 	 */
 	public MSMExplorer() {
 
-		UILib.setPlatformLookAndFeel();
+		try {
+			// Set System L&F
+			UIManager.setLookAndFeel(
+				UIManager.getSystemLookAndFeelClassName());
+		} 
+		catch (Exception e) {
+			// handle exception
+		}
 
 		//Selector window
 		final JFrame selector = new JFrame("W e l c o m e  |  M S M E x p// l o r e r");
