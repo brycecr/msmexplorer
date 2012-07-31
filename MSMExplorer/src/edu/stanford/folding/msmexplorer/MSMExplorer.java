@@ -1018,7 +1018,9 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 					msme.setHierarchy(hierarchy, bottom);
 					toDie.dispose();
 					* */
-					m_vis.getGroup(aggr).clear();
+					if (m_vis.getGroup(aggr) != null) {
+						m_vis.getGroup(aggr).clear();
+					}
 					overSlider.setValue(overSlider.getMaximum());
 				} else if (top < hierarchy.graphs.length - 1) {
 					MSMExplorer.this.setAggregates(bottom, top);
