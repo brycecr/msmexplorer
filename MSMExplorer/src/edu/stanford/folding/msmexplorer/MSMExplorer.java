@@ -1053,6 +1053,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		overLabel.setBounds(65, 0, 60, 20);
 		harchPanel.setEnabled(false);
 		harchPanel.setVisible(false);
+		harchPanel.setOpaque(false);
 		/* ----------- END HIERARCHY GUI ELEMENTS ------------ */
 
 		JLayeredPane graphPane = new JLayeredPane();
