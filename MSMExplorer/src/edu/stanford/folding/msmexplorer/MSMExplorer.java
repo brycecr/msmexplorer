@@ -34,6 +34,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectStreamClass;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
@@ -137,7 +138,7 @@ import prefuse.visual.expression.VisiblePredicate;
  *
  * @author Bryce Cronkite-Ratcliff, brycecr@stanford.edu
  */
-public final class MSMExplorer extends JPanel implements MSMConstants {
+public class MSMExplorer extends JPanel implements MSMConstants {
 
 	// Thresholds for detecting "large" graphs to change some behavior
 	private static final int SIZE_THRESHOLD = 250; //Threshold for "big" graph behavior
@@ -451,6 +452,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		for (int i = 0; i < esjc.length; ++i) {
 			((JComponent)esjc[i]).setToolTipText(eqProbSliderToolTip);
 		}
+		eqProbSlider.setOpaque(false);
 
 		final JTextField eqProbText = new JTextField("EqProb Thresh");
 		eqProbText.addActionListener(new ActionListener() {
@@ -547,6 +549,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 		circleRB.setToolTipText("Render nodes as circles without labels.");
+		circleRB.setOpaque(false);
 		nodeRenderers.add(circleRB);
 
 		JRadioButton labelRB = new JRadioButton("Label", false);
@@ -561,6 +564,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 		labelRB.setToolTipText("Render nodes as rounded rectangles with labels");
+		circleRB.setOpaque(false);
 		nodeRenderers.add(labelRB);
 
 		Box nrBox = new Box(BoxLayout.X_AXIS);
@@ -1081,7 +1085,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 		split.setRightComponent(fpanel);
 		split.setOneTouchExpandable(true);
 		split.setContinuousLayout(false);
-		split.setDividerLocation(1100);
+		split.setDividerLocation(1150);
 
 		// now we run our action list
 		m_vis.run("draw");
@@ -1162,7 +1166,7 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 
 
 			Renderer polyR = new PolygonRenderer(Constants.POLY_TYPE_CURVE);
-			//((PolygonRenderer)polyR).setCurveSlack(0.1f);
+			((PolygonRenderer)polyR).setCurveSlack(0.1f);
 			((DefaultRendererFactory) m_vis.getRendererFactory()).add("ingroup('aggregates')", polyR);
 
 			final ColorAction aStroke = new ColorAction(aggr, VisualItem.STROKECOLOR);
@@ -1180,9 +1184,6 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			ActionList animate = (ActionList) m_vis.getAction("animate");
 			animate.add(aStroke);
 
-			final Action aggLayout = new AggregateLayout(aggr, m_vis);
-			m_vis.putAction("aggLayout", aggLayout);
-			((ActionList) m_vis.getAction("lll")).add(aggLayout);
 		} else {
 			at = (AggregateTable) m_vis.getGroup(aggr);
 			Table nt = (Table) ((Graph) m_vis.getGroup(graph)).getNodeTable();
@@ -1207,6 +1208,10 @@ public final class MSMExplorer extends JPanel implements MSMConstants {
 			}
 			ai.addItem((VisualItem) vNode);
 		}
+		
+		final Action aggLayout = new AggregateLayout(aggr, m_vis);
+		m_vis.putAction("aggLayout", aggLayout);
+		((ActionList) m_vis.getAction("lll")).add(aggLayout);
 		m_vis.run("draw");
 		m_vis.run("aggLayout");
 	}
