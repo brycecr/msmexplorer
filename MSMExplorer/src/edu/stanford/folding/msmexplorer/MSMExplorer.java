@@ -796,8 +796,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					xAxisRange, yAxisRange, 
 					nt.getColumnType((String)xAxisSelector.getSelectedItem()), 
 					nt.getColumnType((String)yAxisSelector.getSelectedItem()), 
-
-					autoRange);
+					autoRange, xAxisLabel, yAxisLabel);
 				autoRange = asd.showDialog();
 			}
 		});
@@ -840,6 +839,9 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					AxisLabelLayout ylabels = new AxisLabelLayout("ylabels", yaxis, ybounds);
 					Rectangle2D xbounds = new Rectangle2D.Double(bounds.getX(), bounds.getY() + bounds.getHeight() - 11, bounds.getWidth(), 10);
 					AxisLabelLayout xlabels = new AxisLabelLayout("xlabels", xaxis, xbounds);
+					xAxisLabel.setLocation((int)xbounds.getMinX(), (int)xbounds.getMaxY());
+					xAxisLabel.setBounds((int)xbounds.getMinX(), (int)xbounds.getMaxY(), 200, 200);
+					xAxisLabel.revalidate();
 					/*
 					if (isIntType(xAxisSelector)) {
 						xlabels.setScale(Constants.NOMINAL);
@@ -1081,6 +1083,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		graphPane.setLayout(null);
 		graphPane.add(display, new Integer(0));
 		graphPane.add(harchPanel, new Integer(1));
+		graphPane.add(xAxisLabel, new Integer(1));
 		harchPanel.setBounds(0, 0, 150, 170);
 		harchPanel.setOpaque(false);
 		graphPane.setPreferredSize(new Dimension(1000, 800));
