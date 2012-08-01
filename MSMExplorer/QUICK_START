@@ -5,7 +5,7 @@ jython run_jython.py
 
 TO RUN (after compilation):
 ./run.sh
-(if permission denied)
+(if permission denied run:)
 chmod 777 run.sh
 (then try again)
 
