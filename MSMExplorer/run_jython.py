@@ -1,3 +1,7 @@
+# This class takes care of your classpath and
+# simply launches an instance of MSMExplorer on Jython.
+# Jython required to run.
+
 import sys
 
 def setClassPath():
