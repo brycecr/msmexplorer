@@ -1101,6 +1101,105 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		m_vis.run("nodeSize");
 
 		add(split);
+
+		//Force panel menu item
+		JMenuItem forcePanel = new JMenuItem("Force Panel");
+		forcePanel.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent ae) {
+				JFrame forceFrame = new JFrame("Force Panel");
+
+				ForceSimulator fsim = ((ForceDirectedLayout)((ActionList)m_vis.getAction("lll")).get(0)).getForceSimulator();
+				JForcePanel fPanel = new JForcePanel(fsim);
+				forceFrame.add(fPanel);
+				forceFrame.pack();
+				forceFrame.setVisible(true);
+			}
+		});
+
+		JMenuItem statsPanel = new JMenuItem("Stats Panel");
+		statsPanel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				GraphStatsWindow gsw = new GraphStatsWindow(g);
+				gsw.setVisible(true);
+			}
+		});
+
+		final JMenuItem openTable = new JMenuItem("Open Node Table");
+		openTable.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				JPrefuseTable.showTableWindow(new 
+					CascadedTable(((Graph)m_vis.getGroup(graph)).
+					getNodeTable(), new NamedColumnProjection(
+					Arrays.copyOf(axisFields.toArray(), 
+					axisFields.size(), String[].class), true)));
+			}	
+		});
+
+		// The following block is the gui boilerplate for a
+		// currently unimplemented automated PDB concatenation function
+		JMenuItem makeMovie = new JMenuItem("Create PDB Movie");
+		makeMovie.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				PDBFrame pdbf = new PDBFrame(g, m_vis);
+			}
+		});
+
+		JMenuItem saveSVG = new JMenuItem("Save Image...");
+		saveSVG.addActionListener(new ExportMSMImageAction(m_vis.getDisplay(0)));
+		saveSVG.setAccelerator(KeyStroke.getKeyStroke("ctrl shift S"));
+
+		JMenu fileMenu = new JMenu("File");
+		fileMenu.add(new OpenMSMAction(this));
+		fileMenu.add(new OpenHierarchyAction());
+		fileMenu.add(new SaveMSMAction(g, this));
+		fileMenu.add(saveSVG);
+		
+		// set up menu
+		JMenu dataMenu = new JMenu("Panels");
+		dataMenu.add(forcePanel);
+		dataMenu.add(statsPanel);
+		dataMenu.add(openTable);
+		//dataMenu.add(makeMovie); XXX put this back when implemented...
+
+		JMenuBar menubar = new JMenuBar();
+		menubar.add(fileMenu);
+		menubar.add(dataMenu);
+
+		// launch window
+		JFrame frm = new JFrame("G r a p h  V i e w  |  M S M E x p l o r e r");
+		frm.setJMenuBar(menubar);
+		frm.setContentPane(this);
+		frm.pack();
+		frm.setVisible(true);
+		frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//XXX must not be quite right...
+		this.frame = frm;
+
+		// Window activate/deactivate behavior
+		frm.addWindowListener(new WindowAdapter() {
+
+			@Override
+			public void windowActivated(WindowEvent e) {
+				m_vis.run("animate");
+			}
+
+			@Override
+			public void windowDeactivated(WindowEvent e) {
+				// Stop layout, unless you are adjusting forces
+				JFrame oppositeFrame;
+				try {
+					oppositeFrame = (JFrame) e.getOppositeWindow();
+				} catch (ClassCastException cce) {
+					oppositeFrame = null;
+				}
+
+				if (oppositeFrame != null
+					&& oppositeFrame.getTitle().equals("Force Panel")); else {
+					m_vis.cancel("animate");
+				}
+			}
+		});
 	}
 
 	/**
@@ -1413,107 +1512,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 	public MSMExplorer graphView(final Graph g, String label) {
 		final MSMExplorer view = new MSMExplorer(g, label);
 
-		//Force panel menu item
-		JMenuItem forcePanel = new JMenuItem("Force Panel");
-		forcePanel.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent ae) {
-				JFrame forceFrame = new JFrame("Force Panel");
-
-				ForceSimulator fsim = ((ForceDirectedLayout) ((ActionList) view.m_vis.getAction("lll")).get(0)).getForceSimulator();
-				JForcePanel fPanel = new JForcePanel(fsim);
-				forceFrame.add(fPanel);
-				forceFrame.pack();
-				forceFrame.setVisible(true);
-			}
-		});
-
-		JMenuItem statsPanel = new JMenuItem("Stats Panel");
-		statsPanel.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				GraphStatsWindow gsw = new GraphStatsWindow(g);
-				gsw.setVisible(true);
-			}
-		});
-
-		final JMenuItem openTable = new JMenuItem("Open Node Table");
-		openTable.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				view.getComponent(WIDTH)
-				JPrefuseTable.showTableWindow(new 
-					CascadedTable(((Graph)m_vis.getGroup(graph)).
-					getNodeTable(), new NamedColumnProjection(
-					Arrays.copyOf(axisFields.toArray(), 
-					axisFields.size(), String[].class), true)));
-			}	
-		});
-		frame.getJMenuBar().getMenu(1).add(openTable);
-
-		// The following block is the gui boilerplate for a
-		// currently unimplemented automated PDB concatenation function
-		JMenuItem makeMovie = new JMenuItem("Create PDB Movie");
-		makeMovie.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				PDBFrame pdbf = new PDBFrame(g, view.m_vis);
-			}
-		});
-
-		JMenuItem saveSVG = new JMenuItem("Save Image...");
-		saveSVG.addActionListener(new ExportMSMImageAction(view.m_vis.getDisplay(0)));
-		saveSVG.setAccelerator(KeyStroke.getKeyStroke("ctrl shift S"));
-
-		JMenu fileMenu = new JMenu("File");
-		fileMenu.add(new OpenMSMAction(view));
-		fileMenu.add(new OpenHierarchyAction());
-		fileMenu.add(new SaveMSMAction(g, view));
-		fileMenu.add(saveSVG);
-		
-		// set up menu
-		JMenu dataMenu = new JMenu("Panels");
-		dataMenu.add(forcePanel);
-		dataMenu.add(statsPanel);
-		//dataMenu.add(makeMovie); XXX put this back when implemented...
-
-		JMenuBar menubar = new JMenuBar();
-		menubar.add(fileMenu);
-		menubar.add(dataMenu);
-
-		// launch window
-		JFrame frm = new JFrame("G r a p h  V i e w  |  M S M E x p l o r e r");
-		frm.setJMenuBar(menubar);
-		frm.setContentPane(view);
-		frm.pack();
-		frm.setVisible(true);
-		frm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//XXX must not be quite right...
-		this.frame = frm;
-		view.frame = frm;
-
-		// Window activate/deactivate behavior
-		frm.addWindowListener(new WindowAdapter() {
-
-			@Override
-			public void windowActivated(WindowEvent e) {
-				view.m_vis.run("animate");
-			}
-
-			@Override
-			public void windowDeactivated(WindowEvent e) {
-				// Stop layout, unless you are adjusting forces
-				JFrame oppositeFrame;
-				try {
-					oppositeFrame = (JFrame) e.getOppositeWindow();
-				} catch (ClassCastException cce) {
-					oppositeFrame = null;
-				}
-
-				if (oppositeFrame != null
-					&& oppositeFrame.getTitle().equals("Force Panel")); else {
-					view.m_vis.cancel("animate");
-				}
-			}
-		});
-
+		view.frame.setPreferredSize(new Dimension(1200,800));
 		return view;
 	}   //end of class graphView(Graph, String)
 
