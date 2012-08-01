@@ -34,6 +34,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
@@ -89,6 +90,7 @@ import prefuse.controls.PanControl;
 import prefuse.controls.WheelZoomControl;
 import prefuse.controls.ZoomControl;
 import prefuse.controls.ZoomToFitControl;
+import prefuse.data.CascadedTable;
 import prefuse.data.Graph;
 import prefuse.data.Node;
 import prefuse.data.Table;
@@ -102,6 +104,7 @@ import prefuse.data.search.KeywordSearchTupleSet;
 import prefuse.data.search.SearchTupleSet;
 import prefuse.data.tuple.DefaultTupleSet;
 import prefuse.data.tuple.TupleSet;
+import prefuse.data.util.NamedColumnProjection;
 import prefuse.render.AxisRenderer;
 import prefuse.render.DefaultRendererFactory;
 import prefuse.render.EdgeRenderer;
@@ -117,6 +120,7 @@ import prefuse.util.display.DisplayLib;
 import prefuse.util.force.Force;
 import prefuse.util.force.ForceSimulator;
 import prefuse.util.ui.JForcePanel;
+import prefuse.util.ui.JPrefuseTable;
 import prefuse.util.ui.JSearchPanel;
 import prefuse.util.ui.JValueSlider;
 import prefuse.visual.AggregateItem;
@@ -781,6 +785,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 
 		final NumberRangeModel xAxisRange = new NumberRangeModel(0, 1, 0, 1);
 		final NumberRangeModel yAxisRange = new NumberRangeModel(0, 1, 0, 1);
+		final JLabel xAxisLabel = new JLabel();
+		final JLabel yAxisLabel = new JLabel();
 
 		JButton openAxisSettings = new JButton ("Axis Settings");
 		openAxisSettings.addActionListener( new ActionListener() {
@@ -790,6 +796,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					xAxisRange, yAxisRange, 
 					nt.getColumnType((String)xAxisSelector.getSelectedItem()), 
 					nt.getColumnType((String)yAxisSelector.getSelectedItem()), 
+
 					autoRange);
 				autoRange = asd.showDialog();
 			}
@@ -968,6 +975,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		openForcePanel.setToolTipText("<html>Open a panel to adjust the force parameters of the layout. "
 			+ "<br>Can be useful to spread out a crowded graph or get different interaction behavior."
 			+ "<br>It's also physicy phun.</html>");
+
+	
 
 		JPanel aesPane = new JPanel();
 		aesPane.setBorder(BorderFactory.createTitledBorder("Aesthetic"));
@@ -1426,6 +1435,19 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 				gsw.setVisible(true);
 			}
 		});
+
+		final JMenuItem openTable = new JMenuItem("Open Node Table");
+		openTable.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				view.getComponent(WIDTH)
+				JPrefuseTable.showTableWindow(new 
+					CascadedTable(((Graph)m_vis.getGroup(graph)).
+					getNodeTable(), new NamedColumnProjection(
+					Arrays.copyOf(axisFields.toArray(), 
+					axisFields.size(), String[].class), true)));
+			}	
+		});
+		frame.getJMenuBar().getMenu(1).add(openTable);
 
 		// The following block is the gui boilerplate for a
 		// currently unimplemented automated PDB concatenation function
