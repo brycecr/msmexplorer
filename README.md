@@ -25,7 +25,9 @@ MSMExplorer is a java-based visualization package for protein folding Markov Sta
 
 This program is released under the terms of the GNU GPL. Copyright Pande Lab 2010, 2011, 2012. As of June 2012, primary development has moved to github at github.com/brycecr/msmexplorer and source code is availble at that URL:
 > git clone https://github.com/brycecr/msmexplorer/
-The default branch is master, which will generally be updated once a feature is some version of fully implemented. Acacia is the primary development branch for work in progress. If you want to mess around with writing Python for MSMExplorer using Jython, checkout out the kulkulkan branch (which should follow master in terms of Java code).
+The default branch is master, which will generally be updated once a feature is some version of fully implemented. 
+The branch acacia is the primary development branch for work in progress. 
+If you want to mess around with writing Python for MSMExplorer via Jython, checkout out the kulkulkan branch (which should follow master in terms of Java code).
 
 NOTE: This program is currently an ALPHA release. Please forward all feature requests and bug reports to msmexplorer@gmail.com
 
