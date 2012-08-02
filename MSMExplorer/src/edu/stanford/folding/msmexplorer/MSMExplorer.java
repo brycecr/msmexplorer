@@ -14,8 +14,9 @@ import edu.stanford.folding.msmexplorer.util.render.ImageToggleLabelRenderer;
 import edu.stanford.folding.msmexplorer.util.render.SelfRefEdgeRenderer;
 import edu.stanford.folding.msmexplorer.util.stats.GraphStatsManager;
 import edu.stanford.folding.msmexplorer.util.stats.GraphStatsWindow;
-import edu.stanford.folding.msmexplorer.util.ui.AxisLabelLabelLayout;
-import edu.stanford.folding.msmexplorer.util.ui.AxisSettingsDialog;
+import edu.stanford.folding.msmexplorer.util.axis.AxisLabelLabelLayout;
+import edu.stanford.folding.msmexplorer.util.axis.AxisRotateRenderer;
+import edu.stanford.folding.msmexplorer.util.axis.AxisSettingsDialog;
 import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
 import edu.stanford.folding.msmexplorer.util.ui.JValueSliderFlammable;
 import edu.stanford.folding.msmexplorer.util.ui.Picture;
@@ -83,7 +84,6 @@ import prefuse.action.assignment.DataColorAction;
 import prefuse.action.assignment.DataSizeAction;
 import prefuse.action.assignment.StrokeAction;
 import prefuse.action.filter.GraphDistanceFilter;
-import prefuse.action.layout.AxisLabelLayout;
 import prefuse.action.layout.AxisLayout;
 import prefuse.action.layout.graph.ForceDirectedLayout;
 import prefuse.controls.NeighborHighlightControl;
@@ -106,7 +106,6 @@ import prefuse.data.search.SearchTupleSet;
 import prefuse.data.tuple.DefaultTupleSet;
 import prefuse.data.tuple.TupleSet;
 import prefuse.data.util.NamedColumnProjection;
-import prefuse.render.AxisRenderer;
 import prefuse.render.DefaultRendererFactory;
 import prefuse.render.EdgeRenderer;
 import prefuse.render.PolygonRenderer;
@@ -184,6 +183,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 
 		try {
 			// Set System L&F
+			System.setProperty("apple.laf.useScreenMenuBar", "true");
 			UIManager.setLookAndFeel(
 				UIManager.getSystemLookAndFeelClassName());
 		} 
@@ -815,7 +815,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					((DefaultRendererFactory) m_vis.getRendererFactory()).add(
 						new OrPredicate(new InGroupPredicate("xlabels"),
 						new InGroupPredicate("ylabels")),
-						new AxisRenderer(Constants.FAR_LEFT, Constants.FAR_BOTTOM));
+						new AxisRotateRenderer(Constants.FAR_LEFT, Constants.FAR_BOTTOM));
 
 					Rectangle2D bounds = display.getItemBounds();
 					AxisLayout xaxis = new AxisLayout(nodes, (String)xAxisSelector.getSelectedItem(), Constants.X_AXIS, VisiblePredicate.TRUE);
@@ -837,10 +837,11 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					}
 
 					Rectangle2D ybounds = new Rectangle2D.Double(bounds.getX() - 10, bounds.getY(), bounds.getWidth() + 10, bounds.getHeight());
-					AxisLabelLayout ylabels = new AxisLabelLayout("ylabels", yaxis, ybounds);
+					AxisLabelLabelLayout ylabels = new AxisLabelLabelLayout("ylabels", yaxis, ybounds);
+					ylabels.setLabel(yAxisLabel);
 					Rectangle2D xbounds = new Rectangle2D.Double(bounds.getX(), bounds.getY() + bounds.getHeight() - 11, bounds.getWidth(), 10);
 					AxisLabelLabelLayout xlabels = new AxisLabelLabelLayout("xlabels", xaxis, xbounds);
-					xlabels.getlabel().setText("HIGUYS");
+					xlabels.setLabel(xAxisLabel);
 					/*
 					if (isIntType(xAxisSelector)) {
 						xlabels.setScale(Constants.NOMINAL);
