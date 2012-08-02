@@ -1,4 +1,4 @@
-package edu.stanford.folding.msmexplorer.util.ui;
+package edu.stanford.folding.msmexplorer.util.axis;
 
 import java.awt.Frame;
 import java.awt.GridLayout;
@@ -27,7 +27,7 @@ public class AxisSettingsDialog extends JDialog {
 	private boolean auto;
 
 	public AxisSettingsDialog(Frame f, final NumberRangeModel xAxis, NumberRangeModel yAxis, 
-			final Class<?> xType, final Class<?> yType, boolean autoRange) {
+			final Class<?> xType, final Class<?> yType, boolean autoRange, final JLabel xlab, final JLabel ylab) {
 		super(f, true); // set modal
 		x = xAxis;
 		y = yAxis;
@@ -44,6 +44,8 @@ public class AxisSettingsDialog extends JDialog {
 		yMax.setText(""+yAxis.getHighValue());
 		final JButton okButton = new JButton("Ok");
 		JButton cancelButton = new JButton("Cancel");
+		final JTextField xlabField = new JTextField(xlab.getText());
+		final JTextField ylabField = new JTextField(ylab.getText());
 
 		cancelButton.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -91,6 +93,8 @@ public class AxisSettingsDialog extends JDialog {
 						}
 					}
 				}
+				xlab.setText(xlabField.getText());
+				ylab.setText(ylabField.getText());
 				setVisible(false);
 				dispose();
 			}
@@ -140,6 +144,10 @@ public class AxisSettingsDialog extends JDialog {
 		add(yMin);
 		add(new JLabel("Y Max:"));
 		add(yMax);
+		add(new JLabel("X Label: "));
+		add(xlabField);
+		add(new JLabel("Y Label: "));
+		add(ylabField);
 		add(new JLabel());
 		add(new JLabel());
 		add(cancelButton);
