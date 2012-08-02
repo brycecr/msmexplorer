@@ -5,10 +5,12 @@ import javax.swing.JLabel;
 import prefuse.action.layout.AxisLabelLayout;
 import prefuse.action.layout.AxisLayout;
 import prefuse.util.ui.ValuedRangeModel;
+import prefuse.visual.VisualItem;
+import prefuse.visual.VisualTable;
 
 /**
- * I want axis labels on an AxisLabelLayout. Is that 
- * too much to ask?
+ * I want axis title labels on an AxisLabelLayout. Is that 
+ * too much to ask? This class says no, it's not.
  * 
  * @author gestalt
  */
@@ -41,11 +43,17 @@ public class AxisLabelLabelLayout extends AxisLabelLayout {
 	}
 
 	@Override
-	public void run (double frac) {
+	public void run(double frac) {
 		super.run(frac);
-		double xxpos = m_bounds.getX() + (m_bounds.getWidth() / 2.0) - (label.getWidth() / 2.0);
-		double xypos = m_bounds.getY() + m_bounds.getHeight() + 5;
-		label.setBounds((int)xxpos, (int)xypos, label.getWidth(), label.getHeight());
-		label.repaint();
-	}
+		VisualTable labels = getTable();
+		VisualItem item = labels.addItem();
+		item.setVisible(true);
+		item.setEndVisible(true);
+		item.set(LABEL, "HELLO");
+		Rectangle2D bounds = getLayoutBounds();
+		double length = Math.max(bounds.getWidth(), bounds.getHeight());
+		set(item, length/2.0d, bounds);
+		setY(item,item, 1000);
+	}	
+
 }
