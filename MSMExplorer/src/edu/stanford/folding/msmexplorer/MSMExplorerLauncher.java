@@ -13,17 +13,18 @@ import javax.swing.UIManager;
 public class MSMExplorerLauncher {
 	
 	public static void main (String[] argv) {
-		if (System.getProperty("os.name").startsWith("Mac")) {
-			try {
+		try {
+			if (System.getProperty("os.name").startsWith("Mac")) {
 				// Set System L&F
 				System.setProperty("apple.laf.useScreenMenuBar", "true");
+				System.setProperty("com.apple.macos.useScreenMenuBar", "true");
 				System.setProperty("com.apple.mrj.application.apple.menu.about.name", "MSMExplorer");
-				UIManager.setLookAndFeel(
-					UIManager.getSystemLookAndFeelClassName());
 			}
-			catch (Exception e) {
-				// handle exception
-			}
+			UIManager.setLookAndFeel(
+				UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (Exception e) {
+			// handle exception
 		}
 		new MSMExplorer();
 	}

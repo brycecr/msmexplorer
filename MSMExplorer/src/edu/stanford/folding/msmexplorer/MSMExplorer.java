@@ -192,7 +192,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		}
 
 		//Selector window
-		final JFrame selector = new JFrame("W e l c o m e  |  M S M E x p// l o r e r");
+		final JFrame selector = new JFrame("W e l c o m e  |  M S M E x p l o r e r");
 		selector.setLayout(new BorderLayout());
 		selector.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
