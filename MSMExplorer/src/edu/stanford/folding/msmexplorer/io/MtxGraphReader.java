@@ -17,10 +17,10 @@ public class MtxGraphReader extends AbstractMSMReader {
 
 	private void init(int nodes, int edges) {
 		m_nodeTable = new Table(nodes, 2);
-		m_nodeTable.addColumn(LABEL, int.class, 0);
+		m_nodeTable.addColumn(LABEL, String.class, "0");
 		m_nodeTable.addColumn(EQPROB, double.class, 1);	
 		for (int i = 0; i < nodes;) {
-			m_nodeTable.setInt(i, 0, ++i);
+			m_nodeTable.setString(i, 0, Integer.toString(++i));
 		}
 
 		m_edgeTable = new Table(edges, 3);

@@ -7,7 +7,11 @@ package edu.stanford.folding.msmexplorer;
 import javax.swing.UIManager;
 
 /**
- *
+ * A simple launcher class that serves as the main class for 
+ * the application. This was built to replace the main class
+ * in the MSMExplorer class, because for some reason the OSX
+ * native Menu Bar name has to be set from a main loop before
+ * 
  * @author gestalt
  */
 public class MSMExplorerLauncher {

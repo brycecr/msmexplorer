@@ -1155,6 +1155,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.add(new OpenMSMAction(this));
 		fileMenu.add(new OpenHierarchyAction());
+		fileMenu.addSeparator();
 		fileMenu.add(new SaveMSMAction(g, this));
 		fileMenu.add(saveSVG);
 		
@@ -1162,6 +1163,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		JMenu dataMenu = new JMenu("Panels");
 		dataMenu.add(forcePanel);
 		dataMenu.add(statsPanel);
+		dataMenu.addSeparator();
 		dataMenu.add(openTable);
 		//dataMenu.add(makeMovie); XXX put this back when implemented...
 
