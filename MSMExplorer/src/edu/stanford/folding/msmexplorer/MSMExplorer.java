@@ -14,6 +14,7 @@ import edu.stanford.folding.msmexplorer.util.render.ImageToggleLabelRenderer;
 import edu.stanford.folding.msmexplorer.util.render.SelfRefEdgeRenderer;
 import edu.stanford.folding.msmexplorer.util.stats.GraphStatsManager;
 import edu.stanford.folding.msmexplorer.util.stats.GraphStatsWindow;
+import edu.stanford.folding.msmexplorer.util.ui.AxisLabelLabelLayout;
 import edu.stanford.folding.msmexplorer.util.ui.AxisSettingsDialog;
 import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
 import edu.stanford.folding.msmexplorer.util.ui.JValueSliderFlammable;
@@ -838,10 +839,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					Rectangle2D ybounds = new Rectangle2D.Double(bounds.getX() - 10, bounds.getY(), bounds.getWidth() + 10, bounds.getHeight());
 					AxisLabelLayout ylabels = new AxisLabelLayout("ylabels", yaxis, ybounds);
 					Rectangle2D xbounds = new Rectangle2D.Double(bounds.getX(), bounds.getY() + bounds.getHeight() - 11, bounds.getWidth(), 10);
-					AxisLabelLayout xlabels = new AxisLabelLayout("xlabels", xaxis, xbounds);
-					xAxisLabel.setLocation((int)xbounds.getMinX(), (int)xbounds.getMaxY());
-					xAxisLabel.setBounds((int)xbounds.getMinX(), (int)xbounds.getMaxY(), 200, 200);
-					xAxisLabel.revalidate();
+					AxisLabelLabelLayout xlabels = new AxisLabelLabelLayout("xlabels", xaxis, xbounds);
+					xlabels.getlabel().setText("HIGUYS");
 					/*
 					if (isIntType(xAxisSelector)) {
 						xlabels.setScale(Constants.NOMINAL);
