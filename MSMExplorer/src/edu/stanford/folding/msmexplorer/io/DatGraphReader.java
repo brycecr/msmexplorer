@@ -1,10 +1,7 @@
 package edu.stanford.folding.msmexplorer.io;
 
-import javax.swing.JOptionPane;
 
-import java.io.File;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -24,10 +21,11 @@ public class DatGraphReader extends AbstractMSMReader {
 
 	private void init(int length) {
 		m_nodeTable = new Table(length, 2);
-		m_nodeTable.addColumn(LABEL, int.class, 0);
+		m_nodeTable.addColumn(LABEL, String.class, "0");
 		m_nodeTable.addColumn(EQPROB, double.class, 1);	
-		for (int i = 1; i < length; ++i)
-			m_nodeTable.setInt(i, 0, i);
+		for (int i = 1; i < length; ++i) {
+			m_nodeTable.setString(i, 0, Integer.toString(i));
+		}
 
 		m_edgeTable = new Table();
 		m_edgeTable.addColumn(Graph.DEFAULT_SOURCE_KEY, int.class); //0th

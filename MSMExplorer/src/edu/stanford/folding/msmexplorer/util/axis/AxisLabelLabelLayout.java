@@ -61,6 +61,7 @@ public class AxisLabelLabelLayout extends AxisLabelLayout {
 			item.setStartVisible(false);
 			item.setEndVisible(false);
 			item.set(LABEL, str);
+			item.setFont(label.getFont());
 			Rectangle2D bounds = getLayoutBounds();
 			double length = getBreadth(bounds);
 			//double width = item.getFont().getSize()*6.0d/3.0d;
@@ -80,9 +81,9 @@ public class AxisLabelLabelLayout extends AxisLabelLayout {
 				case Constants.X_AXIS:
 					xOrY = super.isAscending() ? xOrY + b.getMinX() : b.getMaxX() - xOrY;
 					PrefuseLib.updateDouble(item, VisualItem.X,  xOrY);
-					PrefuseLib.updateDouble(item, VisualItem.Y,  b.getMaxY() + label.getFont().getSize());
+					PrefuseLib.updateDouble(item, VisualItem.Y,  b.getMaxY() + label.getFont().getSize()/2.0d);
 					PrefuseLib.updateDouble(item, VisualItem.X2, xOrY);
-					PrefuseLib.updateDouble(item, VisualItem.Y2, b.getMaxY() + label.getFont().getSize());
+					PrefuseLib.updateDouble(item, VisualItem.Y2, b.getMaxY() + label.getFont().getSize()/2.0d);
 					break;
 				case Constants.Y_AXIS:
 					xOrY = super.isAscending() ? b.getMaxY() - xOrY - 1 : xOrY + b.getMinY();

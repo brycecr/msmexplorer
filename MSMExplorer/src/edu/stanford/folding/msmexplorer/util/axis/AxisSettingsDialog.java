@@ -4,10 +4,9 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DateFormat;
-import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -25,6 +24,9 @@ public class AxisSettingsDialog extends JDialog {
 	private final NumberRangeModel x;
 	private final NumberRangeModel y;
 	private boolean auto;
+
+
+	private static final Integer[] fontSizes = {2,4,6,8,10,12,14,16,28,20,24,28,32,26,40,48,50,56,64,72};
 
 	public AxisSettingsDialog(Frame f, final NumberRangeModel xAxis, NumberRangeModel yAxis, 
 			final Class<?> xType, final Class<?> yType, boolean autoRange, final JLabel xlab, final JLabel ylab) {
@@ -46,6 +48,10 @@ public class AxisSettingsDialog extends JDialog {
 		JButton cancelButton = new JButton("Cancel");
 		final JTextField xlabField = new JTextField(xlab.getText());
 		final JTextField ylabField = new JTextField(ylab.getText());
+		final JComboBox xlabSize = new JComboBox(fontSizes);
+		xlabSize.setSelectedItem(xlab.getFont().getSize());
+		final JComboBox ylabSize = new JComboBox(fontSizes);
+		ylabSize.setSelectedItem(ylab.getFont().getSize());
 
 		cancelButton.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -92,9 +98,11 @@ public class AxisSettingsDialog extends JDialog {
 							}
 						}
 					}
+					xlab.setText(xlabField.getText());
+					xlab.setFont(xlab.getFont().deriveFont(((Integer)xlabSize.getSelectedItem()).floatValue()));
+					ylab.setText(ylabField.getText());
+					ylab.setFont(ylab.getFont().deriveFont(((Integer)ylabSize.getSelectedItem()).floatValue()));
 				}
-				xlab.setText(xlabField.getText());
-				ylab.setText(ylabField.getText());
 				setVisible(false);
 				dispose();
 			}
@@ -144,10 +152,18 @@ public class AxisSettingsDialog extends JDialog {
 		add(yMin);
 		add(new JLabel("Y Max:"));
 		add(yMax);
+		add(new JLabel());
+		add(new JLabel());
+		add(new JLabel());
+		add(new JLabel());
 		add(new JLabel("X Label: "));
-		add(xlabField);
+		add(new JLabel("Size:"));
 		add(new JLabel("Y Label: "));
+		add(new JLabel("Size:"));
+		add(xlabField);
+		add(xlabSize);
 		add(ylabField);
+		add(ylabSize);
 		add(new JLabel());
 		add(new JLabel());
 		add(cancelButton);
