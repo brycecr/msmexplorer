@@ -25,9 +25,22 @@ public class AxisSettingsDialog extends JDialog {
 	private final NumberRangeModel y;
 	private boolean auto;
 
-
 	private static final Integer[] fontSizes = {4,6,8,10,12,14,16,28,20,24,28,32,26,40,48,50,56,64,72};
 
+	/**
+	 * Constructor initializes a Dialog. Use showDialog to make visible.
+	 * The range models and the JLabels will be modified by reference. If
+	 * the user decides to change anything.
+	 * 
+	 * @param f parent frame. Can be null without much issue.
+	 * @param xAxis the numerical range model that backs the X axis
+	 * @param yAxis the numerical range model that backs the Y axis
+	 * @param xType type of the data values for the X axis range model
+	 * @param yType type of the data values for the Y axis range model
+	 * @param autoRange is the axis range currently automatically set?
+	 * @param xlab X Axis overall label. To ignore, put in a new JLabel()
+	 * @param ylab Y Axis overall label. To ignore, put in a new JLabel()
+	 */
 	public AxisSettingsDialog(Frame f, final NumberRangeModel xAxis, NumberRangeModel yAxis, 
 			final Class<?> xType, final Class<?> yType, boolean autoRange, final JLabel xlab, final JLabel ylab) {
 		super(f, true); // set modal
@@ -63,6 +76,9 @@ public class AxisSettingsDialog extends JDialog {
 			}
 		});
 
+		//initialize close behavior (ok/apply vs cancel)
+		//note that we pass a whole bunch of information back
+		//by reference
 		okButton.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				if (okButton.isEnabled()) {
@@ -142,6 +158,8 @@ public class AxisSettingsDialog extends JDialog {
 		yMin.setEnabled(!auto);
 		yMax.setEnabled(!auto);
 	
+		//Add parameters to dialog. Yes, the dialog is a bit ugly...
+		//If you're feeling artistic, please do fix...
 		setLayout(new GridLayout(0,4));
 		add(autoCheckBox);
 		add(new JLabel());
@@ -178,8 +196,26 @@ public class AxisSettingsDialog extends JDialog {
 		pack();
 	}
 
+	/**
+	 * Make the dialog visible. Note that the
+	 * dialog is modal.
+	 * 
+	 * @return whether the axis bounds are set automatically
+	 */
 	public boolean showDialog() {
 		setVisible(true);
 		return auto;
+	}
+
+	/**
+	 * We override this method in order to 
+	 * disable it, because this will definitely mess
+	 * up the dialog...
+	 * 
+	 * @param modal 
+	 */
+	@Override
+	public void setModal(boolean modal) {
+		throw new UnsupportedOperationException("Cannot set AxisSettingsDialog modality");
 	}
 }
