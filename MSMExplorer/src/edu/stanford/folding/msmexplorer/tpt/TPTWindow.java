@@ -2,7 +2,6 @@ package edu.stanford.folding.msmexplorer.tpt;
 
 import edu.stanford.folding.msmexplorer.util.render.ImageToggleLabelRenderer;
 import edu.stanford.folding.msmexplorer.io.ExportMSMImageAction;
-import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -52,7 +51,6 @@ import prefuse.render.EdgeRenderer;
 import prefuse.util.ColorLib;
 import prefuse.util.force.Force;
 import prefuse.util.force.ForceSimulator;
-import prefuse.util.display.ExportDisplayAction;
 import prefuse.util.ui.JForcePanel;
 import prefuse.util.ui.JRangeSlider;
 import prefuse.visual.VisualItem;

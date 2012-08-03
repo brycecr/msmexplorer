@@ -25,7 +25,8 @@ public class AxisSettingsDialog extends JDialog {
 	private final NumberRangeModel y;
 	private boolean auto;
 
-	private static final Integer[] fontSizes = {4,6,8,10,12,14,16,28,20,24,28,32,26,40,48,50,56,64,72};
+	private static final Integer[] fontSizes = {4,6,8,10,12,14,16,28,20,24,28,32,26,40,48,50,56,64,72,
+	84,96,110,130,150,170,200,240,280,320,360,400,450,500};
 
 	/**
 	 * Constructor initializes a Dialog. Use showDialog to make visible.
@@ -203,6 +204,7 @@ public class AxisSettingsDialog extends JDialog {
 	 * @return whether the axis bounds are set automatically
 	 */
 	public boolean showDialog() {
+		setLocationByPlatform(true);
 		setVisible(true);
 		return auto;
 	}
