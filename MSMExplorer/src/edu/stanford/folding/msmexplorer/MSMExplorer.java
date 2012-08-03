@@ -20,6 +20,7 @@ import edu.stanford.folding.msmexplorer.util.axis.AxisSettingsDialog;
 import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
 import edu.stanford.folding.msmexplorer.util.ui.JValueSliderFlammable;
 import edu.stanford.folding.msmexplorer.util.ui.Picture;
+import edu.stanford.folding.msmexplorer.util.ui.VisualizationSettingsDialog;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -265,6 +266,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		tr.setVerticalAlignment(Constants.CENTER);
 		tr.setRoundedCorner(8, 8);
 		m_vis.setRendererFactory(new DefaultRendererFactory(tr, new SelfRefEdgeRenderer()));
+
+		final ShapeRenderer sr = new ShapeRenderer();
 
 
 		// --------------------------------------------------------------------
@@ -540,14 +543,14 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		// (circle or rounded-rectangle label)
 		ButtonGroup nodeRenderers = new ButtonGroup();
 
-		JRadioButton circleRB = new JRadioButton("Circle", false);
+		m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
+		JRadioButton circleRB = new JRadioButton("Shape", false);
 		circleRB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				JRadioButton circleRB = (JRadioButton) ae.getSource();
 				if (circleRB.isSelected()) {
 					DefaultRendererFactory drf = (DefaultRendererFactory)m_vis.getRendererFactory();
-					drf.setDefaultRenderer(new ShapeRenderer());
-					m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
+					drf.setDefaultRenderer(sr);
 					m_vis.run("draw");
 				}
 			}
@@ -978,7 +981,19 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			+ "<br>Can be useful to spread out a crowded graph or get different interaction behavior."
 			+ "<br>It's also physicy phun.</html>");
 
-	
+		final JButton openVisSettingsPanel = new JButton("Vis Settings");
+		openVisSettingsPanel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				EdgeRenderer er = (EdgeRenderer)((DefaultRendererFactory)m_vis.getRendererFactory()).getDefaultEdgeRenderer();
+				PolygonRenderer pr = null;
+				if (m_vis.getVisualGroup(aggr) != null) {
+					pr = (PolygonRenderer)((VisualItem)m_vis.getVisualGroup(aggr).tuples().next()).getRenderer();
+				}
+				VisualizationSettingsDialog vsd = new VisualizationSettingsDialog(frame, m_vis, tr, sr, er, pr);
+				vsd.showDialog();
+			}
+		});
+		
 
 		JPanel aesPane = new JPanel();
 		aesPane.setBorder(BorderFactory.createTitledBorder("Aesthetic"));
@@ -987,6 +1002,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		aesPane.add(hideEdges);
 		aesPane.add(showColorChooser);
 		aesPane.add(openForcePanel);
+		aesPane.add(openVisSettingsPanel);
 		aesPane.setOpaque(false);
 
 		fpanel.add(aesPane);
