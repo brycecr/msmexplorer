@@ -1,6 +1,7 @@
 package edu.stanford.folding.msmexplorer.util.axis;
 
 import java.awt.geom.Rectangle2D;
+import java.util.Iterator;
 import javax.swing.JLabel;
 import prefuse.Constants;
 import prefuse.action.layout.AxisLabelLayout;
@@ -9,7 +10,6 @@ import prefuse.util.PrefuseLib;
 import prefuse.util.ui.ValuedRangeModel;
 import prefuse.visual.VisualItem;
 import prefuse.visual.VisualTable;
-import prefuse.visual.tuple.TableVisualItem;
 
 /**
  * I want axis title labels on an AxisLabelLayout. Is that
@@ -21,6 +21,7 @@ public class AxisLabelLabelLayout extends AxisLabelLayout {
 		
 		protected JLabel label = new JLabel();
 		protected String str = "";
+		private float gridLabSize = 10;
 		
 		public AxisLabelLabelLayout(String group, int axis, ValuedRangeModel values) {
 				super(group, axis, values);
@@ -51,11 +52,21 @@ public class AxisLabelLabelLayout extends AxisLabelLayout {
 				str = lab.getText();
 				label = lab;
 		}
+
+		public void setGridLabelSize(float size) {
+				gridLabSize = size;
+		}
 		
 		@Override
 		public void run(double frac) {
 			super.run(frac);
 			VisualTable labels = getTable();
+			Iterator<VisualItem> items = labels.tuples();
+			while (items.hasNext()) {
+					VisualItem i = items.next();
+					i.setFont(i.getFont().deriveFont(gridLabSize));
+			}
+
 			VisualItem item = labels.addItem();
 			item.setVisible(true);
 			item.setStartVisible(false);
@@ -81,9 +92,9 @@ public class AxisLabelLabelLayout extends AxisLabelLayout {
 				case Constants.X_AXIS:
 					xOrY = super.isAscending() ? xOrY + b.getMinX() : b.getMaxX() - xOrY;
 					PrefuseLib.updateDouble(item, VisualItem.X,  xOrY);
-					PrefuseLib.updateDouble(item, VisualItem.Y,  b.getMaxY() + label.getFont().getSize()/2.0d);
+					PrefuseLib.updateDouble(item, VisualItem.Y,  b.getMaxY() + label.getFont().getSize()/3.0d + gridLabSize);
 					PrefuseLib.updateDouble(item, VisualItem.X2, xOrY);
-					PrefuseLib.updateDouble(item, VisualItem.Y2, b.getMaxY() + label.getFont().getSize()/2.0d);
+					PrefuseLib.updateDouble(item, VisualItem.Y2, b.getMaxY() + label.getFont().getSize()/3.0d + gridLabSize);
 					break;
 				case Constants.Y_AXIS:
 					xOrY = super.isAscending() ? b.getMaxY() - xOrY - 1 : xOrY + b.getMinY();

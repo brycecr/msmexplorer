@@ -4,6 +4,7 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -26,7 +27,7 @@ public class AxisSettingsDialog extends JDialog {
 	private boolean auto;
 
 
-	private static final Integer[] fontSizes = {2,4,6,8,10,12,14,16,28,20,24,28,32,26,40,48,50,56,64,72};
+	private static final Integer[] fontSizes = {4,6,8,10,12,14,16,28,20,24,28,32,26,40,48,50,56,64,72};
 
 	public AxisSettingsDialog(Frame f, final NumberRangeModel xAxis, NumberRangeModel yAxis, 
 			final Class<?> xType, final Class<?> yType, boolean autoRange, final JLabel xlab, final JLabel ylab) {
@@ -35,6 +36,7 @@ public class AxisSettingsDialog extends JDialog {
 		y = yAxis;
 		auto = autoRange;
 
+		//Initialize all swing components
 		final JCheckBox autoCheckBox = new JCheckBox("Auto Set Bounds", auto);
 		final JTextField xMin = new JTextField();
 		xMin.setText(""+xAxis.getLowValue());
@@ -50,8 +52,10 @@ public class AxisSettingsDialog extends JDialog {
 		final JTextField ylabField = new JTextField(ylab.getText());
 		final JComboBox xlabSize = new JComboBox(fontSizes);
 		xlabSize.setSelectedItem(xlab.getFont().getSize());
+		xlabSize.setEditable(true);
 		final JComboBox ylabSize = new JComboBox(fontSizes);
 		ylabSize.setSelectedItem(ylab.getFont().getSize());
+		ylabSize.setEditable(true);
 
 		cancelButton.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -99,9 +103,13 @@ public class AxisSettingsDialog extends JDialog {
 						}
 					}
 					xlab.setText(xlabField.getText());
-					xlab.setFont(xlab.getFont().deriveFont(((Integer)xlabSize.getSelectedItem()).floatValue()));
+					if ((Integer)xlabSize.getSelectedItem() > 0) {
+						xlab.setFont(xlab.getFont().deriveFont(((Integer)xlabSize.getSelectedItem()).floatValue()));
+					}
 					ylab.setText(ylabField.getText());
-					ylab.setFont(ylab.getFont().deriveFont(((Integer)ylabSize.getSelectedItem()).floatValue()));
+					if ((Integer)ylabSize.getSelectedItem() > 0) {
+						ylab.setFont(ylab.getFont().deriveFont(((Integer)ylabSize.getSelectedItem()).floatValue()));
+					}
 				}
 				setVisible(false);
 				dispose();
@@ -134,7 +142,7 @@ public class AxisSettingsDialog extends JDialog {
 		xMax.setEnabled(!auto);
 		yMin.setEnabled(!auto);
 		yMax.setEnabled(!auto);
-		
+	
 		setLayout(new GridLayout(0,4));
 		add(autoCheckBox);
 		add(new JLabel());
