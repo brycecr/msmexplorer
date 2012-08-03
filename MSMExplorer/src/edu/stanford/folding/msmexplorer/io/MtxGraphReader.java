@@ -10,15 +10,24 @@ import prefuse.data.Table;
 import prefuse.data.io.DataIOException;
 
 /**
+ * Read in a .mtx sparse matrix format graph.
+ * This format is the primary input format for most
+ * MSMs as of MSMBuilder v2.0
  *
  * @author gestalt
  */
 public class MtxGraphReader extends AbstractMSMReader {
 
 	private void init(int nodes, int edges) {
+
 		m_nodeTable = new Table(nodes, 2);
+
+		//There's a tradeoff here between String (relabelable)
+		//and int type (adjustable axis bounds). Relabable is pretty nice...
 		m_nodeTable.addColumn(LABEL, String.class, "0");
 		m_nodeTable.addColumn(EQPROB, double.class, 1);	
+
+		//initialize labels as row number, 1-indexed as per the .mtx convention.
 		for (int i = 0; i < nodes;) {
 			m_nodeTable.setString(i, 0, Integer.toString(++i));
 		}

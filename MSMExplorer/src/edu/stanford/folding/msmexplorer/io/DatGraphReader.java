@@ -14,16 +14,30 @@ import prefuse.data.parser.DoubleArrayParser;
 
 
 /**
+ * Read a graph from a dense space delimited matrix file (usually .dat)
+ * Should mostly be phased out as of MSMBuilder 2.0, but still fully
+ * supported here.
  *
- * @author gestalt
+ * @author brycecr
  */
 public class DatGraphReader extends AbstractMSMReader {
 
+	/**
+	 * Prepare backing graph tables for reading.
+	 * 
+	 * @param length 
+	 */
 	private void init(int length) {
+
 		m_nodeTable = new Table(length, 2);
-		m_nodeTable.addColumn(LABEL, String.class, "0");
+
+		//There's a tradeoff here between String (relabelable)
+		//and int type (adjustable axis bounds). Relabable is pretty nice...
+		m_nodeTable.addColumn(LABEL, String.class, "0"); 
 		m_nodeTable.addColumn(EQPROB, double.class, 1);	
-		for (int i = 1; i < length; ++i) {
+
+		//Initialize axis labels to correspond to row numbers, 0-indexed
+		for (int i = 0; i < length; ++i) {
 			m_nodeTable.setString(i, 0, Integer.toString(i));
 		}
 
@@ -33,6 +47,13 @@ public class DatGraphReader extends AbstractMSMReader {
 		m_edgeTable.addColumn(TPROB, double.class); //2nd
 	}
 	
+	/**
+	 * Read a dense matrix in from an InputStream
+	 * 
+	 * @param is
+	 * @return the graph read in, or an empty new graph on failure.
+	 * @throws DataIOException 
+	 */
 	public Graph readGraph(InputStream is) throws DataIOException {
 
 		try {
