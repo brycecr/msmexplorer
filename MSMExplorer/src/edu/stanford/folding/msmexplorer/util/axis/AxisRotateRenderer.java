@@ -4,15 +4,8 @@
  */
 package edu.stanford.folding.msmexplorer.util.axis;
 
-import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
-import prefuse.action.layout.AxisLabelLayout;
 import prefuse.render.AxisRenderer;
-import prefuse.util.ColorLib;
-import prefuse.util.GraphicsLib;
 import prefuse.visual.VisualItem;
 
 /**
