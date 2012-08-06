@@ -5,6 +5,7 @@
 package edu.stanford.folding.msmexplorer.util;
 
 /**
+ * Because sometimes you need to pass by reference.
  *
  * @author gestalt
  */
@@ -20,8 +21,8 @@ public class MutableDouble {
 		d = new Double(doub);
 	}
 
-	public void setValue(Double d) {
-		d = new Double(d);
+	public void setValue(Double doub) {
+		d = new Double(doub);
 	}
 
 	public Double getValue() {

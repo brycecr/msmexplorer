@@ -10,7 +10,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import prefuse.data.query.NumberRangeModel;
 import prefuse.util.FontLib;
 
@@ -46,7 +48,7 @@ public class AxisSettingsDialog extends JDialog {
 	public AxisSettingsDialog(Frame f, final NumberRangeModel xAxis, NumberRangeModel yAxis, 
 			final Class<?> xType, final Class<?> yType, boolean autoRange, 
 			final JLabel xlab, final JLabel ylab, final JLabel gridlab,
-			MutableDouble xSpacing, MutableDouble ySpacing) {
+			final MutableDouble xSpacing, final MutableDouble ySpacing) {
 		super(f, true); // set modal
 		x = xAxis;
 		y = yAxis;
@@ -75,12 +77,8 @@ public class AxisSettingsDialog extends JDialog {
 		final JComboBox gridlabSize = new JComboBox(fontSizes);
 		gridlabSize.setSelectedItem(gridlab.getFont().getSize());
 		gridlabSize.setEditable(true);
-		final JComboBox xGridSpacing = new JComboBox(fontSizes);
-		xGridSpacing.setSelectedItem(xSpacing.getValue());
-		xGridSpacing.setEditable(true);
-		final JComboBox yGridSpacing = new JComboBox(fontSizes);
-		yGridSpacing.setSelectedItem(ySpacing.getValue());
-		yGridSpacing.setEditable(true);
+		final JSpinner xGridSpacing = new JSpinner(new SpinnerNumberModel((double)xSpacing.getValue(), 5.0d, 1000.0d, 10.0d));
+		final JSpinner yGridSpacing = new JSpinner(new SpinnerNumberModel((double)ySpacing.getValue(), 5.0d, 1000.0d, 10.0d));
 
 		cancelButton.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -141,6 +139,8 @@ public class AxisSettingsDialog extends JDialog {
 					if ((Integer)gridlabSize.getSelectedItem() > 0) {
 						gridlab.setFont(gridlab.getFont().deriveFont(((Integer)gridlabSize.getSelectedItem()).floatValue()));
 					}
+					xSpacing.setValue((Double)xGridSpacing.getValue());
+					ySpacing.setValue((Double)yGridSpacing.getValue());
 				}
 				setVisible(false);
 				dispose();
