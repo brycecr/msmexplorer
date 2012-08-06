@@ -43,7 +43,8 @@ public class AxisSettingsDialog extends JDialog {
 	 * @param ylab Y Axis overall label. To ignore, put in a new JLabel()
 	 */
 	public AxisSettingsDialog(Frame f, final NumberRangeModel xAxis, NumberRangeModel yAxis, 
-			final Class<?> xType, final Class<?> yType, boolean autoRange, final JLabel xlab, final JLabel ylab) {
+			final Class<?> xType, final Class<?> yType, boolean autoRange, 
+			final JLabel xlab, final JLabel ylab, final JLabel gridlab) {
 		super(f, true); // set modal
 		x = xAxis;
 		y = yAxis;
@@ -69,6 +70,9 @@ public class AxisSettingsDialog extends JDialog {
 		final JComboBox ylabSize = new JComboBox(fontSizes);
 		ylabSize.setSelectedItem(ylab.getFont().getSize());
 		ylabSize.setEditable(true);
+		final JComboBox gridlabSize = new JComboBox(fontSizes);
+		gridlabSize.setSelectedItem(gridlab.getFont().getSize());
+		gridlabSize.setEditable(true);
 
 		cancelButton.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -125,6 +129,9 @@ public class AxisSettingsDialog extends JDialog {
 					ylab.setText(ylabField.getText());
 					if ((Integer)ylabSize.getSelectedItem() > 0) {
 						ylab.setFont(ylab.getFont().deriveFont(((Integer)ylabSize.getSelectedItem()).floatValue()));
+					}
+					if ((Integer)gridlabSize.getSelectedItem() > 0) {
+						gridlab.setFont(gridlab.getFont().deriveFont(((Integer)gridlabSize.getSelectedItem()).floatValue()));
 					}
 				}
 				setVisible(false);
@@ -190,8 +197,8 @@ public class AxisSettingsDialog extends JDialog {
 		add(xlabSize);
 		add(ylabField);
 		add(ylabSize);
-		add(new JLabel());
-		add(new JLabel());
+		add(new JLabel("Grid Label Size:"));
+		add(gridlabSize);
 		add(cancelButton);
 		add(okButton);
 		pack();

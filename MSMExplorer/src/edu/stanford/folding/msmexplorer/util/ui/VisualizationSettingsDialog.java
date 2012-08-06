@@ -5,11 +5,15 @@
 package edu.stanford.folding.msmexplorer.util.ui;
 
 import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -93,6 +97,7 @@ public class VisualizationSettingsDialog extends JDialog {
 		
 		/* LABEL PANE */
 		JPanel lr_Panel = new JPanel();
+		lr_Panel.setLayout(new GridLayout(0,2));
 		pane.addTab("Label Render", lr_Panel);
 
 		final JSpinner lr_Rounded = new JSpinner(new SpinnerNumberModel(8, 0, 1000, 1));
@@ -104,6 +109,25 @@ public class VisualizationSettingsDialog extends JDialog {
 		});
 		lr_Panel.add(new JLabel("Rounding Radius:"));
 		lr_Panel.add(lr_Rounded);
+
+		final JToggleButton lr_showLabel = new JToggleButton("Images Only", false);
+		lr_showLabel.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				if (lr_showLabel.isSelected()) {
+					if (m_lr.getImageField() != null) {
+						m_lr.setTextField(null);
+						m_vis.run("animate");
+					} else {
+						//if no images are visble, we don't want
+						//to make nodes disappear, so refuse
+						//to select
+						lr_showLabel.setSelected(false);
+					}
+				}
+			}
+		});
+		lr_showLabel.setSelected(m_lr.getImageField() != null);
+		lr_Panel.add(lr_showLabel);
 
 		/* SHAPE PANE */
 		JPanel sr_Panel = new JPanel();

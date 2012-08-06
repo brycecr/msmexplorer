@@ -793,6 +793,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		final NumberRangeModel yAxisRange = new NumberRangeModel(0, 1, 0, 1);
 		final JLabel xAxisLabel = new JLabel();
 		final JLabel yAxisLabel = new JLabel();
+		final JLabel axisGridLabel = new JLabel();
 
 		JButton openAxisSettings = new JButton ("Axis Settings");
 		openAxisSettings.addActionListener( new ActionListener() {
@@ -802,7 +803,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					xAxisRange, yAxisRange, 
 					nt.getColumnType((String)xAxisSelector.getSelectedItem()), 
 					nt.getColumnType((String)yAxisSelector.getSelectedItem()), 
-					autoRange, xAxisLabel, yAxisLabel);
+					autoRange, xAxisLabel, yAxisLabel, axisGridLabel);
 				autoRange = asd.showDialog();
 			}
 		});
@@ -844,9 +845,11 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					Rectangle2D ybounds = new Rectangle2D.Double(bounds.getX() - 10, bounds.getY(), bounds.getWidth() + 10, bounds.getHeight());
 					AxisLabelLabelLayout ylabels = new AxisLabelLabelLayout("ylabels", yaxis, ybounds);
 					ylabels.setLabel(yAxisLabel);
+					ylabels.setGridLabel(axisGridLabel);
 					Rectangle2D xbounds = new Rectangle2D.Double(bounds.getX(), bounds.getY() + bounds.getHeight() - 11, bounds.getWidth(), 10);
 					AxisLabelLabelLayout xlabels = new AxisLabelLabelLayout("xlabels", xaxis, xbounds);
 					xlabels.setLabel(xAxisLabel);
+					xlabels.setGridLabel(axisGridLabel);
 					/*
 					if (isIntType(xAxisSelector)) {
 						xlabels.setScale(Constants.NOMINAL);
@@ -942,7 +945,10 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			public void actionPerformed(ActionEvent ae) {
 				try {
 					ColorAction fill = (ColorAction)((ActionList)m_vis.getAction("animate")).get(2);
-					fill.setDefaultColor(JColorChooser.showDialog(frame, "Choose Node Color", new Color(fill.getDefaultColor())).getRGB());
+					Color newFill = JColorChooser.showDialog(frame, "Choose Node Color", new Color(fill.getDefaultColor()));
+					if (newFill != null) {
+						fill.setDefaultColor(newFill.getRGB());
+					}
 				} catch (Exception e) {
 					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
 				}
