@@ -940,21 +940,6 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 
 		/* -------------- AESTHETIC ADJUST ELEMENTS ---------------- */
 
-		JButton showColorChooser = new JButton("Node Color"); 
-		showColorChooser.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				try {
-					ColorAction fill = (ColorAction)((ActionList)m_vis.getAction("animate")).get(2);
-					Color newFill = JColorChooser.showDialog(frame, "Choose Node Color", new Color(fill.getDefaultColor()));
-					if (newFill != null) {
-						fill.setDefaultColor(newFill.getRGB());
-					}
-				} catch (Exception e) {
-					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
-				}
-			}
-		});
-		showColorChooser.setToolTipText("Open a dialog to select a new node color.");
 
 		final JButton showEdges = new JButton("Show Edges");
 		showEdges.addActionListener( new ActionListener() {
@@ -1008,7 +993,6 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		aesPane.setLayout(new GridLayout(0,2));
 		aesPane.add(showEdges);
 		aesPane.add(hideEdges);
-		aesPane.add(showColorChooser);
 		aesPane.add(openForcePanel);
 		aesPane.add(openVisSettingsPanel);
 		aesPane.setOpaque(false);
