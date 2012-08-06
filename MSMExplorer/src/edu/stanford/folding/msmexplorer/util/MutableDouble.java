@@ -7,7 +7,7 @@ package edu.stanford.folding.msmexplorer.util;
 /**
  * Because sometimes you need to pass by reference.
  *
- * @author gestalt
+ * @author brycecr
  */
 public class MutableDouble {
 

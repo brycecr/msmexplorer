@@ -8,6 +8,7 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
@@ -30,6 +31,8 @@ import prefuse.Visualization;
 import prefuse.action.ActionList;
 import prefuse.action.assignment.ColorAction;
 import prefuse.action.assignment.DataSizeAction;
+import prefuse.data.Graph;
+import prefuse.data.Table;
 import prefuse.render.ImageFactory;
 import prefuse.render.LabelRenderer;
 import prefuse.render.PolygonRenderer;
@@ -149,7 +152,33 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		gen_node.add(new JLabel("Node Size Range: "));
 		gen_node.add(nodeSizeSlider);
 		gen_node.add(showColorChooser);
+
+		Table nt = ((Graph)m_vis.getGroup(GRAPH)).getNodeTable();
+		int numCols = nt.getColumnCount();
+		final Vector<String> nsFields = new Vector<String>(numCols);
+		for (int i = nt.getColumnNumber(LABEL); i < numCols; ++i) {
+			Class<?> cls = nt.getColumnType(i);
+			if (cls == double.class || cls == int.class || cls == float.class ||
+				cls == long.class) {
+				nsFields.add(nt.getColumnName(i));
+			}
+		}
+		final JComboBox nodeSizeActionField = new JComboBox(nsFields);
+		nodeSizeActionField.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				nodeSizeAction.setDataField((String)nodeSizeActionField.getSelectedItem());
+				m_vis.run("nodeSize");
+				m_vis.repaint();
+			}
+		});
+
+		Box gen_nodeAction = new Box(BoxLayout.X_AXIS);
+		gen_nodeAction.setBorder(BorderFactory.createTitledBorder("Node Data Actions"));
+		gen_nodeAction.add(new JLabel("Node Size Field: "));
+		gen_nodeAction.add(nodeSizeActionField);
+
 		gen_Panel.add(gen_node);
+		gen_Panel.add(gen_nodeAction);
 
 		main.add(gen_Panel);
 		
