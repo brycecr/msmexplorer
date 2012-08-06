@@ -30,7 +30,6 @@ import prefuse.Visualization;
 import prefuse.action.ActionList;
 import prefuse.action.assignment.ColorAction;
 import prefuse.action.assignment.DataSizeAction;
-import prefuse.render.EdgeRenderer;
 import prefuse.render.ImageFactory;
 import prefuse.render.LabelRenderer;
 import prefuse.render.PolygonRenderer;

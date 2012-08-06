@@ -1,5 +1,6 @@
 package edu.stanford.folding.msmexplorer.util.axis;
 
+import edu.stanford.folding.msmexplorer.util.MutableDouble;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -44,7 +45,8 @@ public class AxisSettingsDialog extends JDialog {
 	 */
 	public AxisSettingsDialog(Frame f, final NumberRangeModel xAxis, NumberRangeModel yAxis, 
 			final Class<?> xType, final Class<?> yType, boolean autoRange, 
-			final JLabel xlab, final JLabel ylab, final JLabel gridlab) {
+			final JLabel xlab, final JLabel ylab, final JLabel gridlab,
+			MutableDouble xSpacing, MutableDouble ySpacing) {
 		super(f, true); // set modal
 		x = xAxis;
 		y = yAxis;
@@ -73,6 +75,12 @@ public class AxisSettingsDialog extends JDialog {
 		final JComboBox gridlabSize = new JComboBox(fontSizes);
 		gridlabSize.setSelectedItem(gridlab.getFont().getSize());
 		gridlabSize.setEditable(true);
+		final JComboBox xGridSpacing = new JComboBox(fontSizes);
+		xGridSpacing.setSelectedItem(xSpacing.getValue());
+		xGridSpacing.setEditable(true);
+		final JComboBox yGridSpacing = new JComboBox(fontSizes);
+		yGridSpacing.setSelectedItem(ySpacing.getValue());
+		yGridSpacing.setEditable(true);
 
 		cancelButton.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -197,6 +205,10 @@ public class AxisSettingsDialog extends JDialog {
 		add(xlabSize);
 		add(ylabField);
 		add(ylabSize);
+		add(new JLabel("X Grid Spacing: "));
+		add(xGridSpacing);
+		add(new JLabel("Y Grid Spacing: "));
+		add(yGridSpacing);
 		add(new JLabel("Grid Label Size:"));
 		add(gridlabSize);
 		add(cancelButton);

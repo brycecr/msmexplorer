@@ -6,6 +6,7 @@ import edu.stanford.folding.msmexplorer.io.MSMIOLib;
 import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
 import edu.stanford.folding.msmexplorer.tpt.TPTSetupBox;
 import edu.stanford.folding.msmexplorer.tpt.TPTWindow;
+import edu.stanford.folding.msmexplorer.util.MutableDouble;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregateDragControl;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregateLayout;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregatePrioritySorter;
@@ -52,7 +53,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -729,6 +729,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			axisFields.add(nt.getColumnName(i));
 		}
 		axisFields.add ("Load new...");
+		axisFields.add ("None");
 
 		final JComboBox yAxisSelector = new JComboBox(axisFields);
 		final JComboBox xAxisSelector = new JComboBox(axisFields);
@@ -794,6 +795,9 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		final JLabel xAxisLabel = new JLabel();
 		final JLabel yAxisLabel = new JLabel();
 		final JLabel axisGridLabel = new JLabel();
+		//XXX maybe chage default spacing to something more intelligent?
+		final MutableDouble xSpacing = new MutableDouble(50.0);
+		final MutableDouble ySpacing = new MutableDouble(50.0);
 
 		JButton openAxisSettings = new JButton ("Axis Settings");
 		openAxisSettings.addActionListener( new ActionListener() {
@@ -803,7 +807,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					xAxisRange, yAxisRange, 
 					nt.getColumnType((String)xAxisSelector.getSelectedItem()), 
 					nt.getColumnType((String)yAxisSelector.getSelectedItem()), 
-					autoRange, xAxisLabel, yAxisLabel, axisGridLabel);
+					autoRange, xAxisLabel, yAxisLabel, axisGridLabel,
+					xSpacing, ySpacing);
 				autoRange = asd.showDialog();
 			}
 		});
@@ -817,18 +822,18 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 				if (axisToggle.isSelected()) {
 					m_vis.removeAction("axes");
 					m_vis.cancel("lll");
-
+					
 					((DefaultRendererFactory) m_vis.getRendererFactory()).add(
 						new OrPredicate(new InGroupPredicate("xlabels"),
-						new InGroupPredicate("ylabels")),
+							new InGroupPredicate("ylabels")),
 						new AxisRotateRenderer(Constants.FAR_LEFT, Constants.FAR_BOTTOM));
-
+					
 					Rectangle2D bounds = display.getItemBounds();
 					AxisLayout xaxis = new AxisLayout(nodes, (String)xAxisSelector.getSelectedItem(), Constants.X_AXIS, VisiblePredicate.TRUE);
 					xaxis.setLayoutBounds(bounds);
 					AxisLayout yaxis = new AxisLayout(nodes, (String)yAxisSelector.getSelectedItem(), Constants.Y_AXIS, VisiblePredicate.TRUE);
 					yaxis.setLayoutBounds(bounds);
-
+					
 					//Apply custom numerical range, if user asked for it
 					//and the axis in question is in fact numerical
 					if (!autoRange) {
@@ -841,35 +846,37 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 							yaxis.setRangeModel(yAxisRange);
 						}
 					}
-
+					
 					Rectangle2D ybounds = new Rectangle2D.Double(bounds.getX() - 10, bounds.getY(), bounds.getWidth() + 10, bounds.getHeight());
 					AxisLabelLabelLayout ylabels = new AxisLabelLabelLayout("ylabels", yaxis, ybounds);
 					ylabels.setLabel(yAxisLabel);
+					ylabels.setSpacing(ySpacing.getValue());
 					ylabels.setGridLabel(axisGridLabel);
 					Rectangle2D xbounds = new Rectangle2D.Double(bounds.getX(), bounds.getY() + bounds.getHeight() - 11, bounds.getWidth(), 10);
 					AxisLabelLabelLayout xlabels = new AxisLabelLabelLayout("xlabels", xaxis, xbounds);
 					xlabels.setLabel(xAxisLabel);
+					xlabels.setSpacing(xSpacing.getValue());
 					xlabels.setGridLabel(axisGridLabel);
 					/*
-					if (isIntType(xAxisSelector)) {
-						xlabels.setScale(Constants.NOMINAL);
-					}
-					if (isIntType(yAxisSelector)) {
-						ylabels.setSpacing(Math.ceil(ylabels.getSpacing()));
-					}
-					* */
-
+					 * if (isIntType(xAxisSelector)) {
+					 * xlabels.setScale(Constants.NOMINAL);
+					 * }
+					 * if (isIntType(yAxisSelector)) {
+					 * ylabels.setSpacing(Math.ceil(ylabels.getSpacing()));
+					 * }
+					 * */
+					
 					ColorAction yAxisColor = new ColorAction("ylabels", VisualItem.STROKECOLOR, ColorLib.gray(100));
 					ColorAction yLabColor = new ColorAction("ylabels", VisualItem.TEXTCOLOR, ColorLib.gray(0));
 					ColorAction xAxisColor = new ColorAction("xlabels", VisualItem.STROKECOLOR, ColorLib.gray(100));
 					ColorAction xLabColor = new ColorAction("xlabels", VisualItem.TEXTCOLOR, ColorLib.gray(0));
-
+					
 					ActionList axisColor = new ActionList();
 					axisColor.add(yAxisColor);
 					axisColor.add(yLabColor);
 					axisColor.add(xAxisColor);
 					axisColor.add(xLabColor);
-
+					
 					final ActionList axes = new ActionList();
 					axes.add(xaxis);
 					axes.add(yaxis);
@@ -877,7 +884,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					axes.add(xlabels);
 					axes.add(axisColor);
 					axes.add(new RepaintAction());
-
+					
 					m_vis.putAction("axes", axes);
 					m_vis.run("axes");
 					m_vis.run("aggLayout");
@@ -890,14 +897,14 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					m_vis.getGroup("ylabels").clear();
 				}
 			}
-
+			
 			/**
 			 * Determines whether the selected data column in selector
-			 * is of a numerical type. This is sometimes necessary instead of 
+			 * is of a numerical type. This is sometimes necessary instead of
 			 * AxisLayout.getDataType() because the type isn't initialized until
 			 * after the first run, or something like that. This is a pretty
 			 * foolproof way to check.
-			 * 
+			 *
 			 * @param selector to get field from
 			 * @return whether field selected in selector is numerical in graph
 			 */
