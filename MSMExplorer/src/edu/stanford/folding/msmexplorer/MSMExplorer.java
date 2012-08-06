@@ -977,7 +977,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		final JButton openVisSettingsPanel = new JButton("Vis Settings");
 		openVisSettingsPanel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				EdgeRenderer er = (EdgeRenderer)((DefaultRendererFactory)m_vis.getRendererFactory()).getDefaultEdgeRenderer();
+				SelfRefEdgeRenderer er = (SelfRefEdgeRenderer)((DefaultRendererFactory)m_vis.getRendererFactory()).getDefaultEdgeRenderer();
 				PolygonRenderer pr = null;
 				if (m_vis.getVisualGroup(aggr) != null) {
 					pr = (PolygonRenderer)((VisualItem)m_vis.getVisualGroup(aggr).tuples().next()).getRenderer();

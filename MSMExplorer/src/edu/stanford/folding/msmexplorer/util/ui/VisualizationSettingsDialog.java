@@ -1,11 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.stanford.folding.msmexplorer.util.ui;
 
 import edu.stanford.folding.msmexplorer.MSMConstants;
 import edu.stanford.folding.msmexplorer.MSMExplorer;
+import edu.stanford.folding.msmexplorer.util.render.SelfRefEdgeRenderer;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.GridLayout;
@@ -55,7 +52,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 	private final Visualization m_vis;
 	private final LabelRenderer m_lr;
 	private final ShapeRenderer m_sr;
-	private final EdgeRenderer m_er;
+	private final SelfRefEdgeRenderer m_er;
 	private final PolygonRenderer m_pr;
 
 	//copied from AxisSettingsDialog...maybe there's a clean way to share this?
@@ -82,7 +79,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 	private static final String[] IMAGEPOS_LABELS = {"Left", "Right", "Top", "Bottom"};
 
 	public VisualizationSettingsDialog(final Frame f, Visualization vis, LabelRenderer lr, 
-					ShapeRenderer sr, EdgeRenderer er, PolygonRenderer pr) {
+					ShapeRenderer sr, SelfRefEdgeRenderer er, PolygonRenderer pr) {
 		super(f);
 		m_vis = vis;
 		m_lr = lr;
@@ -92,10 +89,11 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 		JTabbedPane pane = new JTabbedPane();
 
+		Box main = new Box(BoxLayout.Y_AXIS);
+
 		/* GENERAL PANE */
 		JPanel gen_Panel = new JPanel();
 		gen_Panel.setLayout(new BoxLayout(gen_Panel, BoxLayout.Y_AXIS));
-		pane.addTab("General", gen_Panel);
 
 		//Slider sets range for automatically interpolated node size
 		final DataSizeAction nodeSizeAction = (DataSizeAction)m_vis.getAction("nodeSize");
@@ -152,11 +150,9 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		gen_node.add(new JLabel("Node Size Range: "));
 		gen_node.add(nodeSizeSlider);
 		gen_node.add(showColorChooser);
-		gen_node.add(Box.createGlue());
-
 		gen_Panel.add(gen_node);
-		gen_Panel.add(Box.createVerticalStrut(100));
-		
+
+		main.add(gen_Panel);
 		
 		/* LABEL PANE */
 		JPanel lr_Panel = new JPanel();
@@ -239,11 +235,23 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		JPanel er_Panel = new JPanel();
 		pane.addTab("Edge Render", er_Panel);
 
+		final JToggleButton showSelfEdges = new JToggleButton("Show Self Edges", m_er.getRenderSelfEdges());
+		showSelfEdges.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				m_er.setRenderSelfEdges(showSelfEdges.isSelected());
+				m_vis.run("draw");
+				m_vis.run("animate");
+			}
+		});
+
+		er_Panel.add(showSelfEdges);
+
 		/* AGG PANE */
 		JPanel pr_Panel = new JPanel();
 		pane.addTab("Aggregate Render", pr_Panel);
 
-		add(pane);
+		main.add(pane);
+		add(main);
 		pack();
 	}
 
