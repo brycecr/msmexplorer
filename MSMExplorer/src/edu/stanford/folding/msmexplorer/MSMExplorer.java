@@ -1453,6 +1453,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		m_vis.putAction("lll", lll);
 		m_vis.putAction("nodeSize", nodeSize);
 		m_vis.putAction("animate", animate);
+		m_vis.putAction("nodeFill", fill);
 
 		m_vis.runAfter("draw", "animate");
 		m_vis.alwaysRunAfter("lll", "draw");

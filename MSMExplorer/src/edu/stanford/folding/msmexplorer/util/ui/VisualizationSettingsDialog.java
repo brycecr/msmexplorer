@@ -8,6 +8,7 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -17,6 +18,7 @@ import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import prefuse.Constants;
 import prefuse.Visualization;
 import prefuse.action.assignment.DataSizeAction;
 import prefuse.render.EdgeRenderer;
@@ -25,6 +27,7 @@ import prefuse.render.LabelRenderer;
 import prefuse.render.PolygonRenderer;
 import prefuse.render.ShapeRenderer;
 import prefuse.util.ui.JRangeSlider;
+import prefuse.visual.VisualItem;
 
 /**
  * A general visualization properties settings dialog
@@ -43,10 +46,18 @@ public class VisualizationSettingsDialog extends JDialog {
 	private final PolygonRenderer m_pr;
 
 	// Visualization group names. Should be same as MSMExplorer
-	private static final String aggr = "aggregates";
-	private static final String graph = "graph";
-	private static final String nodes = "graph.nodes";
-	private static final String edges = "graph.edges";
+	private static final String AGGR = "aggregates";
+	private static final String GRAPH = "graph";
+	private static final String NODES = "graph.nodes";
+	private static final String EDGES = "graph.edges";
+
+	private static final int[] SHAPES = {Constants.SHAPE_CROSS,
+		Constants.SHAPE_DIAMOND, Constants.SHAPE_ELLIPSE, Constants.SHAPE_HEXAGON,
+		Constants.SHAPE_RECTANGLE, Constants.SHAPE_STAR, Constants.SHAPE_TRIANGLE_UP,
+		Constants.SHAPE_TRIANGLE_DOWN};
+
+	private static final String[] SHAPES_LABELS = {"Cross", "Diamond",
+		"Circle", "Hexagon", "Rectangle", "Star", "Up Triangle", "Down Triangle"};
 
 	public VisualizationSettingsDialog(Frame f, Visualization vis, LabelRenderer lr, 
 					ShapeRenderer sr, EdgeRenderer er, PolygonRenderer pr) {
@@ -85,7 +96,7 @@ public class VisualizationSettingsDialog extends JDialog {
 					nodeSizeAction.setMaximumSize(highDub);
 					m_lr.setImageFactory(new ImageFactory());
 					m_lr.getImageFactory().setMaxImageDimensions((int) (150.0d * highDub), (int) (150.0d * highDub));
-					m_lr.getImageFactory().preloadImages(m_vis.getGroup(nodes).tuples(), "image");
+					m_lr.getImageFactory().preloadImages(m_vis.getGroup(NODES).tuples(), "image");
 					m_lr.setImageField("image");
 				}
 				m_vis.run("nodeSize");
@@ -132,6 +143,17 @@ public class VisualizationSettingsDialog extends JDialog {
 		/* SHAPE PANE */
 		JPanel sr_Panel = new JPanel();
 		pane.addTab("Shape Render", sr_Panel);
+		
+		final JComboBox shapeComboBox = new JComboBox(SHAPES_LABELS);
+		shapeComboBox.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				m_vis.setValue(NODES, null, VisualItem.SHAPE, SHAPES[shapeComboBox.getSelectedIndex()]);
+				m_vis.run("nodeFill");
+				m_vis.repaint();
+			}
+		});
+		sr_Panel.add(shapeComboBox);
+		
 		
 		/* EDGE PANE */
 		JPanel er_Panel = new JPanel();
