@@ -2,9 +2,12 @@ package edu.stanford.folding.msmexplorer.util.ui;
 
 import edu.stanford.folding.msmexplorer.MSMConstants;
 import edu.stanford.folding.msmexplorer.MSMExplorer;
+import edu.stanford.folding.msmexplorer.util.FlexDataColorAction;
 import edu.stanford.folding.msmexplorer.util.render.SelfRefEdgeRenderer;
 import java.awt.Color;
 import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,14 +32,15 @@ import javax.swing.event.ChangeListener;
 import prefuse.Constants;
 import prefuse.Visualization;
 import prefuse.action.ActionList;
-import prefuse.action.assignment.ColorAction;
 import prefuse.action.assignment.DataSizeAction;
 import prefuse.data.Graph;
 import prefuse.data.Table;
+import prefuse.data.column.Column;
 import prefuse.render.ImageFactory;
 import prefuse.render.LabelRenderer;
 import prefuse.render.PolygonRenderer;
 import prefuse.render.ShapeRenderer;
+import prefuse.util.ColorLib;
 import prefuse.util.FontLib;
 import prefuse.util.ui.JRangeSlider;
 import prefuse.visual.VisualItem;
@@ -51,6 +55,8 @@ import prefuse.visual.VisualItem;
  */
 public class VisualizationSettingsDialog extends JDialog implements MSMConstants {
 
+	// Visualization we're modifying. Action and group names depend
+	// on what was registered with this visualization object
 	private final Visualization m_vis;
 	private final LabelRenderer m_lr;
 	private final ShapeRenderer m_sr;
@@ -82,6 +88,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 	public VisualizationSettingsDialog(final Frame f, Visualization vis, LabelRenderer lr, 
 					ShapeRenderer sr, SelfRefEdgeRenderer er, PolygonRenderer pr) {
+		//Init instance members
 		super(f);
 		m_vis = vis;
 		m_lr = lr;
@@ -89,11 +96,15 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		m_er = er;
 		m_pr = pr;
 
+		//Pane for options related to different renderers.
 		JTabbedPane pane = new JTabbedPane();
 
+		//main layout box
 		Box main = new Box(BoxLayout.Y_AXIS);
 
-		/* GENERAL PANE */
+		/* ----------------------- GENERAL PANE ----------------------- */
+		//General pane (displayed above the tabbed pane,
+		//but could be it's own tab as well...
 		JPanel gen_Panel = new JPanel();
 		gen_Panel.setLayout(new BoxLayout(gen_Panel, BoxLayout.Y_AXIS));
 
@@ -135,10 +146,11 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		showColorChooser.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				try {
-					ColorAction fill = (ColorAction)((ActionList)m_vis.getAction("animate")).get(2);
+					FlexDataColorAction fill = (FlexDataColorAction)((ActionList)m_vis.getAction("animate")).get(2);
 					Color newFill = JColorChooser.showDialog(f, "Choose Node Color", new Color(fill.getDefaultColor()));
 					if (newFill != null) {
-						fill.setDefaultColor(newFill.getRGB());
+						int[] palette = {newFill.getRGB()};
+						fill.setPalette(palette);
 					}
 				} catch (Exception e) {
 					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
@@ -153,17 +165,17 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		gen_node.add(nodeSizeSlider);
 		gen_node.add(showColorChooser);
 
-		Table nt = ((Graph)m_vis.getGroup(GRAPH)).getNodeTable();
+		final Table nt = ((Graph)m_vis.getGroup(GRAPH)).getNodeTable();
 		int numCols = nt.getColumnCount();
-		final Vector<String> nsFields = new Vector<String>(numCols);
+		final Vector<String> numericalFields = new Vector<String>(5);
+		final Vector<String> fields = new Vector<String>(5);
 		for (int i = nt.getColumnNumber(LABEL); i < numCols; ++i) {
-			Class<?> cls = nt.getColumnType(i);
-			if (cls == double.class || cls == int.class || cls == float.class ||
-				cls == long.class) {
-				nsFields.add(nt.getColumnName(i));
+			if (isNumerical(nt.getColumn(i))) {
+				numericalFields.add(nt.getColumnName(i));
 			}
+			fields.add(nt.getColumnName(i));
 		}
-		final JComboBox nodeSizeActionField = new JComboBox(nsFields);
+		final JComboBox nodeSizeActionField = new JComboBox(numericalFields);
 		nodeSizeActionField.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				nodeSizeAction.setDataField((String)nodeSizeActionField.getSelectedItem());
@@ -172,17 +184,88 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		});
 
-		Box gen_nodeAction = new Box(BoxLayout.X_AXIS);
+		final FlexDataColorAction nodeColorAction = (FlexDataColorAction)m_vis.getAction("nodeFill");
+		final JComboBox nodeColorActionField = new JComboBox(fields);
+		nodeColorActionField.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				int dataType = Constants.ORDINAL;
+				String col = (String)nodeColorActionField.getSelectedItem();
+				if (isNumerical(nt.getColumn(col))) {
+					dataType = Constants.NUMERICAL;
+				}
+				nodeColorAction.setDataField(col);
+				nodeColorAction.setDataType(dataType);
+				m_vis.run("nodeFill");
+				m_vis.repaint();
+			}
+		});
+
+		int[] palette = nodeColorAction.getPalette();
+
+		final JButton startColorButton = new JButton("Start Color", new
+				ColorSwatch(new Color(palette[palette.length-1])));
+		startColorButton.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				try {
+					Color newColor = JColorChooser.showDialog(f, "Choose Node Color", 
+							new Color(nodeColorAction.getDefaultColor()));
+					if (newColor != null) {
+						int[] oldPalette = nodeColorAction.getPalette();
+						int[] palette = ColorLib.getInterpolatedPalette(newColor.getRGB(), oldPalette[oldPalette.length-1]);
+						nodeColorAction.setPalette(palette);
+						((ColorSwatch)startColorButton.getIcon()).setColor(newColor);
+					}
+				} catch (Exception e) {
+					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
+				}
+			}
+		});
+
+		final JButton endColorButton = new JButton("End Color", 
+			new ColorSwatch(new Color(palette[0])));
+		endColorButton.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				try {
+					Color newColor = JColorChooser.showDialog(f, "Choose Node Color", 
+							new Color(nodeColorAction.getDefaultColor()));
+					if (newColor != null) {
+						int[] palette = ColorLib.getInterpolatedPalette(nodeColorAction.getPalette()[0], newColor.getRGB());
+						nodeColorAction.setPalette(palette);
+						((ColorSwatch)endColorButton.getIcon()).setColor(newColor);
+					}
+				} catch (Exception e) {
+					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
+				}
+			}
+		});
+
+		JPanel gen_nodeAction = new JPanel(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.HORIZONTAL;
 		gen_nodeAction.setBorder(BorderFactory.createTitledBorder("Node Data Actions"));
-		gen_nodeAction.add(new JLabel("Node Size Field: "));
-		gen_nodeAction.add(nodeSizeActionField);
+		c.gridx = 0;
+		c.gridy = 0;
+		gen_nodeAction.add(new JLabel("Node Size Field: "), c);
+		c.gridwidth = 3;
+		c.gridx = 1;
+		gen_nodeAction.add(nodeSizeActionField, c);
+		c.gridwidth = 1;
+		c.gridx = 0;
+		c.gridy = 1;
+		gen_nodeAction.add(new JLabel("Node Color Field"), c);
+		c.gridx = 1;
+		gen_nodeAction.add(nodeColorActionField, c);
+		c.gridx = 2;
+		gen_nodeAction.add(startColorButton, c);
+		c.gridx = 3;
+		gen_nodeAction.add(endColorButton, c);
 
 		gen_Panel.add(gen_node);
 		gen_Panel.add(gen_nodeAction);
 
 		main.add(gen_Panel);
 		
-		/* LABEL PANE */
+		/* ----------------------- LABEL PANE ----------------------- */
 		JPanel lr_Panel = new JPanel();
 		lr_Panel.setLayout(new GridLayout(0,2));
 		pane.addTab("Label Render", lr_Panel);
@@ -243,7 +326,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		lr_Panel.add(lr_showLabel);
 
 
-		/* SHAPE PANE */
+		/* ------------------ SHAPE PANE --------------------- */
 		JPanel sr_Panel = new JPanel();
 		pane.addTab("Shape Render", sr_Panel);
 		
@@ -259,7 +342,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		sr_Panel.add(new JLabel("Node Shape: "));
 		sr_Panel.add(shapeComboBox);
 		
-		/* EDGE PANE */
+		/* -------------------- EDGE PANE --------------------- */
 		JPanel er_Panel = new JPanel();
 		pane.addTab("Edge Render", er_Panel);
 
@@ -274,7 +357,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 		er_Panel.add(showSelfEdges);
 
-		/* AGG PANE */
+		/* --------------------- AGG PANE ----------------------- */
 		JPanel pr_Panel = new JPanel();
 		pane.addTab("Aggregate Render", pr_Panel);
 
@@ -286,5 +369,14 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 	public void showDialog() {
 		setLocationByPlatform(true);
 		setVisible(true);
+	}
+
+	private boolean isNumerical(Column c) {
+		Class<?> cls = c.getColumnType();
+		if (cls == double.class || cls == int.class || cls == float.class ||
+			cls == long.class) {
+			return true;
+		}
+		return false;
 	}
 }

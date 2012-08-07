@@ -6,6 +6,7 @@ import edu.stanford.folding.msmexplorer.io.MSMIOLib;
 import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
 import edu.stanford.folding.msmexplorer.tpt.TPTSetupBox;
 import edu.stanford.folding.msmexplorer.tpt.TPTWindow;
+import edu.stanford.folding.msmexplorer.util.FlexDataColorAction;
 import edu.stanford.folding.msmexplorer.util.MutableDouble;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregateDragControl;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregateLayout;
@@ -1370,11 +1371,17 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 	 */
 	public void initGraph(Graph g, Visualization vis) {
 
-		ColorAction fill = new ColorAction(nodes,
+		/*
+		final ColorAction fill = new ColorAction(nodes,
 		  VisualItem.FILLCOLOR, ColorLib.rgb(179, 255, 156));
-		  fill.add(VisualItem.FIXED, ColorLib.rgb(255, 100, 100));
-		  fill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 200, 125));
-		  fill.add(new InGroupPredicate(Visualization.SEARCH_ITEMS), 
+		 * 
+		 */
+		int[] palette = {ColorLib.rgb(179, 255, 156)};
+		final FlexDataColorAction fill = new FlexDataColorAction(nodes,
+			LABEL, Constants.ORDINAL, VisualItem.FILLCOLOR, palette);
+		fill.add(VisualItem.FIXED, ColorLib.rgb(255, 100, 100));
+		fill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 200, 125));
+		fill.add(new InGroupPredicate(Visualization.SEARCH_ITEMS), 
 			  ColorLib.rgb(200, 40, 55));
 
 		DataColorAction edgeColor = new DataColorAction(edges, TPROB,
