@@ -138,32 +138,12 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 					m_lr.setImageField("image");
 				}
 				m_vis.run("nodeSize");
+				m_vis.run("aggLayout");
 				m_vis.run("animate");
 			}
 		});
 
-		JButton showColorChooser = new JButton("Node Color"); 
-		showColorChooser.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				try {
-					FlexDataColorAction fill = (FlexDataColorAction)((ActionList)m_vis.getAction("animate")).get(2);
-					Color newFill = JColorChooser.showDialog(f, "Choose Node Color", new Color(fill.getDefaultColor()));
-					if (newFill != null) {
-						int[] palette = {newFill.getRGB()};
-						fill.setPalette(palette);
-					}
-				} catch (Exception e) {
-					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
-				}
-			}
-		});
-		showColorChooser.setToolTipText("Open a dialog to select a new node color.");
 
-		Box gen_node = new Box(BoxLayout.X_AXIS);
-		gen_node.setBorder(BorderFactory.createTitledBorder("Gen. Node Appearance"));
-		gen_node.add(new JLabel("Node Size Range: "));
-		gen_node.add(nodeSizeSlider);
-		gen_node.add(showColorChooser);
 
 		final Table nt = ((Graph)m_vis.getGroup(GRAPH)).getNodeTable();
 		int numCols = nt.getColumnCount();
@@ -199,6 +179,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				m_vis.repaint();
 			}
 		});
+		nodeColorActionField.setSelectedItem(nodeColorAction.getDataField());
 
 		int[] palette = nodeColorAction.getPalette();
 
@@ -238,6 +219,33 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				}
 			}
 		});
+
+		JButton showColorChooser = new JButton("Node Color"); 
+		showColorChooser.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				try {
+					FlexDataColorAction fill = (FlexDataColorAction)((ActionList)m_vis.getAction("animate")).get(2);
+					Color newFill = JColorChooser.showDialog(f, "Choose Node Color", new Color(fill.getDefaultColor()));
+					if (newFill != null) {
+						int[] palette = {newFill.getRGB()};
+						fill.setPalette(palette);
+						((ColorSwatch)startColorButton.getIcon()).setColor(newFill);
+						((ColorSwatch)endColorButton.getIcon()).setColor(newFill);
+						startColorButton.repaint();
+						endColorButton.repaint();
+					}
+				} catch (Exception e) {
+					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
+				}
+			}
+		});
+		showColorChooser.setToolTipText("Open a dialog to select a new node color.");
+
+		Box gen_node = new Box(BoxLayout.X_AXIS);
+		gen_node.setBorder(BorderFactory.createTitledBorder("Gen. Node Appearance"));
+		gen_node.add(new JLabel("Node Size Range: "));
+		gen_node.add(nodeSizeSlider);
+		gen_node.add(showColorChooser);
 
 		JPanel gen_nodeAction = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -336,6 +344,14 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				m_vis.setValue(NODES, null, VisualItem.SHAPE, SHAPES[shapeComboBox.getSelectedIndex()]);
 				m_vis.run("nodeFill");
 				m_vis.repaint();
+			}
+		});
+
+		
+		final JComboBox shapeActionField = new JComboBox(fields);
+		shapeActionField.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				
 			}
 		});
 		
