@@ -32,6 +32,7 @@ import javax.swing.event.ChangeListener;
 import prefuse.Constants;
 import prefuse.Visualization;
 import prefuse.action.ActionList;
+import prefuse.action.assignment.DataShapeAction;
 import prefuse.action.assignment.DataSizeAction;
 import prefuse.data.Graph;
 import prefuse.data.Table;
@@ -85,6 +86,9 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 	private static final int[] IMAGEPOS = {Constants.LEFT, Constants.RIGHT,
 		Constants.TOP, Constants.BOTTOM};
 	private static final String[] IMAGEPOS_LABELS = {"Left", "Right", "Top", "Bottom"};
+
+	private static final String[] PALETTE_LABELS = {"Interpolated", "Category", "Cool", 
+		"Hot", "Grayscale", "HSB"};
 
 	public VisualizationSettingsDialog(final Frame f, Visualization vis, LabelRenderer lr, 
 					ShapeRenderer sr, SelfRefEdgeRenderer er, PolygonRenderer pr) {
@@ -241,6 +245,42 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		});
 		showColorChooser.setToolTipText("Open a dialog to select a new node color.");
 
+	//private static final String[] PALETTE_LABELS = {"Interpolated", "Category", "Cool", 
+	//	"Hot", "Grayscale", "HSB"};
+		final JComboBox presetPalettes = new JComboBox(PALETTE_LABELS);
+		presetPalettes.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				int[] palette;
+				switch (presetPalettes.getSelectedIndex()) {
+					case 0:
+						palette = ColorLib.getInterpolatedPalette(((ColorSwatch)
+							startColorButton.getIcon()).getColor().getRGB(), 
+							((ColorSwatch)endColorButton.getIcon()).getColor().getRGB());
+						break;
+					case 1:
+						palette = ColorLib.getCategoryPalette(12);
+						break;
+					case 2:
+						palette = ColorLib.getCoolPalette();
+						break;
+					case 3:
+						palette = ColorLib.getHotPalette();
+						break;
+					case 4:
+						palette = ColorLib.getGrayscalePalette();
+						break;
+					case 5:
+						palette = ColorLib.getHSBPalette();
+						break;
+					default:
+						return;
+				}
+				nodeColorAction.setPalette(palette);
+				m_vis.run("nodeFill");
+				m_vis.repaint();
+			}
+		}); 
+
 		Box gen_node = new Box(BoxLayout.X_AXIS);
 		gen_node.setBorder(BorderFactory.createTitledBorder("Gen. Node Appearance"));
 		gen_node.add(new JLabel("Node Size Range: "));
@@ -267,6 +307,8 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		gen_nodeAction.add(startColorButton, c);
 		c.gridx = 3;
 		gen_nodeAction.add(endColorButton, c);
+		c.gridx = 4;
+		gen_nodeAction.add(presetPalettes, c);
 
 		gen_Panel.add(gen_node);
 		gen_Panel.add(gen_nodeAction);
@@ -335,7 +377,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 
 		/* ------------------ SHAPE PANE --------------------- */
-		JPanel sr_Panel = new JPanel();
+		JPanel sr_Panel = new JPanel(new GridLayout(0,2));
 		pane.addTab("Shape Render", sr_Panel);
 		
 		final JComboBox shapeComboBox = new JComboBox(SHAPES_LABELS);
@@ -351,12 +393,31 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		final JComboBox shapeActionField = new JComboBox(fields);
 		shapeActionField.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				
+				ActionList draw = (ActionList)m_vis.getAction("draw");
+				DataShapeAction dataShapeAction = null;
+				assert draw.size() > 1;
+				if (draw.get(draw.size() - 1) instanceof DataShapeAction) { 
+					dataShapeAction = (DataShapeAction)draw.get(draw.size() - 1);
+				} else if (draw.get(draw.size() - 2) instanceof DataShapeAction) {
+					dataShapeAction = (DataShapeAction)draw.get(draw.size() - 2);
+				} 
+
+				if (dataShapeAction != null) {
+					dataShapeAction.setDataField((String)shapeActionField.getSelectedItem());
+				} else {
+					dataShapeAction = new DataShapeAction(NODES, (String)shapeActionField.getSelectedItem());
+					dataShapeAction.setVisualization(m_vis);
+					draw.add(dataShapeAction);
+				}
+				m_vis.run("draw");
+				m_vis.repaint();
 			}
 		});
 		
 		sr_Panel.add(new JLabel("Node Shape: "));
 		sr_Panel.add(shapeComboBox);
+		sr_Panel.add(new JLabel("Node Shape Field:"));
+		sr_Panel.add(shapeActionField);
 		
 		/* -------------------- EDGE PANE --------------------- */
 		JPanel er_Panel = new JPanel();
