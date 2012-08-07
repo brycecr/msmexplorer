@@ -59,6 +59,7 @@ public class ColumnChooserDialog extends JDialog {
 	}
 
 	public String showDialog() {
+		setLocationByPlatform(true);
 		setVisible(true);
 		if (success == true) {
 			return nameField.getText();

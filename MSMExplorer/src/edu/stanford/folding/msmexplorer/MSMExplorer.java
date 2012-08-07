@@ -6,6 +6,8 @@ import edu.stanford.folding.msmexplorer.io.MSMIOLib;
 import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
 import edu.stanford.folding.msmexplorer.tpt.TPTSetupBox;
 import edu.stanford.folding.msmexplorer.tpt.TPTWindow;
+import edu.stanford.folding.msmexplorer.util.FlexDataColorAction;
+import edu.stanford.folding.msmexplorer.util.MutableDouble;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregateDragControl;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregateLayout;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregatePrioritySorter;
@@ -20,6 +22,7 @@ import edu.stanford.folding.msmexplorer.util.axis.AxisSettingsDialog;
 import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
 import edu.stanford.folding.msmexplorer.util.ui.JValueSliderFlammable;
 import edu.stanford.folding.msmexplorer.util.ui.Picture;
+import edu.stanford.folding.msmexplorer.util.ui.VisualizationSettingsDialog;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -51,7 +54,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -265,6 +267,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		tr.setVerticalAlignment(Constants.CENTER);
 		tr.setRoundedCorner(8, 8);
 		m_vis.setRendererFactory(new DefaultRendererFactory(tr, new SelfRefEdgeRenderer()));
+
+		final ShapeRenderer sr = new ShapeRenderer();
 
 
 		// --------------------------------------------------------------------
@@ -540,14 +544,14 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		// (circle or rounded-rectangle label)
 		ButtonGroup nodeRenderers = new ButtonGroup();
 
-		JRadioButton circleRB = new JRadioButton("Circle", false);
+		m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
+		JRadioButton circleRB = new JRadioButton("Shape", false);
 		circleRB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				JRadioButton circleRB = (JRadioButton) ae.getSource();
 				if (circleRB.isSelected()) {
 					DefaultRendererFactory drf = (DefaultRendererFactory)m_vis.getRendererFactory();
-					drf.setDefaultRenderer(new ShapeRenderer());
-					m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
+					drf.setDefaultRenderer(sr);
 					m_vis.run("draw");
 				}
 			}
@@ -650,11 +654,13 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					((DataSizeAction) m_vis.getAction("nodeSize")).setMaximumSize(50.0);
 					m_vis.run("nodeSize");
 				} else {
-					((DataSizeAction) m_vis.getAction("nodeSize")).setMaximumSize(1.0);
-					m_vis.run("nodeSize");
+					DataSizeAction nodeSize = (DataSizeAction)m_vis.getAction("nodeSize");
 					tr.setImageField("image");
-					tr.setImagePosition(Constants.TOP);
-					tr.getImageFactory().setMaxImageDimensions(100, 100);
+					double scale = 1.0d / m_vis.getDisplay(0).getScale();
+					nodeSize.setMinimumSize(1.0d * scale * scale);
+					nodeSize.setMaximumSize(1.0d * scale * scale);
+					tr.getImageFactory().setMaxImageDimensions((int) (150.0d * scale), (int) (150.0d * scale));
+					m_vis.run("nodeSize");
 				}
 				m_vis.run("draw");
 			}
@@ -724,6 +730,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			axisFields.add(nt.getColumnName(i));
 		}
 		axisFields.add ("Load new...");
+		axisFields.add ("None");
 
 		final JComboBox yAxisSelector = new JComboBox(axisFields);
 		final JComboBox xAxisSelector = new JComboBox(axisFields);
@@ -788,6 +795,10 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		final NumberRangeModel yAxisRange = new NumberRangeModel(0, 1, 0, 1);
 		final JLabel xAxisLabel = new JLabel();
 		final JLabel yAxisLabel = new JLabel();
+		final JLabel axisGridLabel = new JLabel();
+		//XXX maybe chage default spacing to something more intelligent?
+		final MutableDouble xSpacing = new MutableDouble(50.0);
+		final MutableDouble ySpacing = new MutableDouble(50.0);
 
 		JButton openAxisSettings = new JButton ("Axis Settings");
 		openAxisSettings.addActionListener( new ActionListener() {
@@ -797,7 +808,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					xAxisRange, yAxisRange, 
 					nt.getColumnType((String)xAxisSelector.getSelectedItem()), 
 					nt.getColumnType((String)yAxisSelector.getSelectedItem()), 
-					autoRange, xAxisLabel, yAxisLabel);
+					autoRange, xAxisLabel, yAxisLabel, axisGridLabel,
+					xSpacing, ySpacing);
 				autoRange = asd.showDialog();
 			}
 		});
@@ -811,18 +823,18 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 				if (axisToggle.isSelected()) {
 					m_vis.removeAction("axes");
 					m_vis.cancel("lll");
-
+					
 					((DefaultRendererFactory) m_vis.getRendererFactory()).add(
 						new OrPredicate(new InGroupPredicate("xlabels"),
-						new InGroupPredicate("ylabels")),
+							new InGroupPredicate("ylabels")),
 						new AxisRotateRenderer(Constants.FAR_LEFT, Constants.FAR_BOTTOM));
-
+					
 					Rectangle2D bounds = display.getItemBounds();
 					AxisLayout xaxis = new AxisLayout(nodes, (String)xAxisSelector.getSelectedItem(), Constants.X_AXIS, VisiblePredicate.TRUE);
 					xaxis.setLayoutBounds(bounds);
 					AxisLayout yaxis = new AxisLayout(nodes, (String)yAxisSelector.getSelectedItem(), Constants.Y_AXIS, VisiblePredicate.TRUE);
 					yaxis.setLayoutBounds(bounds);
-
+					
 					//Apply custom numerical range, if user asked for it
 					//and the axis in question is in fact numerical
 					if (!autoRange) {
@@ -835,33 +847,37 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 							yaxis.setRangeModel(yAxisRange);
 						}
 					}
-
+					
 					Rectangle2D ybounds = new Rectangle2D.Double(bounds.getX() - 10, bounds.getY(), bounds.getWidth() + 10, bounds.getHeight());
 					AxisLabelLabelLayout ylabels = new AxisLabelLabelLayout("ylabels", yaxis, ybounds);
 					ylabels.setLabel(yAxisLabel);
+					ylabels.setSpacing(ySpacing.getValue());
+					ylabels.setGridLabel(axisGridLabel);
 					Rectangle2D xbounds = new Rectangle2D.Double(bounds.getX(), bounds.getY() + bounds.getHeight() - 11, bounds.getWidth(), 10);
 					AxisLabelLabelLayout xlabels = new AxisLabelLabelLayout("xlabels", xaxis, xbounds);
 					xlabels.setLabel(xAxisLabel);
+					xlabels.setSpacing(xSpacing.getValue());
+					xlabels.setGridLabel(axisGridLabel);
 					/*
-					if (isIntType(xAxisSelector)) {
-						xlabels.setScale(Constants.NOMINAL);
-					}
-					if (isIntType(yAxisSelector)) {
-						ylabels.setSpacing(Math.ceil(ylabels.getSpacing()));
-					}
-					* */
-
+					 * if (isIntType(xAxisSelector)) {
+					 * xlabels.setScale(Constants.NOMINAL);
+					 * }
+					 * if (isIntType(yAxisSelector)) {
+					 * ylabels.setSpacing(Math.ceil(ylabels.getSpacing()));
+					 * }
+					 * */
+					
 					ColorAction yAxisColor = new ColorAction("ylabels", VisualItem.STROKECOLOR, ColorLib.gray(100));
 					ColorAction yLabColor = new ColorAction("ylabels", VisualItem.TEXTCOLOR, ColorLib.gray(0));
 					ColorAction xAxisColor = new ColorAction("xlabels", VisualItem.STROKECOLOR, ColorLib.gray(100));
 					ColorAction xLabColor = new ColorAction("xlabels", VisualItem.TEXTCOLOR, ColorLib.gray(0));
-
+					
 					ActionList axisColor = new ActionList();
 					axisColor.add(yAxisColor);
 					axisColor.add(yLabColor);
 					axisColor.add(xAxisColor);
 					axisColor.add(xLabColor);
-
+					
 					final ActionList axes = new ActionList();
 					axes.add(xaxis);
 					axes.add(yaxis);
@@ -869,7 +885,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					axes.add(xlabels);
 					axes.add(axisColor);
 					axes.add(new RepaintAction());
-
+					
 					m_vis.putAction("axes", axes);
 					m_vis.run("axes");
 					m_vis.run("aggLayout");
@@ -882,14 +898,14 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					m_vis.getGroup("ylabels").clear();
 				}
 			}
-
+			
 			/**
 			 * Determines whether the selected data column in selector
-			 * is of a numerical type. This is sometimes necessary instead of 
+			 * is of a numerical type. This is sometimes necessary instead of
 			 * AxisLayout.getDataType() because the type isn't initialized until
 			 * after the first run, or something like that. This is a pretty
 			 * foolproof way to check.
-			 * 
+			 *
 			 * @param selector to get field from
 			 * @return whether field selected in selector is numerical in graph
 			 */
@@ -932,18 +948,6 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 
 		/* -------------- AESTHETIC ADJUST ELEMENTS ---------------- */
 
-		JButton showColorChooser = new JButton("Node Color"); 
-		showColorChooser.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				try {
-					ColorAction fill = (ColorAction)((ActionList)m_vis.getAction("animate")).get(2);
-					fill.setDefaultColor(JColorChooser.showDialog(frame, "Choose Node Color", new Color(fill.getDefaultColor())).getRGB());
-				} catch (Exception e) {
-					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
-				}
-			}
-		});
-		showColorChooser.setToolTipText("Open a dialog to select a new node color.");
 
 		final JButton showEdges = new JButton("Show Edges");
 		showEdges.addActionListener( new ActionListener() {
@@ -978,15 +982,27 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			+ "<br>Can be useful to spread out a crowded graph or get different interaction behavior."
 			+ "<br>It's also physicy phun.</html>");
 
-	
+		final JButton openVisSettingsPanel = new JButton("Vis Settings");
+		openVisSettingsPanel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				SelfRefEdgeRenderer er = (SelfRefEdgeRenderer)((DefaultRendererFactory)m_vis.getRendererFactory()).getDefaultEdgeRenderer();
+				PolygonRenderer pr = null;
+				if (m_vis.getVisualGroup(aggr) != null) {
+					pr = (PolygonRenderer)((VisualItem)m_vis.getVisualGroup(aggr).tuples().next()).getRenderer();
+				}
+				VisualizationSettingsDialog vsd = new VisualizationSettingsDialog(frame, m_vis, tr, sr, er, pr);
+				vsd.showDialog();
+			}
+		});
+		
 
 		JPanel aesPane = new JPanel();
 		aesPane.setBorder(BorderFactory.createTitledBorder("Aesthetic"));
 		aesPane.setLayout(new GridLayout(0,2));
 		aesPane.add(showEdges);
 		aesPane.add(hideEdges);
-		aesPane.add(showColorChooser);
 		aesPane.add(openForcePanel);
+		aesPane.add(openVisSettingsPanel);
 		aesPane.setOpaque(false);
 
 		fpanel.add(aesPane);
@@ -1355,11 +1371,17 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 	 */
 	public void initGraph(Graph g, Visualization vis) {
 
-		ColorAction fill = new ColorAction(nodes,
+		/*
+		final ColorAction fill = new ColorAction(nodes,
 		  VisualItem.FILLCOLOR, ColorLib.rgb(179, 255, 156));
-		  fill.add(VisualItem.FIXED, ColorLib.rgb(255, 100, 100));
-		  fill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 200, 125));
-		  fill.add(new InGroupPredicate(Visualization.SEARCH_ITEMS), 
+		 * 
+		 */
+		int[] palette = {ColorLib.rgb(179, 255, 156)};
+		final FlexDataColorAction fill = new FlexDataColorAction(nodes,
+			LABEL, Constants.ORDINAL, VisualItem.FILLCOLOR, palette);
+		fill.add(VisualItem.FIXED, ColorLib.rgb(255, 100, 100));
+		fill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 200, 125));
+		fill.add(new InGroupPredicate(Visualization.SEARCH_ITEMS), 
 			  ColorLib.rgb(200, 40, 55));
 
 		DataColorAction edgeColor = new DataColorAction(edges, TPROB,
@@ -1429,6 +1451,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		m_vis.putAction("lll", lll);
 		m_vis.putAction("nodeSize", nodeSize);
 		m_vis.putAction("animate", animate);
+		m_vis.putAction("nodeFill", fill);
 
 		m_vis.runAfter("draw", "animate");
 		m_vis.alwaysRunAfter("lll", "draw");

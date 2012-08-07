@@ -1,5 +1,6 @@
 package edu.stanford.folding.msmexplorer.util.axis;
 
+import edu.stanford.folding.msmexplorer.util.MutableDouble;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -9,7 +10,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import prefuse.data.query.NumberRangeModel;
 import prefuse.util.FontLib;
 
@@ -25,7 +28,8 @@ public class AxisSettingsDialog extends JDialog {
 	private final NumberRangeModel y;
 	private boolean auto;
 
-	private static final Integer[] fontSizes = {4,6,8,10,12,14,16,28,20,24,28,32,26,40,48,50,56,64,72};
+	private static final Integer[] fontSizes = {4,6,8,10,12,14,16,28,20,24,28,32,26,40,48,50,56,64,72,
+	84,96,110,130,150,170,200,240,280,320,360,400,450,500};
 
 	/**
 	 * Constructor initializes a Dialog. Use showDialog to make visible.
@@ -42,7 +46,9 @@ public class AxisSettingsDialog extends JDialog {
 	 * @param ylab Y Axis overall label. To ignore, put in a new JLabel()
 	 */
 	public AxisSettingsDialog(Frame f, final NumberRangeModel xAxis, NumberRangeModel yAxis, 
-			final Class<?> xType, final Class<?> yType, boolean autoRange, final JLabel xlab, final JLabel ylab) {
+			final Class<?> xType, final Class<?> yType, boolean autoRange, 
+			final JLabel xlab, final JLabel ylab, final JLabel gridlab,
+			final MutableDouble xSpacing, final MutableDouble ySpacing) {
 		super(f, true); // set modal
 		x = xAxis;
 		y = yAxis;
@@ -68,6 +74,11 @@ public class AxisSettingsDialog extends JDialog {
 		final JComboBox ylabSize = new JComboBox(fontSizes);
 		ylabSize.setSelectedItem(ylab.getFont().getSize());
 		ylabSize.setEditable(true);
+		final JComboBox gridlabSize = new JComboBox(fontSizes);
+		gridlabSize.setSelectedItem(gridlab.getFont().getSize());
+		gridlabSize.setEditable(true);
+		final JSpinner xGridSpacing = new JSpinner(new SpinnerNumberModel((double)xSpacing.getValue(), 5.0d, 1000.0d, 10.0d));
+		final JSpinner yGridSpacing = new JSpinner(new SpinnerNumberModel((double)ySpacing.getValue(), 5.0d, 1000.0d, 10.0d));
 
 		cancelButton.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -125,6 +136,11 @@ public class AxisSettingsDialog extends JDialog {
 					if ((Integer)ylabSize.getSelectedItem() > 0) {
 						ylab.setFont(ylab.getFont().deriveFont(((Integer)ylabSize.getSelectedItem()).floatValue()));
 					}
+					if ((Integer)gridlabSize.getSelectedItem() > 0) {
+						gridlab.setFont(gridlab.getFont().deriveFont(((Integer)gridlabSize.getSelectedItem()).floatValue()));
+					}
+					xSpacing.setValue((Double)xGridSpacing.getValue());
+					ySpacing.setValue((Double)yGridSpacing.getValue());
 				}
 				setVisible(false);
 				dispose();
@@ -189,8 +205,12 @@ public class AxisSettingsDialog extends JDialog {
 		add(xlabSize);
 		add(ylabField);
 		add(ylabSize);
-		add(new JLabel());
-		add(new JLabel());
+		add(new JLabel("X Grid Spacing: "));
+		add(xGridSpacing);
+		add(new JLabel("Y Grid Spacing: "));
+		add(yGridSpacing);
+		add(new JLabel("Grid Label Size:"));
+		add(gridlabSize);
 		add(cancelButton);
 		add(okButton);
 		pack();
@@ -203,6 +223,7 @@ public class AxisSettingsDialog extends JDialog {
 	 * @return whether the axis bounds are set automatically
 	 */
 	public boolean showDialog() {
+		setLocationByPlatform(true);
 		setVisible(true);
 		return auto;
 	}
