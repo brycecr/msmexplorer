@@ -151,8 +151,15 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 		final Table nt = ((Graph)m_vis.getGroup(GRAPH)).getNodeTable();
 		int numCols = nt.getColumnCount();
+
+		//just the numerical type fields. It doesn't make sense to scale
+		//nodes based on an ordinal range, so we restrict to a numerical types
 		final Vector<String> numericalFields = new Vector<String>(5);
+
+		//all data fields (except visualization backing junk)
 		final Vector<String> fields = new Vector<String>(5);
+
+		//we start at Label to skip all the backing data
 		for (int i = nt.getColumnNumber(LABEL); i < numCols; ++i) {
 			if (isNumerical(nt.getColumn(i))) {
 				numericalFields.add(nt.getColumnName(i));
@@ -167,6 +174,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				m_vis.repaint();
 			}
 		});
+		nodeSizeActionField.setSelectedItem(nodeSizeAction.getDataField());
 
 		final FlexDataColorAction nodeColorAction = (FlexDataColorAction)m_vis.getAction("nodeFill");
 		final JComboBox nodeColorActionField = new JComboBox(fields);
@@ -227,7 +235,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		});
 
-		JButton showColorChooser = new JButton("Node Color"); 
+		final JButton showColorChooser = new JButton("Node Color", new ColorSwatch(new Color(nodeColorAction.getPalette()[0])));
 		showColorChooser.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				try {
@@ -236,8 +244,10 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 					if (newFill != null) {
 						int[] palette = {newFill.getRGB()};
 						fill.setPalette(palette);
+						((ColorSwatch)showColorChooser.getIcon()).setColor(newFill);
 						((ColorSwatch)startColorButton.getIcon()).setColor(newFill);
 						((ColorSwatch)endColorButton.getIcon()).setColor(newFill);
+						showColorChooser.repaint();
 						startColorButton.repaint();
 						endColorButton.repaint();
 					}
@@ -248,21 +258,6 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		});
 		showColorChooser.setToolTipText("Open a dialog to select a new node color.");
 
-		JButton showLabelColorChooser = new JButton("Text Color"); 
-		showLabelColorChooser.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				try {
-					FlexDataColorAction fill = (FlexDataColorAction)((ActionList)m_vis.getAction("animate")).get(2);
-					Color newFill = JColorChooser.showDialog(f, "Choose Node Color", new Color(fill.getDefaultColor()));
-					if (newFill != null) {
-						m_vis.setValue(NODES, null, VisualItem.TEXTCOLOR, newFill.getRGB());
-					}
-				} catch (Exception e) {
-					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
-				}
-			}
-		});
-		showLabelColorChooser.setToolTipText("Open a dialog to select a new node color.");
 
 	//private static final String[] PALETTE_LABELS = {"Interpolated", "Category", "Cool", 
 	//	"Hot", "Grayscale", "HSB"};
@@ -317,11 +312,6 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		c.gridx = 2;
 		c.gridy = 1;
 		gen_node.add(showColorChooser, c);
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.gridwidth = 1;
-		c.gridx = 3;
-		c.gridy = 1;
-		gen_node.add(showLabelColorChooser, c);
 
 		JPanel gen_nodeAction = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -411,6 +401,23 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		});
 		lr_Panel.add(lr_showLabel);
 
+		JButton lr_showLabelColorChooser = new JButton("Text Color"); 
+		lr_showLabelColorChooser.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				try {
+					FlexDataColorAction fill = (FlexDataColorAction)((ActionList)m_vis.getAction("animate")).get(2);
+					Color newFill = JColorChooser.showDialog(f, "Choose Node Color", new Color(fill.getDefaultColor()));
+					if (newFill != null) {
+						m_vis.setValue(NODES, null, VisualItem.TEXTCOLOR, newFill.getRGB());
+					}
+				} catch (Exception e) {
+					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
+				}
+			}
+		});
+		lr_showLabelColorChooser.setToolTipText("Open a dialog to select a new label text color.");
+		lr_Panel.add(lr_showLabelColorChooser);
+
 
 		/* ------------------ SHAPE PANE --------------------- */
 		JPanel sr_Panel = new JPanel(new GridLayout(0,2));
@@ -456,7 +463,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		sr_Panel.add(shapeActionField);
 		
 		/* -------------------- EDGE PANE --------------------- */
-		JPanel er_Panel = new JPanel();
+		JPanel er_Panel = new JPanel(new GridLayout(0,2));
 		pane.addTab("Edge Render", er_Panel);
 
 		final JToggleButton showSelfEdges = new JToggleButton("Show Self Edges", m_er.getRenderSelfEdges());
