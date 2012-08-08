@@ -186,6 +186,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		nodeColorActionField.setSelectedItem(nodeColorAction.getDataField());
 
 		int[] palette = nodeColorAction.getPalette();
+		final JComboBox presetPalettes = new JComboBox(PALETTE_LABELS);
 
 		final JButton startColorButton = new JButton("Start Color", new
 				ColorSwatch(new Color(palette[palette.length-1])));
@@ -199,6 +200,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 						int[] palette = ColorLib.getInterpolatedPalette(newColor.getRGB(), oldPalette[oldPalette.length-1]);
 						nodeColorAction.setPalette(palette);
 						((ColorSwatch)startColorButton.getIcon()).setColor(newColor);
+						presetPalettes.setSelectedIndex(0);
 					}
 				} catch (Exception e) {
 					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
@@ -217,6 +219,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 						int[] palette = ColorLib.getInterpolatedPalette(nodeColorAction.getPalette()[0], newColor.getRGB());
 						nodeColorAction.setPalette(palette);
 						((ColorSwatch)endColorButton.getIcon()).setColor(newColor);
+						presetPalettes.setSelectedIndex(0);
 					}
 				} catch (Exception e) {
 					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
@@ -245,9 +248,24 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		});
 		showColorChooser.setToolTipText("Open a dialog to select a new node color.");
 
+		JButton showLabelColorChooser = new JButton("Text Color"); 
+		showLabelColorChooser.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				try {
+					FlexDataColorAction fill = (FlexDataColorAction)((ActionList)m_vis.getAction("animate")).get(2);
+					Color newFill = JColorChooser.showDialog(f, "Choose Node Color", new Color(fill.getDefaultColor()));
+					if (newFill != null) {
+						m_vis.setValue(NODES, null, VisualItem.TEXTCOLOR, newFill.getRGB());
+					}
+				} catch (Exception e) {
+					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
+				}
+			}
+		});
+		showLabelColorChooser.setToolTipText("Open a dialog to select a new node color.");
+
 	//private static final String[] PALETTE_LABELS = {"Interpolated", "Category", "Cool", 
 	//	"Hot", "Grayscale", "HSB"};
-		final JComboBox presetPalettes = new JComboBox(PALETTE_LABELS);
 		presetPalettes.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				int[] palette;
@@ -281,14 +299,32 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		}); 
 
-		Box gen_node = new Box(BoxLayout.X_AXIS);
+		JPanel gen_node = new JPanel(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
 		gen_node.setBorder(BorderFactory.createTitledBorder("Gen. Node Appearance"));
-		gen_node.add(new JLabel("Node Size Range: "));
-		gen_node.add(nodeSizeSlider);
-		gen_node.add(showColorChooser);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridwidth = 1;
+		c.gridx = 0;
+		c.gridy = 0;
+		gen_node.add(new JLabel("Node Size Range: "), c);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridwidth = 4;
+		c.gridx = 1;
+		c.gridy = 0;
+		gen_node.add(nodeSizeSlider, c);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridwidth = 1;
+		c.gridx = 2;
+		c.gridy = 1;
+		gen_node.add(showColorChooser, c);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridwidth = 1;
+		c.gridx = 3;
+		c.gridy = 1;
+		gen_node.add(showLabelColorChooser, c);
 
 		JPanel gen_nodeAction = new JPanel(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
+		c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
 		gen_nodeAction.setBorder(BorderFactory.createTitledBorder("Node Data Actions"));
 		c.gridx = 0;
@@ -432,6 +468,34 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		});
 
+		final Table et = ((Graph)m_vis.getGroup(GRAPH)).getEdgeTable();
+		final Vector<String> etFields = new Vector<String>(5);
+		for (int i = 0; i < et.getColumnCount(); ++i) {
+			etFields.add(et.getColumnName(i));
+		}
+		final JComboBox edgeColorField = new JComboBox(etFields);
+		edgeColorField.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				ActionList animate = (ActionList)m_vis.getAction("animate");
+				FlexDataColorAction edgeArrowColorAction = (FlexDataColorAction)animate.get(1);
+				FlexDataColorAction edgeColorAction = (FlexDataColorAction)animate.get(2);
+				int dataType = Constants.ORDINAL;
+				String col = (String)edgeColorField.getSelectedItem();
+				if (isNumerical(et.getColumn(col))) {
+					dataType = Constants.NUMERICAL;
+					edgeColorAction.setBinCount(10);
+					edgeColorAction.setScale(Constants.QUANTILE_SCALE);
+				}
+				edgeColorAction.setDataField((String)edgeColorField.getSelectedItem());
+				edgeColorAction.setDataType(dataType);
+				edgeArrowColorAction.setDataField((String)edgeColorField.getSelectedItem());
+				edgeArrowColorAction.setDataType(dataType);
+				m_vis.run("animate");
+				m_vis.repaint();
+			}
+		});
+
+		er_Panel.add(edgeColorField);
 		er_Panel.add(showSelfEdges);
 
 		/* --------------------- AGG PANE ----------------------- */

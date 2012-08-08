@@ -1384,13 +1384,13 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		fill.add(new InGroupPredicate(Visualization.SEARCH_ITEMS), 
 			  ColorLib.rgb(200, 40, 55));
 
-		DataColorAction edgeColor = new DataColorAction(edges, TPROB,
+		FlexDataColorAction edgeColor = new FlexDataColorAction(edges, TPROB,
 			Constants.NOMINAL, VisualItem.STROKECOLOR,
 			ColorLib.getGrayscalePalette());
 		edgeColor.add(VisualItem.HOVER, ColorLib.rgb(200, 40, 60));
 		edgeColor.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 150, 68));
 
-		DataColorAction edgeFill = new DataColorAction(edges, TPROB,
+		FlexDataColorAction edgeFill = new FlexDataColorAction(edges, TPROB,
 			Constants.NOMINAL, VisualItem.FILLCOLOR,
 			ColorLib.getGrayscalePalette());
 		edgeFill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(200, 0, 0));
@@ -1421,13 +1421,13 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		// Set up actionlists
 		final ActionList draw = new ActionList();
 		draw.add(distFilter);
-		draw.add(edgeFill);
 		draw.add(new ColorAction(nodes, VisualItem.TEXTCOLOR, ColorLib.rgb(0, 0, 0)));
 		draw.add(new ColorAction(nodes, VisualItem.STROKECOLOR, ColorLib.gray(50)));
 		//draw.add(eqProbFilter);
 
 		ActionList animate = new ActionList(ActionList.INFINITY);
 		animate.add(edgeWeight);
+		animate.add(edgeFill);
 		animate.add(edgeColor);
 		animate.add(fill);
 		animate.add(new RepaintAction());
