@@ -51,6 +51,7 @@ public class ColumnChooserDialog extends JDialog implements MSMConstants {
 		typeComboBox = new JComboBox(types); 
 		nameField = new JTextField("name");
 		groupField = new JComboBox(visFields);
+		groupField.setEnabled(group == null);
 		if (group != null && visFields.contains(group)) {
 			groupField.setSelectedItem(group);
 		}

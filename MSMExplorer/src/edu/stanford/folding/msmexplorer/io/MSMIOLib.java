@@ -13,7 +13,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
-import prefuse.Visualization;
 import prefuse.data.Graph;
 import prefuse.data.Tuple;
 import prefuse.data.io.DataIOException;

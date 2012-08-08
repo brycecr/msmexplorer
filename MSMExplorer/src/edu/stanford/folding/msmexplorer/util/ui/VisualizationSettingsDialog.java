@@ -496,7 +496,10 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		});
 
+		er_Panel.add(new JLabel("Edge Color Field: "));
 		er_Panel.add(edgeColorField);
+		er_Panel.add(new JLabel("Edge Weight Field: "));
+		er_Panel.add(edgeWeightField);
 		er_Panel.add(showSelfEdges);
 
 		/* --------------------- AGG PANE ----------------------- */
