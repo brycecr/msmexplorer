@@ -68,12 +68,6 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 	private static final Integer[] FONTSIZES = {4,6,8,10,12,14,16,28,20,24,28,32,26,40,48,50,56,64,72,
 	84,96,110,130,150,170,200,240,280,320,360,400,450,500};
 
-	// Visualization group names. Should be same as MSMExplorer
-	private static final String AGGR = "aggregates";
-	private static final String GRAPH = "graph";
-	private static final String NODES = "graph.nodes";
-	private static final String EDGES = "graph.edges";
-
 	//Shaperender node shapes and corresponding labels in the JComboBox
 	private static final int[] SHAPES = {Constants.SHAPE_CROSS,
 		Constants.SHAPE_DIAMOND, Constants.SHAPE_ELLIPSE, Constants.SHAPE_HEXAGON,

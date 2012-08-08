@@ -6,18 +6,21 @@ import java.awt.Component;
 import java.io.File;
 import java.util.Date;
 import java.util.Dictionary;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
+import prefuse.Visualization;
 import prefuse.data.Graph;
-import prefuse.data.Table;
+import prefuse.data.Tuple;
 import prefuse.data.io.DataIOException;
 import prefuse.data.io.GraphMLReader;
 import prefuse.data.io.GraphMLWriter;
 import prefuse.data.io.GraphReader;
+import prefuse.data.tuple.TupleSet;
 import prefuse.util.io.IOLib;
 import prefuse.util.io.SimpleFileFilter;
 
@@ -43,7 +46,7 @@ public class MSMIOLib {
 	 * @param name name to give the new column
 	 * @return string pathname for the folder where the file was opened
 	 */
-	public static String applyNewlineDelimitedFile(Graph g, String name, Class<?> cls) {
+	public static String applyNewlineDelimitedFile(TupleSet g, String name, Class<?> cls) {
 		return applyNewlineDelimitedFile(null, DEFAULT_DIRECTORY, g, name, cls);
 	}
 
@@ -57,7 +60,7 @@ public class MSMIOLib {
 	 * @param cls type of new column
 	 * @return string pathname for the folder where the file was opened
 	 */
-	public static String applyNewlineDelimitedFile(Component c, Graph g, String name, Class<?> cls) {
+	public static String applyNewlineDelimitedFile(Component c, TupleSet g, String name, Class<?> cls) {
 		return applyNewlineDelimitedFile(c, DEFAULT_DIRECTORY, g, name, cls);
 	}
 	
@@ -71,7 +74,7 @@ public class MSMIOLib {
 	 * @param name name to give the new column
 	 * @return string pathname for the folder where the file was opened
 	 */
-	public static String applyNewlineDelimitedFile(Component c, String path, Graph g, String name) {
+	public static String applyNewlineDelimitedFile(Component c, String path, TupleSet g, String name) {
 		return applyNewlineDelimitedFile(c, path, g, name, null);
 	}
 
@@ -86,15 +89,19 @@ public class MSMIOLib {
 	 * @param cls type of new column
 	 * @return string pathname for the folder where the file was opened
 	 */
-	public static String applyNewlineDelimitedFile(Component c, String path, Graph g, String name, Class<?> cls) {
+	public static String applyNewlineDelimitedFile(Component c, String path, TupleSet g, String name, Class<?> cls) {
 		if (g == null) {
 			JOptionPane.showMessageDialog(c, "Attempting to apply a newline"
-				+ " delimited file to a null graph.", "Newline Delimited IO Error",
+				+ " delimited file to a null group.", "Newline Delimited IO Error",
 				JOptionPane.ERROR_MESSAGE);
 			return null;
 		} else if (name == null) {
 			JOptionPane.showMessageDialog(c, "Please provide a name for the new data.", 
 				"Nameless Data Error", JOptionPane.ERROR_MESSAGE);
+			return null;
+		} else if (!g.isAddColumnSupported()) {
+			JOptionPane.showMessageDialog(c, "Cannot add a new column to this graph.", 
+				"New Column Error", JOptionPane.ERROR_MESSAGE);
 			return null;
 		}
 		
@@ -112,16 +119,18 @@ public class MSMIOLib {
 
 		// if the type is recognized and specified, make a column
 		// of that type
-		if (cls == String.class || cls == int.class || cls == double.class
-			|| cls == float.class || cls == long.class || cls == boolean.class
-			|| cls == Date.class) {
-			g.addColumn(name, cls);
-
-		} else { // else, make a general object column
-			g.addColumn(name, Object.class);
+		if (((Tuple)g.tuples().next()).get(name) == null) {
+			if (cls == String.class || cls == int.class || cls == double.class
+				|| cls == float.class || cls == long.class || cls == boolean.class
+				|| cls == Date.class) {
+				g.addColumn(name, cls);
+				
+			} else { // else, make a general object column
+				g.addColumn(name, Object.class);
+			}
 		}
 
-		if (g.getNodeCount() != contents.length) {
+		if (g.getTupleCount() != contents.length) {
 			JOptionPane.showMessageDialog(c, "Length of newline delmited file "
 				+ "differs from number of nodes in graph; ambiguity in assigning"
 				+ " values to nodes.", "Newline File Length Error", 
@@ -129,9 +138,10 @@ public class MSMIOLib {
 			return null;
 		}
 
-		Table nt = g.getNodeTable();
-		for (int i = 0; i < contents.length; ++i) {
-			nt.set(i, name, contents[i]);
+		Iterator<Tuple> itr = g.tuples();
+		while (itr.hasNext()) {
+			Tuple tup = itr.next();
+			tup.set(name, contents[tup.getRow()]);
 		}
 		return f.getParent();
 	}
