@@ -9,6 +9,7 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
@@ -457,7 +458,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		sr_Panel.add(shapeActionField);
 		
 		/* -------------------- EDGE PANE --------------------- */
-		JPanel er_Panel = new JPanel(new GridLayout(0,2));
+		JPanel er_Panel = new JPanel(new GridBagLayout());
 		pane.addTab("Edge Render", er_Panel);
 
 		final JToggleButton showSelfEdges = new JToggleButton("Show Self Edges", m_er.getRenderSelfEdges());
@@ -471,7 +472,11 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 		final Table et = ((Graph)m_vis.getGroup(GRAPH)).getEdgeTable();
 		final Vector<String> etFields = new Vector<String>(5);
+		final Vector<String> etNumFields = new Vector<String>(5);
 		for (int i = et.getColumnNumber(TPROB); i < et.getColumnCount(); ++i) {
+			if (isNumerical(et.getColumn(i))) {
+				etNumFields.add(et.getColumnName(i));
+			}
 			etFields.add(et.getColumnName(i));
 		}
 		final JComboBox edgeColorField = new JComboBox(etFields);
@@ -487,7 +492,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 					edgeColorAction.setBinCount(10);
 					edgeColorAction.setScale(Constants.QUANTILE_SCALE);
 				}
-				edgeColorAction.setDataField((String)edgeColorField.getSelectedItem());
+				edgeColorAction.setDataField(col);
 				edgeColorAction.setDataType(dataType);
 				edgeArrowColorAction.setDataField((String)edgeColorField.getSelectedItem());
 				edgeArrowColorAction.setDataType(dataType);
@@ -496,10 +501,54 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		});
 
-		er_Panel.add(new JLabel("Edge Color Field: "));
-		er_Panel.add(edgeColorField);
-		er_Panel.add(new JLabel("Edge Weight Field: "));
-		er_Panel.add(edgeWeightField);
+		final JRangeSlider edgeWeightSlider = new JRangeSlider(1, 80000, 1, 400, Constants.ORIENT_TOP_BOTTOM);
+		edgeWeightSlider.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				ActionList animate = (ActionList)m_vis.getAction("animate");
+				DataSizeAction edgeWeightAction = (DataSizeAction)animate.get(0);
+				JRangeSlider slider = (JRangeSlider) e.getSource();
+				edgeWeightAction.setMinimumSize(slider.getLowValue()/4.0d);
+				edgeWeightAction.setMaximumSize(slider.getHighValue()/4.0d);
+				m_vis.run("animate");
+				m_vis.repaint();
+			}
+		});
+		edgeWeightSlider.setToolTipText("Set the range for edge thickness.");
+
+		final JComboBox edgeWeightField = new JComboBox(etNumFields);
+		edgeWeightField.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				ActionList animate = (ActionList)m_vis.getAction("animate");
+				DataSizeAction edgeWeightAction = (DataSizeAction)animate.get(0);
+				edgeWeightAction.setDataField((String)edgeWeightField.getSelectedItem());
+				edgeWeightAction.setMinimumSize(edgeWeightSlider.getLowValue());
+				edgeWeightAction.setMaximumSize(edgeWeightSlider.getHighValue());
+				m_vis.run("animate");
+				m_vis.repaint();
+			}
+		});
+
+		c = new GridBagConstraints();
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridwidth = 1;
+		er_Panel.add(new JLabel("Edge Color Field: "), c);
+		c.gridx = 1;
+		er_Panel.add(edgeColorField, c);
+		c.insets = new Insets(20,0,0,0);
+		c.gridx = 0;
+		c.gridy = 1;
+		er_Panel.add(new JLabel("Edge Weight Field: "), c);
+		c.gridx = 1;
+		c.gridy = 1;
+		er_Panel.add(edgeWeightField, c);
+		c.insets = new Insets(0,0,0,0);
+		c.gridx = 0;
+		c.gridy = 2;
+		c.gridwidth = 4;
+		er_Panel.add(edgeWeightSlider, c);
 		er_Panel.add(showSelfEdges);
 
 		/* --------------------- AGG PANE ----------------------- */

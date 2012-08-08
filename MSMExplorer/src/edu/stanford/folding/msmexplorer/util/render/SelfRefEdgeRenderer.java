@@ -35,8 +35,11 @@ public class SelfRefEdgeRenderer extends EdgeRenderer {
 			VisualItem item2 = edge.getTargetItem();
 			
 			//  self interaction
-			if ((item1 == item2) && showSelfEdges)
+			if (item1 == item2)
 			{
+				if (!showSelfEdges) {
+					return null;
+				}
 				getAlignedPoint(m_tmpPoints[0], item1.getBounds(), m_xAlign1, m_yAlign1);
 				getAlignedPoint(m_tmpPoints[1], item2.getBounds(), m_xAlign2, m_yAlign2);
 				

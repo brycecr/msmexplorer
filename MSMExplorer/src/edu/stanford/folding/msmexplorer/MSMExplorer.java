@@ -1392,13 +1392,14 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		edgeFill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(200, 0, 0));
 		edgeFill.setFilterPredicate(new VisiblePredicate());
 
-		StrokeAction edgeWeight = new StrokeAction(EDGES,
-			StrokeLib.getStroke(1.0f));
-		edgeWeight.add(VisualItem.HIGHLIGHT, StrokeLib.getStroke(2.0f));
+		DataSizeAction edgeWeight = new DataSizeAction(EDGES, "probability", 100, Constants.LOG_SCALE);
+		edgeWeight.setMaximumSize(1.0);
+		edgeWeight.setMinimumSize(1.0);
 
+		//currently unused
 		StrokeAction nodeWeight = new StrokeAction(NODES,
 			StrokeLib.getStroke(1.0f));
-		nodeWeight.add(VisualItem.HIGHLIGHT, StrokeLib.getStroke(2.0f));
+		//nodeWeight.add(new InGroupPredicate(Visualization.FOCUS_ITEMS), StrokeLib.getStroke(2.0f));
 
 		final DataSizeAction nodeSize = new DataSizeAction(NODES,
 			EQPROB, 50, Constants.LOG_SCALE);
