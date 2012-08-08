@@ -1389,11 +1389,13 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			ColorLib.getGrayscalePalette());
 		edgeColor.add(VisualItem.HOVER, ColorLib.rgb(200, 40, 60));
 		edgeColor.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 150, 68));
+		edgeColor.setFilterPredicate(new VisiblePredicate());
 
 		FlexDataColorAction edgeFill = new FlexDataColorAction(edges, TPROB,
 			Constants.NOMINAL, VisualItem.FILLCOLOR,
 			ColorLib.getGrayscalePalette());
 		edgeFill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(200, 0, 0));
+		edgeFill.setFilterPredicate(new VisiblePredicate());
 
 		StrokeAction edgeWeight = new StrokeAction(edges,
 			StrokeLib.getStroke(1.0f));

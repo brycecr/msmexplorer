@@ -470,7 +470,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 		final Table et = ((Graph)m_vis.getGroup(GRAPH)).getEdgeTable();
 		final Vector<String> etFields = new Vector<String>(5);
-		for (int i = 0; i < et.getColumnCount(); ++i) {
+		for (int i = et.getColumnNumber(TPROB); i < et.getColumnCount(); ++i) {
 			etFields.add(et.getColumnName(i));
 		}
 		final JComboBox edgeColorField = new JComboBox(etFields);
