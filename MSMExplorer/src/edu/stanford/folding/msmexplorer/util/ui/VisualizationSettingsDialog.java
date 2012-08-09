@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
@@ -625,6 +626,15 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			this(f, colorButton, new ArrayList<FlexDataColorAction>() {{add(action);}}, end, presetPalette); 
 		}
 		
+		/**
+		 * Initializes ActionListener with gui elements, actions, and an end of the spectrum.
+		 * 
+		 * @param f parent component (can be NULL)
+		 * @param colorButton the button this action is being assigned to. If button has ColorSwatch object as its icon, it will be updated on color change
+		 * @param actions an arraylist of all the actions to set the new palette for. All should use identical palettes.
+		 * @param end which end of the spectrum does this button set? Values must come from static constants in this class
+		 * @param presetPalette JComboBox that has palette presets so that adjusting the color on this button sets to "Interpolated" (can be NULL)
+		 */
 		public PaletteColorButtonActionListener(Frame f, JButton colorButton, ArrayList<FlexDataColorAction> actions, int end, JComboBox presetPalette) {
 			//Can't construct if any of these are the case...
 			if (colorButton == null || actions == null || actions.isEmpty() || (end != START && end != END)) {
@@ -640,8 +650,11 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		/**
 		 * Implements actionPerformed. Opens a color chooser dialog
 		 * to select a new color for the actions in m_actions.
+		 * Assigns that action to all the actions in m_actions
+		 * at the end specified by m_end and updates gui components
+		 * button color and presetPalette to reflect the change.
 		 * 
-		 * @param ae 
+		 * @param ae ActionEvent that initiated this call
 		 */
 		public void actionPerformed(ActionEvent ae) {
 			try {
@@ -661,7 +674,10 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 					for (int i = 0; i < m_actions.length; ++i) {
 						m_actions[i].setPalette(newPalette);
 					}
-					((ColorSwatch)m_colorButton.getIcon()).setColor(newColor);
+					Icon icn = m_colorButton.getIcon();
+					if (icn instanceof ColorSwatch) {
+						((ColorSwatch)icn).setColor(newColor);
+					}
 					if (m_presetPalette != null) {
 						m_presetPalette.setSelectedItem("Interpolated");
 					}
