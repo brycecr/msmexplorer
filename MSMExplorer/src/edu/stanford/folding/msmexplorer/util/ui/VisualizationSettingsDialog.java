@@ -12,6 +12,8 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -193,42 +195,13 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 		final JButton startColorButton = new JButton("Start Color", new
 				ColorSwatch(new Color(palette[palette.length-1])));
-		startColorButton.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				try {
-					Color newColor = JColorChooser.showDialog(f, "Choose Node Color", 
-							new Color(nodeColorAction.getDefaultColor()));
-					if (newColor != null) {
-						int[] oldPalette = nodeColorAction.getPalette();
-						int[] palette = ColorLib.getInterpolatedPalette(newColor.getRGB(), oldPalette[oldPalette.length-1]);
-						nodeColorAction.setPalette(palette);
-						((ColorSwatch)startColorButton.getIcon()).setColor(newColor);
-						presetPalettes.setSelectedIndex(0);
-					}
-				} catch (Exception e) {
-					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
-				}
-			}
-		});
+		startColorButton.addActionListener( new PaletteColorButtonActionListener(f, startColorButton,
+			nodeColorAction, PaletteColorButtonActionListener.START, presetPalettes));
 
 		final JButton endColorButton = new JButton("End Color", 
 			new ColorSwatch(new Color(palette[0])));
-		endColorButton.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				try {
-					Color newColor = JColorChooser.showDialog(f, "Choose Node Color", 
-							new Color(nodeColorAction.getDefaultColor()));
-					if (newColor != null) {
-						int[] palette = ColorLib.getInterpolatedPalette(nodeColorAction.getPalette()[0], newColor.getRGB());
-						nodeColorAction.setPalette(palette);
-						((ColorSwatch)endColorButton.getIcon()).setColor(newColor);
-						presetPalettes.setSelectedIndex(0);
-					}
-				} catch (Exception e) {
-					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
-				}
-			}
-		});
+		endColorButton.addActionListener( new PaletteColorButtonActionListener(f, endColorButton,
+			nodeColorAction, PaletteColorButtonActionListener.END, presetPalettes));
 
 		final JButton showColorChooser = new JButton("Node Color", new ColorSwatch(new Color(nodeColorAction.getPalette()[0])));
 		showColorChooser.addActionListener( new ActionListener() {
@@ -470,6 +443,10 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		});
 
+		ActionList animate = (ActionList)m_vis.getAction("animate");
+		final FlexDataColorAction edgeArrowColorAction = (FlexDataColorAction)animate.get(1);
+		final FlexDataColorAction edgeColorAction = (FlexDataColorAction)animate.get(2);
+
 		final Table et = ((Graph)m_vis.getGroup(GRAPH)).getEdgeTable();
 		final Vector<String> etFields = new Vector<String>(5);
 		final Vector<String> etNumFields = new Vector<String>(5);
@@ -482,9 +459,6 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		final JComboBox edgeColorField = new JComboBox(etFields);
 		edgeColorField.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				ActionList animate = (ActionList)m_vis.getAction("animate");
-				FlexDataColorAction edgeArrowColorAction = (FlexDataColorAction)animate.get(1);
-				FlexDataColorAction edgeColorAction = (FlexDataColorAction)animate.get(2);
 				int dataType = Constants.ORDINAL;
 				String col = (String)edgeColorField.getSelectedItem();
 				if (isNumerical(et.getColumn(col))) {
@@ -500,6 +474,56 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				m_vis.repaint();
 			}
 		});
+
+		final JComboBox edgePresetPalettes = new JComboBox(PALETTE_LABELS);
+		
+		int[] er_palette = edgeColorAction.getPalette();
+
+		final JButton edgeStartColorButton = new JButton("Start Color", new
+				ColorSwatch(new Color(er_palette[er_palette.length-1])));
+		edgeStartColorButton.addActionListener( new PaletteColorButtonActionListener(f, edgeStartColorButton,
+			new ArrayList<FlexDataColorAction>() {{add(edgeColorAction); add(edgeArrowColorAction);}},
+			PaletteColorButtonActionListener.START, edgePresetPalettes));
+
+		final JButton edgeEndColorButton = new JButton("End Color", new
+				ColorSwatch(new Color(er_palette[er_palette.length-1])));
+		edgeEndColorButton.addActionListener( new PaletteColorButtonActionListener(f, edgeEndColorButton, 
+			new ArrayList<FlexDataColorAction>() {{add(edgeColorAction); add(edgeArrowColorAction);}},
+			PaletteColorButtonActionListener.END, edgePresetPalettes));
+
+		edgePresetPalettes.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				int[] palette;
+				switch (edgePresetPalettes.getSelectedIndex()) {
+					case 0:
+						palette = ColorLib.getInterpolatedPalette(((ColorSwatch)
+							edgeStartColorButton.getIcon()).getColor().getRGB(), 
+							((ColorSwatch)edgeEndColorButton.getIcon()).getColor().getRGB());
+						break;
+					case 1:
+						palette = ColorLib.getCategoryPalette(12);
+						break;
+					case 2:
+						palette = ColorLib.getCoolPalette();
+						break;
+					case 3:
+						palette = ColorLib.getHotPalette();
+						break;
+					case 4:
+						palette = ColorLib.getGrayscalePalette();
+						break;
+					case 5:
+						palette = ColorLib.getHSBPalette();
+						break;
+					default:
+						return;
+				}
+				edgeColorAction.setPalette(palette);
+				edgeArrowColorAction.setPalette(palette);
+				m_vis.run("nodeFill");
+				m_vis.repaint();
+			}
+		}); 
 
 		final JRangeSlider edgeWeightSlider = new JRangeSlider(1, 80000, 1, 400, Constants.ORIENT_TOP_BOTTOM);
 		edgeWeightSlider.addChangeListener(new ChangeListener() {
@@ -531,25 +555,31 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 		c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.gridx = 0;
+		c.gridx = 3;
 		c.gridy = 0;
+		er_Panel.add(showSelfEdges, c);
+		c.gridx = 0;
+		c.gridy = 1;
 		c.gridwidth = 1;
 		er_Panel.add(new JLabel("Edge Color Field: "), c);
 		c.gridx = 1;
 		er_Panel.add(edgeColorField, c);
+		c.gridx = 2;
+		er_Panel.add(edgeStartColorButton, c);
+		c.gridx = 3;
+		er_Panel.add(edgeEndColorButton, c);
 		c.insets = new Insets(20,0,0,0);
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 2;
 		er_Panel.add(new JLabel("Edge Weight Field: "), c);
 		c.gridx = 1;
-		c.gridy = 1;
+		c.gridy = 2;
 		er_Panel.add(edgeWeightField, c);
 		c.insets = new Insets(0,0,0,0);
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = 3;
 		c.gridwidth = 4;
 		er_Panel.add(edgeWeightSlider, c);
-		er_Panel.add(showSelfEdges);
 
 		/* --------------------- AGG PANE ----------------------- */
 		JPanel pr_Panel = new JPanel();
@@ -572,5 +602,73 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * An ActionListener that backs buttons that select the start
+	 * and end colors for palettes for FlexDataColorActions.
+	 */
+	private class PaletteColorButtonActionListener implements ActionListener {
+
+		//Constants denoting which end of the palette this button sets
+		//the start or the beginning...
+		public static final int START = 0;
+		public static final int END = 0;
+
+		private int m_end;
+		private Frame m_frame;
+		private JButton m_colorButton;
+		private FlexDataColorAction[] m_actions;
+		private JComboBox m_presetPalette;
+
+		public PaletteColorButtonActionListener(Frame f, JButton colorButton, final FlexDataColorAction action, int end, JComboBox presetPalette) {
+			this(f, colorButton, new ArrayList<FlexDataColorAction>() {{add(action);}}, end, presetPalette); 
+		}
+		
+		public PaletteColorButtonActionListener(Frame f, JButton colorButton, ArrayList<FlexDataColorAction> actions, int end, JComboBox presetPalette) {
+			//Can't construct if any of these are the case...
+			if (colorButton == null || actions == null || actions.isEmpty() || (end != START && end != END)) {
+				Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, new Exception("Bad ColorButtonAction params"));
+				return;
+			}
+			m_frame = f;
+			m_colorButton = colorButton;
+			m_actions = Arrays.copyOf(actions.toArray(), actions.size(), FlexDataColorAction[].class);
+			m_presetPalette = presetPalette;
+		}
+
+		/**
+		 * Implements actionPerformed. Opens a color chooser dialog
+		 * to select a new color for the actions in m_actions.
+		 * 
+		 * @param ae 
+		 */
+		public void actionPerformed(ActionEvent ae) {
+			try {
+				Color newColor = JColorChooser.showDialog(m_frame, "Choose Node Color",
+					new Color(m_actions[0].getDefaultColor()));
+				if (newColor != null) {
+					int[] oldPalette = m_actions[0].getPalette();
+					int[] newPalette;
+					if (m_end == START) {
+						newPalette = ColorLib.getInterpolatedPalette(newColor.getRGB(), oldPalette[oldPalette.length-1]);
+					} else if (m_end == END) {
+						newPalette = ColorLib.getInterpolatedPalette(oldPalette[0], newColor.getRGB());
+					} else {
+						assert 5 == 3;
+						return;
+					}
+					for (int i = 0; i < m_actions.length; ++i) {
+						m_actions[i].setPalette(newPalette);
+					}
+					((ColorSwatch)m_colorButton.getIcon()).setColor(newColor);
+					if (m_presetPalette != null) {
+						m_presetPalette.setSelectedItem("Interpolated");
+					}
+				}
+			} catch (Exception e) {
+				Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
+			}
+		}
 	}
 }
