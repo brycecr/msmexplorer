@@ -725,7 +725,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			axisFields.add(nt.getColumnName(i));
 		}
 		axisFields.add ("Load new...");
-		axisFields.add ("None");
+		axisFields.add ("No Axis");
 
 		final JComboBox yAxisSelector = new JComboBox(axisFields);
 		final JComboBox xAxisSelector = new JComboBox(axisFields);
@@ -738,7 +738,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					ColumnChooserDialog ccf = new ColumnChooserDialog(frame, m_vis, NODES);
 					String name = ccf.showDialog();
 					if (name != null && !axisFields.contains(name)) {
-						axisFields.insertElementAt(name, axisFields.size()-1);
+						axisFields.insertElementAt(name, axisFields.size()-2);
 						xAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
 						yAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
 					} else {
@@ -766,7 +766,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					ColumnChooserDialog ccf = new ColumnChooserDialog(frame, m_vis, NODES);
 					String name = ccf.showDialog();
 					if (name != null) {
-						axisFields.insertElementAt(name, axisFields.size()-1);
+						axisFields.insertElementAt(name, axisFields.size()-2);
 						yAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
 						xAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
 					} else {
@@ -982,7 +982,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			public void actionPerformed(ActionEvent ae) {
 				SelfRefEdgeRenderer er = (SelfRefEdgeRenderer)((DefaultRendererFactory)m_vis.getRendererFactory()).getDefaultEdgeRenderer();
 				PolygonRenderer pr = null;
-				if (m_vis.getVisualGroup(AGGR) != null) {
+				if (m_vis.getVisualGroup(AGGR) != null && m_vis.getVisualGroup(AGGR).getTupleCount() > 0) {
 					pr = (PolygonRenderer)((VisualItem)m_vis.getVisualGroup(AGGR).tuples().next()).getRenderer();
 				}
 				VisualizationSettingsDialog vsd = new VisualizationSettingsDialog(frame, m_vis, tr, sr, er, pr);
@@ -1045,13 +1045,14 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					* */
 					if (m_vis.getGroup(AGGR) != null) {
 						m_vis.getGroup(AGGR).clear();
+						m_vis.removeAction(AGGR);
 					}
 					overSlider.setValue(overSlider.getMaximum());
 				} else if (top < hierarchy.graphs.length - 1) {
 					MSMExplorer.this.setAggregates(bottom, top);
 					if (g.getNodeTable().getColumnNumber("mapping") >= 0) {
 						axisFields.remove("mapping");
-						axisFields.insertElementAt("mapping", axisFields.size() - 1);
+						axisFields.insertElementAt("mapping", axisFields.size() - 2);
 					}
 				}
 			}

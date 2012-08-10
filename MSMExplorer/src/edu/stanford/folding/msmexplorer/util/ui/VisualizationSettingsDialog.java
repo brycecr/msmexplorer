@@ -34,9 +34,12 @@ import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import prefuse.action.Action;
 import prefuse.Constants;
 import prefuse.Visualization;
 import prefuse.action.ActionList;
+import prefuse.action.EncoderAction;
+import prefuse.action.assignment.DataColorAction;
 import prefuse.action.assignment.DataShapeAction;
 import prefuse.action.assignment.DataSizeAction;
 import prefuse.data.Graph;
@@ -89,6 +92,10 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 	private static final String[] PALETTE_LABELS = {"Interpolated", "Category", "Cool", 
 		"Hot", "Grayscale", "HSB"};
 
+	private static final String[] SCALE_LABELS = {"Linear", "Log", "Square Root", "Quantile"};
+	private static final Integer[] SCALE_TYPES = {Constants.LINEAR_SCALE, Constants.LOG_SCALE,
+		Constants.SQRT_SCALE, Constants.QUANTILE_SCALE};
+
 	public VisualizationSettingsDialog(final Frame f, Visualization vis, LabelRenderer lr, 
 					ShapeRenderer sr, SelfRefEdgeRenderer er, PolygonRenderer pr) {
 		//Init instance members
@@ -103,13 +110,14 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		JTabbedPane pane = new JTabbedPane();
 
 		//main layout box
-		Box main = new Box(BoxLayout.Y_AXIS);
+		//Box main = new Box(BoxLayout.Y_AXIS);
 
 		/* ----------------------- GENERAL PANE ----------------------- */
 		//General pane (displayed above the tabbed pane,
 		//but could be it's own tab as well...
-		JPanel gen_Panel = new JPanel();
-		gen_Panel.setLayout(new BoxLayout(gen_Panel, BoxLayout.Y_AXIS));
+		JPanel node_Panel = new JPanel();
+		pane.addTab("Gen. Node", node_Panel);
+		node_Panel.setLayout(new BoxLayout(node_Panel, BoxLayout.Y_AXIS));
 
 		//Slider sets range for automatically interpolated node size
 		final DataSizeAction nodeSizeAction = (DataSizeAction)m_vis.getAction("nodeSize");
@@ -175,6 +183,11 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		});
 		nodeSizeActionField.setSelectedItem(nodeSizeAction.getDataField());
 
+		final JComboBox nodeSizeScaleField = new JComboBox(SCALE_LABELS);
+		nodeSizeScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeSizeAction.getScale()));
+		nodeSizeScaleField.addActionListener( new ScaleComboxActionListener(nodeSizeScaleField,
+			nodeSizeAction, m_vis.getAction("nodeSize")));
+
 		final FlexDataColorAction nodeColorAction = (FlexDataColorAction)m_vis.getAction("nodeFill");
 		final JComboBox nodeColorActionField = new JComboBox(fields);
 		nodeColorActionField.addActionListener( new ActionListener() {
@@ -191,6 +204,11 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		});
 		nodeColorActionField.setSelectedItem(nodeColorAction.getDataField());
+
+		JComboBox nodeColorScaleField = new JComboBox(SCALE_LABELS);
+		nodeColorScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeColorAction.getScale()));
+		nodeColorScaleField.addActionListener( new ScaleComboxActionListener(nodeColorScaleField,
+				nodeColorAction, m_vis.getAction("nodeFill")));
 
 		int[] palette = nodeColorAction.getPalette();
 		final JComboBox presetPalettes = new JComboBox(PALETTE_LABELS);
@@ -266,19 +284,9 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		GridBagConstraints c = new GridBagConstraints();
 		gen_node.setBorder(BorderFactory.createTitledBorder("Gen. Node Appearance"));
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.gridwidth = 1;
-		c.gridx = 0;
-		c.gridy = 0;
-		gen_node.add(new JLabel("Node Size Range: "), c);
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.gridwidth = 4;
+		c.gridwidth = 3;
 		c.gridx = 1;
 		c.gridy = 0;
-		gen_node.add(nodeSizeSlider, c);
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.gridwidth = 1;
-		c.gridx = 2;
-		c.gridy = 1;
 		gen_node.add(showColorChooser, c);
 
 		JPanel gen_nodeAction = new JPanel(new GridBagLayout());
@@ -288,31 +296,51 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		c.gridx = 0;
 		c.gridy = 0;
 		gen_nodeAction.add(new JLabel("Node Size Field: "), c);
-		c.gridwidth = 3;
+		c.gridwidth = 1;
 		c.gridx = 1;
 		gen_nodeAction.add(nodeSizeActionField, c);
-		c.gridwidth = 1;
+		c.gridx = 2;
+		gen_nodeAction.add(new JLabel("Scale Type: ", JLabel.RIGHT), c);
+		c.gridx = 3;
+		gen_nodeAction.add(nodeSizeScaleField, c);
 		c.gridx = 0;
 		c.gridy = 1;
+		gen_nodeAction.add(new JLabel("Node Size Range: "), c);
+		c.gridx = 1;
+		c.gridwidth = 3;
+		gen_nodeAction.add(nodeSizeSlider, c);
+		c.insets = new Insets(20,0,0,0);
+		c.gridwidth = 1;
+		c.gridx = 0;
+		c.gridy = 2;
 		gen_nodeAction.add(new JLabel("Node Color Field"), c);
 		c.gridx = 1;
 		gen_nodeAction.add(nodeColorActionField, c);
 		c.gridx = 2;
-		gen_nodeAction.add(startColorButton, c);
+		gen_nodeAction.add(new JLabel("Scale Type: ", JLabel.RIGHT), c);
 		c.gridx = 3;
+		gen_nodeAction.add(nodeColorScaleField, c);
+		c.gridx = 0;
+		c.gridy = 3;
+		c.insets = new Insets(0,0,0,0);
+		gen_nodeAction.add(new JLabel("Color Palette: ", JLabel.RIGHT), c);
+		c.gridx = 1;
+		gen_nodeAction.add(startColorButton, c);
+		c.gridx = 2;
 		gen_nodeAction.add(endColorButton, c);
-		c.gridx = 4;
+		c.gridx = 3;
 		gen_nodeAction.add(presetPalettes, c);
 
-		gen_Panel.add(gen_node);
-		gen_Panel.add(gen_nodeAction);
+		gen_node.setOpaque(false);
+		gen_nodeAction.setOpaque(false);
+		node_Panel.add(gen_node);
+		node_Panel.add(gen_nodeAction);
+		node_Panel.setOpaque(false);
 
-		main.add(gen_Panel);
-		
 		/* ----------------------- LABEL PANE ----------------------- */
 		JPanel lr_Panel = new JPanel();
 		lr_Panel.setLayout(new GridLayout(0,2));
-		pane.addTab("Label Render", lr_Panel);
+		pane.addTab("Label", lr_Panel);
 
 		final JSpinner lr_Rounded = new JSpinner(new SpinnerNumberModel(8, 0, 1000, 1));
 		lr_Rounded.addChangeListener(new ChangeListener() {
@@ -322,7 +350,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				m_vis.repaint();
 			}
 		});
-		lr_Panel.add(new JLabel("Rounding Radius:"));
+		lr_Panel.add(new JLabel("Rounding Radius: ", JLabel.RIGHT));
 		lr_Panel.add(lr_Rounded);
 
 		final JComboBox lr_fontSize = new JComboBox(FONTSIZES);
@@ -334,7 +362,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		});
 		lr_fontSize.setSelectedItem(((VisualItem)m_vis.getVisualGroup(NODES).tuples().next()).getFont().getSize());
-		lr_Panel.add(new JLabel("Label Font Size"));
+		lr_Panel.add(new JLabel("Label Font Size: ", JLabel.RIGHT));
 		lr_Panel.add(lr_fontSize);
 
 		final JComboBox lr_imagePos = new JComboBox(IMAGEPOS_LABELS);
@@ -345,7 +373,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				m_vis.repaint();
 			}
 		});
-		lr_Panel.add(new JLabel("Image Position"));
+		lr_Panel.add(new JLabel("Image Position: ", JLabel.RIGHT));
 		lr_Panel.add(lr_imagePos);
 
 		final JToggleButton lr_showLabel = new JToggleButton("Images Only", m_lr.getTextField() == null);
@@ -369,7 +397,8 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		});
 		lr_Panel.add(lr_showLabel);
 
-		JButton lr_showLabelColorChooser = new JButton("Text Color"); 
+		final JButton lr_showLabelColorChooser = new JButton("Text Color", new ColorSwatch(
+				new Color(((VisualItem)m_vis.getGroup(NODES).tuples().next()).getTextColor()))); 
 		lr_showLabelColorChooser.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				try {
@@ -377,6 +406,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 					Color newFill = JColorChooser.showDialog(f, "Choose Node Color", new Color(fill.getDefaultColor()));
 					if (newFill != null) {
 						m_vis.setValue(NODES, null, VisualItem.TEXTCOLOR, newFill.getRGB());
+						((ColorSwatch)lr_showLabelColorChooser.getIcon()).setColor(newFill);
 					}
 				} catch (Exception e) {
 					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
@@ -385,12 +415,13 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		});
 		lr_showLabelColorChooser.setToolTipText("Open a dialog to select a new label text color.");
 		lr_Panel.add(lr_showLabelColorChooser);
+		lr_Panel.add(Box.createVerticalGlue());
 		lr_Panel.setOpaque(false);
 
 
 		/* ------------------ SHAPE PANE --------------------- */
 		JPanel sr_Panel = new JPanel(new GridBagLayout());
-		pane.addTab("Shape Render", sr_Panel);
+		pane.addTab("Shape", sr_Panel);
 		
 		final JComboBox shapeComboBox = new JComboBox(SHAPES_LABELS);
 		shapeComboBox.addActionListener( new ActionListener() {
@@ -445,7 +476,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		
 		/* -------------------- EDGE PANE --------------------- */
 		JPanel er_Panel = new JPanel(new GridBagLayout());
-		pane.addTab("Edge Render", er_Panel);
+		pane.addTab("Edge", er_Panel);
 
 		final JToggleButton showSelfEdges = new JToggleButton("Show Self Edges", m_er.getRenderSelfEdges());
 		showSelfEdges.addActionListener( new ActionListener() {
@@ -456,9 +487,11 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		});
 
-		ActionList animate = (ActionList)m_vis.getAction("animate");
+		final ActionList animate = (ActionList)m_vis.getAction("animate");
 		final FlexDataColorAction edgeArrowColorAction = (FlexDataColorAction)animate.get(1);
 		final FlexDataColorAction edgeColorAction = (FlexDataColorAction)animate.get(2);
+		edgeColorAction.setDataType(Constants.NUMERICAL);
+		edgeArrowColorAction.setDataType(Constants.NUMERICAL);
 
 		final Table et = ((Graph)m_vis.getGroup(GRAPH)).getEdgeTable();
 		final Vector<String> etFields = new Vector<String>(5);
@@ -487,6 +520,12 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				m_vis.repaint();
 			}
 		});
+
+		final JComboBox edgeColorScaleField = new JComboBox(SCALE_LABELS);
+		edgeColorScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeColorAction.getScale()));
+		edgeColorScaleField.addActionListener( new ScaleComboxActionListener(edgeColorScaleField,
+				new ArrayList<EncoderAction>(2){{add(edgeColorAction);add(edgeArrowColorAction);}}, 
+				m_vis.getAction("animate")));
 
 		final JComboBox edgePresetPalettes = new JComboBox(PALETTE_LABELS);
 		
@@ -538,14 +577,14 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		}); 
 
-		final JRangeSlider edgeWeightSlider = new JRangeSlider(1, 80000, 1, 400, Constants.ORIENT_TOP_BOTTOM);
+		final DataSizeAction edgeWeightAction = (DataSizeAction)animate.get(0);
+
+		final JRangeSlider edgeWeightSlider = new JRangeSlider(1, 80000, 1, 1, Constants.ORIENT_TOP_BOTTOM);
 		edgeWeightSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				ActionList animate = (ActionList)m_vis.getAction("animate");
-				DataSizeAction edgeWeightAction = (DataSizeAction)animate.get(0);
 				JRangeSlider slider = (JRangeSlider) e.getSource();
-				edgeWeightAction.setMinimumSize(slider.getLowValue()/4.0d);
-				edgeWeightAction.setMaximumSize(slider.getHighValue()/4.0d);
+				edgeWeightAction.setMinimumSize((double)slider.getLowValue()/5.0d);
+				edgeWeightAction.setMaximumSize((double)slider.getHighValue()/5.0d);
 				m_vis.run("animate");
 				m_vis.repaint();
 			}
@@ -555,8 +594,6 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		final JComboBox edgeWeightField = new JComboBox(etNumFields);
 		edgeWeightField.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				ActionList animate = (ActionList)m_vis.getAction("animate");
-				DataSizeAction edgeWeightAction = (DataSizeAction)animate.get(0);
 				edgeWeightAction.setDataField((String)edgeWeightField.getSelectedItem());
 				edgeWeightAction.setMinimumSize(edgeWeightSlider.getLowValue());
 				edgeWeightAction.setMaximumSize(edgeWeightSlider.getHighValue());
@@ -564,6 +601,11 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				m_vis.repaint();
 			}
 		});
+
+		final JComboBox edgeWeightScaleField = new JComboBox(SCALE_LABELS);
+		edgeWeightScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeColorAction.getScale()));
+		edgeWeightScaleField.addActionListener( new ScaleComboxActionListener(edgeWeightScaleField,
+			edgeWeightAction, m_vis.getAction("animate")));
 
 		c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -579,17 +621,27 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		c.gridx = 1;
 		er_Panel.add(edgeColorField, c);
 		c.gridx = 2;
-		er_Panel.add(edgeStartColorButton, c);
+		er_Panel.add(new JLabel("Scale Type: ", JLabel.RIGHT), c);
 		c.gridx = 3;
-		er_Panel.add(edgeEndColorButton, c);
-		c.gridx = 0;
-		c.gridy = 2;
-		er_Panel.add(new JLabel("Edge Weight Field: "), c);
+		er_Panel.add(edgeColorScaleField, c);
+		c.insets = new Insets(0,0,0,0);
 		c.gridx = 1;
 		c.gridy = 2;
-		er_Panel.add(edgeWeightField, c);
-		c.insets = new Insets(0,0,0,0);
+		er_Panel.add(edgeStartColorButton, c);
+		c.gridx = 2;
+		er_Panel.add(edgeEndColorButton, c);
+		c.insets = new Insets(20,0,0,0);
+		c.gridx = 0;
 		c.gridy = 3;
+		er_Panel.add(new JLabel("Edge Weight Field: "), c);
+		c.gridx = 1;
+		er_Panel.add(edgeWeightField, c);
+		c.gridx = 2;
+		er_Panel.add(new JLabel("Scale Type: ", JLabel.RIGHT), c);
+		c.gridx = 3;
+		er_Panel.add(edgeWeightScaleField, c);
+		c.insets = new Insets(0,0,0,0);
+		c.gridy = 4;
 		c.gridx = 0;
 		er_Panel.add(new JLabel("Weight Range: "), c);
 		c.gridx = 1;
@@ -598,10 +650,10 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		er_Panel.setOpaque(false);
 
 		/* --------------------- AGG PANE ----------------------- */
-		if (m_vis.getGroup(AGGR) != null) {
+		if (m_pr != null) {
 			assert m_pr != null;
 			JPanel pr_Panel = new JPanel( new GridBagLayout());
-			pane.addTab("Aggregate Render", pr_Panel);
+			pane.addTab("Agg.", pr_Panel);
 
 			final JSpinner aggCurve = new JSpinner(new SpinnerNumberModel(m_pr.getCurveSlack(), 0.0d, 10.0d, .02d));
 			aggCurve.addChangeListener( new ChangeListener() {
@@ -642,9 +694,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 					switch (pr_presetPalettes.getSelectedIndex()) {
 						case 0:
 							Color start = ((ColorSwatch)aggrStartColorButton.getIcon()).getColor();
-							start = new Color(start.getRed(), start.getGreen(), start.getBlue(), 128);
 							Color end = ((ColorSwatch)aggrEndColorButton.getIcon()).getColor();
-							end = new Color(end.getRed(), end.getGreen(), end.getBlue(), 128);
 							palette = ColorLib.getInterpolatedPalette(start.getRGB(), end.getRGB());
 							break;
 						case 1:
@@ -652,30 +702,24 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 							break;
 						case 2:
 							palette = ColorLib.getCoolPalette();
-							for (int i = 0; i < palette.length; ++i) {
-								palette[i] = (palette[i] | 0x80000000) & 0x8000ffff;
-							}
 							break;
 						case 3:
 							palette = ColorLib.getHotPalette();
-							for (int i = 0; i < palette.length; ++i) {
-								palette[i] = (palette[i] | 0x80000000) & 0x8000ffff;
-							}
 							break;
 						case 4:
 							palette = ColorLib.getGrayscalePalette();
-							for (int i = 0; i < palette.length; ++i) {
-								palette[i] = (palette[i] | 0x80000000) & 0x8000ffff;
-							}
 							break;
 						case 5:
 							palette = ColorLib.getHSBPalette();
-							for (int i = 0; i < palette.length; ++i) {
-								palette[i] = (palette[i] | 0x80000000) & 0x8000ffff;
-							}
 							break;
 						default:
 							return;
+					}
+					//This bit of crunchiness sets the alpha at value 128
+					//redundant for category palette but it's hard to argue
+					//that's a big issue...
+					for (int i = 0; i < palette.length; ++i) {
+						palette[i] = (palette[i] | 0x80000000) & 0x80ffffff;
 					}
 					aggrColorAction.setPalette(palette);
 					m_vis.run("draw");
@@ -706,8 +750,8 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 
 
-		main.add(pane);
-		add(main);
+		pane.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT); //unfortunately doesn't seem to affect OSX...
+		add(pane);
 		pack();
 	}
 
@@ -805,6 +849,52 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			} catch (Exception e) {
 				Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, e);
 			}
+		}
+	}
+
+	/**
+	 * A simple ActionListener that manages actions for JComboBoxes that 
+	 * choose scale types for Data___Actions (anything that responds to getScale and setScale)
+	 */
+	private class ScaleComboxActionListener implements ActionListener {
+
+		private Action[] m_actions = new Action[0];
+		private EncoderAction[] m_sizeActions = new EncoderAction[0];
+		private JComboBox m_field;
+
+		public ScaleComboxActionListener(JComboBox field, EncoderAction sizeAction, final Action action) {
+			this(field, sizeAction, new ArrayList<Action>(1){{add(action);}});
+		}
+		
+		public ScaleComboxActionListener(JComboBox field, final EncoderAction sizeAction, ArrayList<Action> actions) {
+			this(field, new ArrayList<EncoderAction>(1){{add(sizeAction);}}, actions);
+		}
+
+		public ScaleComboxActionListener(JComboBox field, ArrayList<EncoderAction> sizeActions, final Action action) {
+			this(field, sizeActions, new ArrayList<Action>(1){{add(action);}});
+		}
+
+		public ScaleComboxActionListener(JComboBox field, ArrayList<EncoderAction> sizeActions, ArrayList<Action> actions) {
+			m_actions = actions.toArray(m_actions);
+			m_sizeActions = sizeActions.toArray(m_sizeActions);
+			m_field = field;
+		}
+		
+		public void actionPerformed(ActionEvent ae) {
+			for (int i = 0; i < m_sizeActions.length; ++i) {
+				EncoderAction m_sizeAction = m_sizeActions[i];
+				if (m_sizeAction instanceof FlexDataColorAction) {
+					((FlexDataColorAction)m_sizeAction).setScale(SCALE_TYPES[m_field.getSelectedIndex()]);
+				} else if (m_sizeAction instanceof DataColorAction) {
+					((DataColorAction)m_sizeAction).setScale(SCALE_TYPES[m_field.getSelectedIndex()]);
+				} else if (m_sizeAction instanceof DataSizeAction) {
+					((DataSizeAction)m_sizeAction).setScale(SCALE_TYPES[m_field.getSelectedIndex()]);
+				}
+			}
+			for (int i = 0; i < m_actions.length; ++i) {
+				m_actions[i].run();
+			}
+			m_vis.repaint();
 		}
 	}
 }
