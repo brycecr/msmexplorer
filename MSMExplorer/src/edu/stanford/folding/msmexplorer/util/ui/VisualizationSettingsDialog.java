@@ -121,6 +121,14 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 		//Slider sets range for automatically interpolated node size
 		final DataSizeAction nodeSizeAction = (DataSizeAction)m_vis.getAction("nodeSize");
+		int small = (int)nodeSizeAction.getMinimumSize();
+		int large = (int)nodeSizeAction.getMaximumSize();
+		if (small < 1) {
+			small = 1;
+		}
+		if (large < 1) {
+			large = 1;
+		}
 		final JRangeSlider nodeSizeSlider = new JRangeSlider(1, 2000, 
 			(int)nodeSizeAction.getMinimumSize(), (int)nodeSizeAction.getMaximumSize(), 
 			JRangeSlider.HORIZONTAL);
@@ -227,11 +235,10 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		showColorChooser.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				try {
-					FlexDataColorAction fill = (FlexDataColorAction)((ActionList)m_vis.getAction("animate")).get(2);
-					Color newFill = JColorChooser.showDialog(f, "Choose Node Color", new Color(fill.getDefaultColor()));
+					Color newFill = JColorChooser.showDialog(f, "Choose Node Color", new Color(nodeColorAction.getDefaultColor()));
 					if (newFill != null) {
 						int[] palette = {newFill.getRGB()};
-						fill.setPalette(palette);
+						nodeColorAction.setPalette(palette);
 						((ColorSwatch)showColorChooser.getIcon()).setColor(newFill);
 						((ColorSwatch)startColorButton.getIcon()).setColor(newFill);
 						((ColorSwatch)endColorButton.getIcon()).setColor(newFill);
@@ -503,6 +510,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			etFields.add(et.getColumnName(i));
 		}
 		final JComboBox edgeColorField = new JComboBox(etFields);
+		edgeColorField.setSelectedItem(edgeColorAction.getDataField());
 		edgeColorField.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				int dataType = Constants.ORDINAL;
@@ -514,7 +522,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				}
 				edgeColorAction.setDataField(col);
 				edgeColorAction.setDataType(dataType);
-				edgeArrowColorAction.setDataField((String)edgeColorField.getSelectedItem());
+				edgeArrowColorAction.setDataField(col);
 				edgeArrowColorAction.setDataType(dataType);
 				m_vis.run("animate");
 				m_vis.repaint();
@@ -783,7 +791,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		private int m_end;
 		private Frame m_frame;
 		private JButton m_colorButton;
-		private FlexDataColorAction[] m_actions;
+		private FlexDataColorAction[] m_actions = new FlexDataColorAction[0];
 		private JComboBox m_presetPalette;
 
 		public PaletteColorButtonActionListener(Frame f, JButton colorButton, final FlexDataColorAction action, int end, JComboBox presetPalette) {
@@ -807,7 +815,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 			m_frame = f;
 			m_colorButton = colorButton;
-			m_actions = Arrays.copyOf(actions.toArray(), actions.size(), FlexDataColorAction[].class);
+			m_actions = actions.toArray(m_actions);
 			m_presetPalette = presetPalette;
 		}
 
