@@ -32,6 +32,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Point2D;
@@ -203,6 +204,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 		graphButton.setToolTipText("Visualize a Markov State Model");
+		graphButton.setSelected(true);
+		graphButton.setMnemonic(KeyEvent.VK_ENTER);
 
 		//Perform TPT without proceeding through Graph View
 		JButton tptButton = new JButton("Just TPT");

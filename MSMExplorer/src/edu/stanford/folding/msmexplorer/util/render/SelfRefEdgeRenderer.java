@@ -65,23 +65,4 @@ public class SelfRefEdgeRenderer extends EdgeRenderer {
 		
 		return super.getRawShape(item);
 	} //getRawShape
-	
-	/**
-	 * @see prefuse.render.Renderer#render(java.awt.Graphics2D, prefuse.visual.VisualItem)
-	 */
-	@Override
-	public void render(Graphics2D g, VisualItem item) {
-		// render the edge line
-		super.render(g, item);
-
-		EdgeItem edge = (EdgeItem) item;
-		VisualItem item1 = edge.getSourceItem();
-		VisualItem item2 = edge.getTargetItem();
-
-		// render the edge arrow head, if appropriate
-		if ( m_curArrow != null && item1 == item2 ) {
-			g.setPaint(ColorLib.getColor(item.getFillColor()));
-			g.fill(m_curArrow);
-		}
-	}
 }

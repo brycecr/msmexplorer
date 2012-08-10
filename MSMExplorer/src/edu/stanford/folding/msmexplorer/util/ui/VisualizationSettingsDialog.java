@@ -580,14 +580,18 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				}
 				edgeColorAction.setPalette(palette);
 				edgeArrowColorAction.setPalette(palette);
-				m_vis.run("nodeFill");
+				m_vis.run("animate");
 				m_vis.repaint();
 			}
 		}); 
 
 		final DataSizeAction edgeWeightAction = (DataSizeAction)animate.get(0);
 
-		final JRangeSlider edgeWeightSlider = new JRangeSlider(1, 80000, 1, 1, Constants.ORIENT_TOP_BOTTOM);
+		int smallw = (int)edgeWeightAction.getMinimumSize();
+		int largew = (int)edgeWeightAction.getMaximumSize();
+		smallw = (smallw > 0) ? smallw : 1;
+		largew = (largew > 0) ? largew : 1;
+		final JRangeSlider edgeWeightSlider = new JRangeSlider(1, 80000, smallw, largew, Constants.ORIENT_TOP_BOTTOM);
 		edgeWeightSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				JRangeSlider slider = (JRangeSlider) e.getSource();
@@ -638,6 +642,8 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		er_Panel.add(edgeStartColorButton, c);
 		c.gridx = 2;
 		er_Panel.add(edgeEndColorButton, c);
+		c.gridx = 3;
+		er_Panel.add(edgePresetPalettes, c);
 		c.insets = new Insets(20,0,0,0);
 		c.gridx = 0;
 		c.gridy = 3;
