@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file converted from MSMBuilder Output by MSMtoGML -->
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+<graph edgedefault="directed">
+<key id="label" for="node" attr.name="label" attr.type="string"/>
+<key id="probability" for="edge" attr.name="probability" attr.type="double"/>
+<key id="eqProb" for="node" attr.name="eqProb" attr.type="double"/>
+<!-- Nodes -->
+<node id="0">
+	<data key="label">0</data>
+        <data key="eqProb">.9</data>
+</node>
+<node id="1">
+	<data key="label">1</data>
+        <data key="eqProb">.7</data>
+</node>
+<node id="2">
+	<data key="label">2</data>
+        <data key="eqProb">.5</data>
+</node>
+<node id="3">
+	<data key="label">3</data>
+        <data key="eqProb">.3</data>
+</node>
+<node id="4">
+	<data key="label">4</data>
+        <data key="eqProb">.1</data>
+</node>
+<!-- Edges -->
+<edge id="e00" source="0" target="0">
+	<data key="probability">0.770115</data>
+</edge>
+<edge id="e02" source="0" target="2">
+	<data key="probability">0.00198939</data>
+</edge>
+<edge id="e03" source="0" target="3">
+	<data key="probability">0.196065</data>
+</edge>
+<edge id="e04" source="0" target="4">
+	<data key="probability">0.0309461</data>
+</edge>
+<edge id="e11" source="1" target="1">
+	<data key="probability">0.826403</data>
+</edge>
+<edge id="e12" source="1" target="2">
+	<data key="probability">0.030099</data>
+</edge>
+<edge id="e13" source="1" target="3">
+	<data key="probability">0.069967</data>
+</edge>
+<edge id="e14" source="1" target="4">
+	<data key="probability">0.0730033</data>
+</edge>
+<edge id="e20" source="2" target="0">
+	<data key="probability">0.00120822</data>
+</edge>
+<edge id="e21" source="2" target="1">
+	<data key="probability">0.0306081</data>
+</edge>
+<edge id="e22" source="2" target="2">
+	<data key="probability">0.808431</data>
+</edge>
+<edge id="e23" source="2" target="3">
+	<data key="probability">0.152638</data>
+</edge>
+<edge id="e30" source="3" target="0">
+	<data key="probability">0.0120199</data>
+</edge>
+<edge id="e31" source="3" target="1">
+	<data key="probability">0.00718216</data>
+</edge>
+<edge id="e32" source="3" target="2">
+	<data key="probability">0.0154078</data>
+</edge>
+<edge id="e33" source="3" target="3">
+	<data key="probability">0.889801</data>
+</edge>
+<edge id="e34" source="3" target="4">
+	<data key="probability">0.0755888</data>
+</edge>
+<edge id="e40" source="4" target="0">
+	<data key="probability">0.000629627</data>
+</edge>
+<edge id="e41" source="4" target="1">
+	<data key="probability">0.00248703</data>
+</edge>
+<edge id="e43" source="4" target="3">
+	<data key="probability">0.0250861</data>
+</edge>
+<edge id="e44" source="4" target="4">
+	<data key="probability">0.971559</data>
+</edge>
+</graph>
+</graphml>
