@@ -32,6 +32,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Point2D;
@@ -149,14 +150,9 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 	private static final int SIZE_THRESHOLD = 250; //Threshold for "big" graph behavior
 	private static final int DEGREE_THRESHOLD = 60; //Degree threshold for "big" graph
 
+
 	//Current Version #
 	private static final String version = "v0.04";
-
-	// Visualization group names
-	private static final String aggr = "aggregates";
-	private static final String graph = "graph";
-	private static final String nodes = "graph.nodes";
-	private static final String edges = "graph.edges";
 
 	// The Visualization object.
 	private final Visualization m_vis = new Visualization();
@@ -208,6 +204,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 		graphButton.setToolTipText("Visualize a Markov State Model");
+		graphButton.setSelected(true);
+		graphButton.setMnemonic(KeyEvent.VK_ENTER);
 
 		//Perform TPT without proceeding through Graph View
 		JButton tptButton = new JButton("Just TPT");
@@ -421,7 +419,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 				}
 				double val = eqProbSlider.getValue().doubleValue();
 
-				Iterator itr = m_vis.visibleItems(nodes);
+				Iterator itr = m_vis.visibleItems(NODES);
 				while (itr.hasNext()) {
 					VisualItem i = (VisualItem) itr.next();
 					Tuple n = m_vis.getSourceTuple(i);
@@ -544,7 +542,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		// (circle or rounded-rectangle label)
 		ButtonGroup nodeRenderers = new ButtonGroup();
 
-		m_vis.setValue(nodes, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
+		m_vis.setValue(NODES, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
 		JRadioButton circleRB = new JRadioButton("Shape", false);
 		circleRB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -705,7 +703,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 
-		SearchQueryBinding sq = new SearchQueryBinding((Table) m_vis.getGroup(nodes), "label",
+		SearchQueryBinding sq = new SearchQueryBinding((Table) m_vis.getGroup(NODES), "label",
 			(SearchTupleSet) m_vis.getGroup(Visualization.SEARCH_ITEMS));
 
 		final JSearchPanel search = sq.createSearchPanel(false);
@@ -730,7 +728,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			axisFields.add(nt.getColumnName(i));
 		}
 		axisFields.add ("Load new...");
-		axisFields.add ("None");
+		axisFields.add ("No Axis");
 
 		final JComboBox yAxisSelector = new JComboBox(axisFields);
 		final JComboBox xAxisSelector = new JComboBox(axisFields);
@@ -740,10 +738,10 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			public void actionPerformed(ActionEvent ae) {
 				String selected = (String)xAxisSelector.getSelectedItem();
 				if (selected.equals("Load new...")) {
-					ColumnChooserDialog ccf = new ColumnChooserDialog(frame, g);
+					ColumnChooserDialog ccf = new ColumnChooserDialog(frame, m_vis, NODES);
 					String name = ccf.showDialog();
-					if (name != null) {
-						axisFields.insertElementAt(name, axisFields.size()-1);
+					if (name != null && !axisFields.contains(name)) {
+						axisFields.insertElementAt(name, axisFields.size()-2);
 						xAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
 						yAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
 					} else {
@@ -768,10 +766,10 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			public void actionPerformed(ActionEvent ae) {
 				String selected = (String)yAxisSelector.getSelectedItem();
 				if (selected.equals("Load new...")) {
-					ColumnChooserDialog ccf = new ColumnChooserDialog(frame, g);
+					ColumnChooserDialog ccf = new ColumnChooserDialog(frame, m_vis, NODES);
 					String name = ccf.showDialog();
 					if (name != null) {
-						axisFields.insertElementAt(name, axisFields.size()-1);
+						axisFields.insertElementAt(name, axisFields.size()-2);
 						yAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
 						xAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
 					} else {
@@ -830,9 +828,9 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 						new AxisRotateRenderer(Constants.FAR_LEFT, Constants.FAR_BOTTOM));
 					
 					Rectangle2D bounds = display.getItemBounds();
-					AxisLayout xaxis = new AxisLayout(nodes, (String)xAxisSelector.getSelectedItem(), Constants.X_AXIS, VisiblePredicate.TRUE);
+					AxisLayout xaxis = new AxisLayout(NODES, (String)xAxisSelector.getSelectedItem(), Constants.X_AXIS, VisiblePredicate.TRUE);
 					xaxis.setLayoutBounds(bounds);
-					AxisLayout yaxis = new AxisLayout(nodes, (String)yAxisSelector.getSelectedItem(), Constants.Y_AXIS, VisiblePredicate.TRUE);
+					AxisLayout yaxis = new AxisLayout(NODES, (String)yAxisSelector.getSelectedItem(), Constants.Y_AXIS, VisiblePredicate.TRUE);
 					yaxis.setLayoutBounds(bounds);
 					
 					//Apply custom numerical range, if user asked for it
@@ -889,7 +887,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					m_vis.putAction("axes", axes);
 					m_vis.run("axes");
 					m_vis.run("aggLayout");
-					Rectangle2D lbounds = m_vis.getBounds(graph);
+					Rectangle2D lbounds = m_vis.getBounds(GRAPH);
 					GraphicsLib.expand(lbounds, 100 + (int) (1 / display.getScale()));
 					DisplayLib.fitViewToBounds(display, lbounds, 1000);
 				} else {
@@ -911,7 +909,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			 */
 			private boolean isNumerical(JComboBox selector) {
 				String selected = (String)selector.getSelectedItem();
-				Class<?> cls = ((Graph)m_vis.getGroup(graph)).getNodeTable().getColumnType(selected);
+				Class<?> cls = ((Graph)m_vis.getGroup(GRAPH)).getNodeTable().getColumnType(selected);
 				if (cls == double.class || cls == int.class || cls == float.class ||
 						cls == long.class) {
 					return true;	
@@ -921,7 +919,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 
 			private boolean isIntType(JComboBox selector) {
 				String selected = (String)selector.getSelectedItem();
-				Class<?> cls = ((Graph)m_vis.getGroup(graph)).getNodeTable().getColumnType(selected);
+				Class<?> cls = ((Graph)m_vis.getGroup(GRAPH)).getNodeTable().getColumnType(selected);
 				if (cls == int.class || cls == long.class) {
 					return true;	
 				}
@@ -952,7 +950,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		final JButton showEdges = new JButton("Show Edges");
 		showEdges.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				m_vis.setVisible(edges, null, true);
+				m_vis.setVisible(EDGES, null, true);
 			}
 		});
 		showEdges.setToolTipText("Re-show edges if they hidden.");
@@ -960,7 +958,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		final JButton hideEdges = new JButton("Hide Edges");
 		hideEdges.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				m_vis.setVisible(edges, null, false);
+				m_vis.setVisible(EDGES, null, false);
 				m_vis.cancel("lll");
 			}
 		});
@@ -987,8 +985,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			public void actionPerformed(ActionEvent ae) {
 				SelfRefEdgeRenderer er = (SelfRefEdgeRenderer)((DefaultRendererFactory)m_vis.getRendererFactory()).getDefaultEdgeRenderer();
 				PolygonRenderer pr = null;
-				if (m_vis.getVisualGroup(aggr) != null) {
-					pr = (PolygonRenderer)((VisualItem)m_vis.getVisualGroup(aggr).tuples().next()).getRenderer();
+				if (m_vis.getVisualGroup(AGGR) != null && m_vis.getVisualGroup(AGGR).getTupleCount() > 0) {
+					pr = (PolygonRenderer)((VisualItem)m_vis.getVisualGroup(AGGR).tuples().next()).getRenderer();
 				}
 				VisualizationSettingsDialog vsd = new VisualizationSettingsDialog(frame, m_vis, tr, sr, er, pr);
 				vsd.showDialog();
@@ -1048,15 +1046,16 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					msme.setHierarchy(hierarchy, bottom);
 					toDie.dispose();
 					* */
-					if (m_vis.getGroup(aggr) != null) {
-						m_vis.getGroup(aggr).clear();
+					if (m_vis.getGroup(AGGR) != null) {
+						m_vis.getGroup(AGGR).clear();
+						m_vis.removeAction(AGGR);
 					}
 					overSlider.setValue(overSlider.getMaximum());
 				} else if (top < hierarchy.graphs.length - 1) {
 					MSMExplorer.this.setAggregates(bottom, top);
 					if (g.getNodeTable().getColumnNumber("mapping") >= 0) {
 						axisFields.remove("mapping");
-						axisFields.insertElementAt("mapping", axisFields.size() - 1);
+						axisFields.insertElementAt("mapping", axisFields.size() - 2);
 					}
 				}
 			}
@@ -1148,7 +1147,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		openTable.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				JPrefuseTable.showTableWindow(new 
-					CascadedTable(((Graph)m_vis.getGroup(graph)).
+					CascadedTable(((Graph)m_vis.getGroup(GRAPH)).
 					getNodeTable(), new NamedColumnProjection(
 					Arrays.copyOf(axisFields.toArray(), 
 					axisFields.size(), String[].class), true)));
@@ -1283,12 +1282,12 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 
 		MSMIOLib.setMapping(hierarchy, bottom, top);
 
-		TupleSet vg = m_vis.getGroup(nodes);
+		TupleSet vg = m_vis.getGroup(NODES);
 		Iterator<VisualItem> vNodes = vg.tuples();
 
 		AggregateTable at;
-		if (m_vis.getGroup(aggr) == null) {
-			at = m_vis.addAggregates(aggr);
+		if (m_vis.getGroup(AGGR) == null) {
+			at = m_vis.addAggregates(AGGR);
 			at.addColumn(VisualItem.POLYGON, float[].class);
 			at.addColumn("id", int.class);
 
@@ -1297,12 +1296,12 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			((PolygonRenderer)polyR).setCurveSlack(0.1f);
 			((DefaultRendererFactory) m_vis.getRendererFactory()).add("ingroup('aggregates')", polyR);
 
-			final ColorAction aStroke = new ColorAction(aggr, VisualItem.STROKECOLOR);
+			final ColorAction aStroke = new ColorAction(AGGR, VisualItem.STROKECOLOR);
 			aStroke.setDefaultColor(ColorLib.gray(200));
 			aStroke.add(VisualItem.FIXED, ColorLib.rgb(240, 150, 100));
 			aStroke.setVisualization(m_vis);
 
-			final ColorAction aFill = new DataColorAction(aggr, "id",
+			final ColorAction aFill = new FlexDataColorAction(AGGR, "id",
 				Constants.NOMINAL, VisualItem.FILLCOLOR, ColorLib.getCategoryPalette(50, 0.95f, .15f, .9f, .5f));
 			aFill.setVisualization(m_vis);
 
@@ -1313,8 +1312,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			animate.add(aStroke);
 
 		} else {
-			at = (AggregateTable) m_vis.getGroup(aggr);
-			Table nt = (Table) ((Graph) m_vis.getGroup(graph)).getNodeTable();
+			at = (AggregateTable) m_vis.getGroup(AGGR);
+			Table nt = (Table) ((Graph) m_vis.getGroup(GRAPH)).getNodeTable();
 			for (int row = 0; row < nt.getRowCount(); ++row) {
 				at.removeRow(row);
 			}
@@ -1337,7 +1336,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			ai.addItem((VisualItem) vNode);
 		}
 		
-		final Action aggLayout = new AggregateLayout(aggr, m_vis);
+		final Action aggLayout = new AggregateLayout(AGGR, m_vis);
 		m_vis.putAction("aggLayout", aggLayout);
 		((ActionList) m_vis.getAction("lll")).add(aggLayout);
 		m_vis.run("draw");
@@ -1355,9 +1354,9 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		DefaultRendererFactory drf = (DefaultRendererFactory) m_vis.getRendererFactory();
 
 		// update graph
-		m_vis.removeGroup(graph);
-		VisualGraph vg = m_vis.addGraph(graph, g);
-		m_vis.setValue(edges, null, VisualItem.INTERACTIVE, Boolean.FALSE);
+		m_vis.removeGroup(GRAPH);
+		VisualGraph vg = m_vis.addGraph(GRAPH, g);
+		m_vis.setValue(EDGES, null, VisualItem.INTERACTIVE, Boolean.FALSE);
 		VisualItem f = (VisualItem) vg.getNode(0);
 		m_vis.getGroup(Visualization.FOCUS_ITEMS).setTuple(f);
 		f.setFixed(false);
@@ -1377,33 +1376,37 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		 * 
 		 */
 		int[] palette = {ColorLib.rgb(179, 255, 156)};
-		final FlexDataColorAction fill = new FlexDataColorAction(nodes,
+		final FlexDataColorAction fill = new FlexDataColorAction(NODES,
 			LABEL, Constants.ORDINAL, VisualItem.FILLCOLOR, palette);
 		fill.add(VisualItem.FIXED, ColorLib.rgb(255, 100, 100));
 		fill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 200, 125));
 		fill.add(new InGroupPredicate(Visualization.SEARCH_ITEMS), 
 			  ColorLib.rgb(200, 40, 55));
 
-		DataColorAction edgeColor = new DataColorAction(edges, TPROB,
+		FlexDataColorAction edgeColor = new FlexDataColorAction(EDGES, TPROB,
 			Constants.NOMINAL, VisualItem.STROKECOLOR,
-			ColorLib.getGrayscalePalette());
+			ColorLib.getGrayscalePalette(100));
 		edgeColor.add(VisualItem.HOVER, ColorLib.rgb(200, 40, 60));
 		edgeColor.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 150, 68));
+		edgeColor.setFilterPredicate(new VisiblePredicate());
 
-		DataColorAction edgeFill = new DataColorAction(edges, TPROB,
+		FlexDataColorAction edgeFill = new FlexDataColorAction(EDGES, TPROB,
 			Constants.NOMINAL, VisualItem.FILLCOLOR,
-			ColorLib.getGrayscalePalette());
-		edgeFill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(200, 0, 0));
+			ColorLib.getGrayscalePalette(100));
+		edgeFill.add(VisualItem.HOVER, ColorLib.rgb(200, 40, 60));
+		edgeFill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 150, 68));
+		edgeFill.setFilterPredicate(new VisiblePredicate());
 
-		StrokeAction edgeWeight = new StrokeAction(edges,
+		DataSizeAction edgeWeight = new DataSizeAction(EDGES, "probability", 100, Constants.LOG_SCALE);
+		edgeWeight.setMaximumSize(1.0);
+		edgeWeight.setMinimumSize(1.0);
+
+		//currently unused
+		StrokeAction nodeWeight = new StrokeAction(NODES,
 			StrokeLib.getStroke(1.0f));
-		edgeWeight.add(VisualItem.HIGHLIGHT, StrokeLib.getStroke(2.0f));
+		//nodeWeight.add(new InGroupPredicate(Visualization.FOCUS_ITEMS), StrokeLib.getStroke(2.0f));
 
-		StrokeAction nodeWeight = new StrokeAction(nodes,
-			StrokeLib.getStroke(1.0f));
-		nodeWeight.add(VisualItem.HIGHLIGHT, StrokeLib.getStroke(2.0f));
-
-		final DataSizeAction nodeSize = new DataSizeAction(nodes,
+		final DataSizeAction nodeSize = new DataSizeAction(NODES,
 			EQPROB, 50, Constants.LOG_SCALE);
 		nodeSize.setMaximumSize(50.0);
 
@@ -1414,20 +1417,20 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 
 		// Set up filter
 		//int hops = 5;
-		final GraphDistanceFilter distFilter = new GraphDistanceFilter(graph, 40);
+		final GraphDistanceFilter distFilter = new GraphDistanceFilter(GRAPH, 40);
 		//Predicate eqProbPredicate = ExpressionParser.predicate("NOT(ISNODE() AND [eqProb] > .5)");
 		//final VisibilityFilter eqProbFilter = new VisibilityFilter(eqProbPredicate);
 
 		// Set up actionlists
 		final ActionList draw = new ActionList();
 		draw.add(distFilter);
-		draw.add(edgeFill);
-		draw.add(new ColorAction(nodes, VisualItem.TEXTCOLOR, ColorLib.rgb(0, 0, 0)));
-		draw.add(new ColorAction(nodes, VisualItem.STROKECOLOR, ColorLib.gray(50)));
+		draw.add(new ColorAction(NODES, VisualItem.TEXTCOLOR, ColorLib.rgb(0, 0, 0)));
+		draw.add(new ColorAction(NODES, VisualItem.STROKECOLOR, ColorLib.gray(50)));
 		//draw.add(eqProbFilter);
 
 		ActionList animate = new ActionList(ActionList.INFINITY);
 		animate.add(edgeWeight);
+		animate.add(edgeFill);
 		animate.add(edgeColor);
 		animate.add(fill);
 		animate.add(new RepaintAction());
@@ -1437,10 +1440,10 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		//If graph is "large",
 		if (g.getNodeCount() > SIZE_THRESHOLD
 			|| GraphStatsManager.calcAvgDegree(g) > DEGREE_THRESHOLD) {
-			lll.add(new ForceDirectedLayout(graph, false, true)); //Then run-once
+			lll.add(new ForceDirectedLayout(GRAPH, false, true)); //Then run-once
 		} else {
 			lll.setDuration(ActionList.INFINITY);
-			lll.add(new ForceDirectedLayout(graph));              //Else, continually animate
+			lll.add(new ForceDirectedLayout(GRAPH));              //Else, continually animate
 		}
 
 

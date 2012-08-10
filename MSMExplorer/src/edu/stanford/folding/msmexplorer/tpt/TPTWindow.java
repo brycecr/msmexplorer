@@ -115,18 +115,16 @@ public class TPTWindow extends JFrame {
 		//should create a deep copy of the graph XXX is this necessary? Kind of not nice for resources...
 		final Graph gra = new Graph(g.getNodeTable(), g.getEdgeTable(), g.isDirected(), g.getNodeKeyField(), g.getEdgeSourceField(), g.getEdgeTargetField());
 		//create data columns
-		if (gra.getNodeTable().getColumnNumber("source") != -1) {
+		if (gra.getNodeTable().getColumnNumber("tptGroup") != -1) {
 			revert(gra.getEdgeTable().getColumn("flux"));
 			revert(gra.getNodeTable().getColumn("flux"));
-			revert(gra.getNodeTable().getColumn("source"));
-			revert(gra.getNodeTable().getColumn("target"));
+			revert(gra.getNodeTable().getColumn("tptGroup"));
 			revert(gra.getNodeTable().getColumn("inTPT"));
 			revert(gra.getEdgeTable().getColumn("inTPT"));
 			revert(gra.getNodeTable().getColumn("TPT Distance"));
 		} else {
 
-			gra.getNodeTable().addColumn("source", boolean.class, false);
-			gra.getNodeTable().addColumn("target", boolean.class, false);
+			gra.getNodeTable().addColumn("tptGroup", int.class, 0);
 			gra.getNodeTable().addColumn("inTPT", boolean.class, false);
 			gra.getEdgeTable().addColumn("inTPT", boolean.class, false);
 			gra.addColumn("flux", double.class, 0.0d);
@@ -136,11 +134,11 @@ public class TPTWindow extends JFrame {
 		final TPTFactoryCM tptCalc = new TPTFactoryCM(gra, source, target);
 
 		for (Iterator tuples = source.tuples(); tuples.hasNext();) {
-			((Tuple) tuples.next()).set("source", true);
+			((Tuple) tuples.next()).set("tptGroup", 1);
 		}
 
 		for (Iterator tuples = target.tuples(); tuples.hasNext();) {
-			((Tuple) tuples.next()).set("target", true);
+			((Tuple) tuples.next()).set("tptGroup", 2);
 		}
 
 
@@ -271,12 +269,12 @@ public class TPTWindow extends JFrame {
 		imgDataFill.add(VisualItem.FIXED, ColorLib.rgb(255, 255, 255));
 
 		final ColorAction imgAltDataFill = new ColorAction(nodes, VisualItem.FILLCOLOR, ColorLib.rgb(255, 255, 255));
-		imgAltDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(240, 120, 120));
-		imgAltDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(120, 200, 240));
+		imgAltDataFill.add(ExpressionParser.predicate("[tptGroup] == 1"), ColorLib.rgb(240, 120, 120));
+		imgAltDataFill.add(ExpressionParser.predicate("[tptGroup] == 2"), ColorLib.rgb(120, 200, 240));
 
 		final ColorAction altDataFill = new ColorAction(nodes, VisualItem.FILLCOLOR, ColorLib.rgb(124, 252, 0));
-		altDataFill.add(ExpressionParser.predicate("[source]"), ColorLib.rgb(240, 120, 120));
-		altDataFill.add(ExpressionParser.predicate("[target]"), ColorLib.rgb(120, 200, 240));
+		altDataFill.add(ExpressionParser.predicate("[tptGroup] == 1"), ColorLib.rgb(240, 120, 120));
+		altDataFill.add(ExpressionParser.predicate("[tptGroup] == 2"), ColorLib.rgb(120, 200, 240));
 
 		final ColorAction nodeStroke = new ColorAction(nodes, VisualItem.STROKECOLOR, ColorLib.rgb(50, 50, 50));
 		nodeStroke.add(VisualItem.HOVER, ColorLib.rgb(226, 86, 0));
@@ -536,7 +534,7 @@ public class TPTWindow extends JFrame {
 		openAdj.setToolTipText("<html>Display a panel to adjust the "
 				+"<br>force parameters for automatic layout of non-fixed nodes.</html>");
 
-		JRangeSlider edgeWeightSlider = new JRangeSlider(1, 800, 1, 400, Constants.ORIENT_TOP_BOTTOM);
+		JRangeSlider edgeWeightSlider = new JRangeSlider(1, 2000, 1, 400, Constants.ORIENT_TOP_BOTTOM);
 		edgeWeightSlider.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent e) {

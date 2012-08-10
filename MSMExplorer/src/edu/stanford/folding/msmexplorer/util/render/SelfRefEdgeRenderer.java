@@ -5,9 +5,12 @@
 
 package edu.stanford.folding.msmexplorer.util.render;
 
+import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
+import prefuse.Constants;
 import prefuse.render.EdgeRenderer;
+import prefuse.util.ColorLib;
 import prefuse.visual.VisualItem;
 import prefuse.visual.EdgeItem;
 
@@ -35,8 +38,11 @@ public class SelfRefEdgeRenderer extends EdgeRenderer {
 			VisualItem item2 = edge.getTargetItem();
 			
 			//  self interaction
-			if ((item1 == item2) && showSelfEdges)
+			if (item1 == item2)
 			{
+				if (!showSelfEdges) {
+					return null;
+				}
 				getAlignedPoint(m_tmpPoints[0], item1.getBounds(), m_xAlign1, m_yAlign1);
 				getAlignedPoint(m_tmpPoints[1], item2.getBounds(), m_xAlign2, m_yAlign2);
 				

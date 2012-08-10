@@ -4,41 +4,57 @@
  */
 package edu.stanford.folding.msmexplorer.io;
 
+import edu.stanford.folding.msmexplorer.MSMConstants;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.String;
 import java.util.Date;
+import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import prefuse.data.Graph;
+import prefuse.Visualization;
 
 /**
  *
  * @author gestalt
  */
-public class ColumnChooserDialog extends JDialog {
+public class ColumnChooserDialog extends JDialog implements MSMConstants {
 
-	private final Graph graph;
+	private final Visualization m_vis;
 	private final JComboBox typeComboBox;
 	private final JButton loadButton;
 	private final JTextField nameField;
+	private final JComboBox groupField;
 	private static final String[] types = { "Double", "Integer", "String", 
 		"Boolean", "Float", "Long", "Date", "Other (Object)" };
 
 	private boolean success = false;
 
 
-	public ColumnChooserDialog(Frame f, Graph g) {
+	public ColumnChooserDialog(Frame f, Visualization vis, String group) {
 		super (f, "New Column Properties", true);
-		graph = g;
+		m_vis = vis;
+
+		Vector<String> visFields = new Vector<String>(4);
+		visFields.add(NODES);
+		visFields.add(EDGES);
+		if (m_vis.getGroup(AGGR) != null) {
+			visFields.add(AGGR);
+		}
 
 		String[] options = new String[8];
 		typeComboBox = new JComboBox(types); 
 		nameField = new JTextField("name");
+		groupField = new JComboBox(visFields);
+		groupField.setEnabled(group == null);
+		if (group != null && visFields.contains(group)) {
+			groupField.setSelectedItem(group);
+		}
 		loadButton = new JButton("Load File");
 		loadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -53,6 +69,8 @@ public class ColumnChooserDialog extends JDialog {
 		this.add(nameField);
 		this.add(new JLabel("Column Type: "));
 		this.add(typeComboBox);
+		this.add(new JLabel("Vis Group: "));
+		this.add(groupField);
 		this.add(new JLabel());
 		this.add(loadButton);
 		this.pack();
@@ -69,7 +87,7 @@ public class ColumnChooserDialog extends JDialog {
 	}
 
 	private void loadButtonActionPerformed(java.awt.event.ActionEvent evt) {                                           
-		String ret = MSMIOLib.applyNewlineDelimitedFile(graph, nameField.getText(), 
+		String ret = MSMIOLib.applyNewlineDelimitedFile(m_vis.getGroup((String)groupField.getSelectedItem()), nameField.getText(), 
 			getClassOf(typeComboBox.getSelectedIndex()));
 		if (ret != null) {
 			success = true;
