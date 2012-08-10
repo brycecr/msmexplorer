@@ -1297,7 +1297,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			aStroke.add(VisualItem.FIXED, ColorLib.rgb(240, 150, 100));
 			aStroke.setVisualization(m_vis);
 
-			final ColorAction aFill = new DataColorAction(AGGR, "id",
+			final ColorAction aFill = new FlexDataColorAction(AGGR, "id",
 				Constants.NOMINAL, VisualItem.FILLCOLOR, ColorLib.getCategoryPalette(50, 0.95f, .15f, .9f, .5f));
 			aFill.setVisualization(m_vis);
 

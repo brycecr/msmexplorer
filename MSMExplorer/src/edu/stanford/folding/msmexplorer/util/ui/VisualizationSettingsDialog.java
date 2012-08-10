@@ -5,6 +5,7 @@ import edu.stanford.folding.msmexplorer.MSMExplorer;
 import edu.stanford.folding.msmexplorer.util.FlexDataColorAction;
 import edu.stanford.folding.msmexplorer.util.render.SelfRefEdgeRenderer;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -228,8 +229,6 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		showColorChooser.setToolTipText("Open a dialog to select a new node color.");
 
 
-	//private static final String[] PALETTE_LABELS = {"Interpolated", "Category", "Cool", 
-	//	"Hot", "Grayscale", "HSB"};
 		presetPalettes.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				int[] palette;
@@ -386,10 +385,11 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		});
 		lr_showLabelColorChooser.setToolTipText("Open a dialog to select a new label text color.");
 		lr_Panel.add(lr_showLabelColorChooser);
+		lr_Panel.setOpaque(false);
 
 
 		/* ------------------ SHAPE PANE --------------------- */
-		JPanel sr_Panel = new JPanel(new GridLayout(0,2));
+		JPanel sr_Panel = new JPanel(new GridBagLayout());
 		pane.addTab("Shape Render", sr_Panel);
 		
 		final JComboBox shapeComboBox = new JComboBox(SHAPES_LABELS);
@@ -426,10 +426,22 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		});
 		
-		sr_Panel.add(new JLabel("Node Shape: "));
-		sr_Panel.add(shapeComboBox);
-		sr_Panel.add(new JLabel("Node Shape Field:"));
-		sr_Panel.add(shapeActionField);
+		c = new GridBagConstraints();
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridwidth = 2;
+		sr_Panel.add(new JLabel("Node Shape: "), c);
+		c.gridx = 2;
+		sr_Panel.add(shapeComboBox, c);
+		c.insets = new Insets(10,0,0,0);
+		c.gridx = 0;
+		c.gridy = 1;
+		sr_Panel.add(new JLabel("Node Shape Field:"), c);
+		c.gridx = 2;
+		c.gridy = 1;
+		sr_Panel.add(shapeActionField, c);
+		sr_Panel.setOpaque(false);
 		
 		/* -------------------- EDGE PANE --------------------- */
 		JPanel er_Panel = new JPanel(new GridBagLayout());
@@ -481,7 +493,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		int[] er_palette = edgeColorAction.getPalette();
 
 		final JButton edgeStartColorButton = new JButton("Start Color", new
-				ColorSwatch(new Color(er_palette[er_palette.length-1])));
+				ColorSwatch(new Color(er_palette[0])));
 		edgeStartColorButton.addActionListener( new PaletteColorButtonActionListener(f, edgeStartColorButton,
 			new ArrayList<FlexDataColorAction>() {{add(edgeColorAction); add(edgeArrowColorAction);}},
 			PaletteColorButtonActionListener.START, edgePresetPalettes));
@@ -528,7 +540,6 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 		final JRangeSlider edgeWeightSlider = new JRangeSlider(1, 80000, 1, 400, Constants.ORIENT_TOP_BOTTOM);
 		edgeWeightSlider.addChangeListener(new ChangeListener() {
-
 			public void stateChanged(ChangeEvent e) {
 				ActionList animate = (ActionList)m_vis.getAction("animate");
 				DataSizeAction edgeWeightAction = (DataSizeAction)animate.get(0);
@@ -556,9 +567,11 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 		c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.gridx = 3;
+		c.gridwidth = 2;
+		c.gridx = 1;
 		c.gridy = 0;
 		er_Panel.add(showSelfEdges, c);
+		c.insets = new Insets(10,0,0,0);
 		c.gridx = 0;
 		c.gridy = 1;
 		c.gridwidth = 1;
@@ -569,7 +582,6 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		er_Panel.add(edgeStartColorButton, c);
 		c.gridx = 3;
 		er_Panel.add(edgeEndColorButton, c);
-		c.insets = new Insets(20,0,0,0);
 		c.gridx = 0;
 		c.gridy = 2;
 		er_Panel.add(new JLabel("Edge Weight Field: "), c);
@@ -577,14 +589,122 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		c.gridy = 2;
 		er_Panel.add(edgeWeightField, c);
 		c.insets = new Insets(0,0,0,0);
-		c.gridx = 0;
 		c.gridy = 3;
-		c.gridwidth = 4;
+		c.gridx = 0;
+		er_Panel.add(new JLabel("Weight Range: "), c);
+		c.gridx = 1;
+		c.gridwidth = 3;
 		er_Panel.add(edgeWeightSlider, c);
+		er_Panel.setOpaque(false);
 
 		/* --------------------- AGG PANE ----------------------- */
-		JPanel pr_Panel = new JPanel();
-		pane.addTab("Aggregate Render", pr_Panel);
+		if (m_vis.getGroup(AGGR) != null) {
+			assert m_pr != null;
+			JPanel pr_Panel = new JPanel( new GridBagLayout());
+			pane.addTab("Aggregate Render", pr_Panel);
+
+			final JSpinner aggCurve = new JSpinner(new SpinnerNumberModel(m_pr.getCurveSlack(), 0.0d, 10.0d, .02d));
+			aggCurve.addChangeListener( new ChangeListener() {
+				public void stateChanged(ChangeEvent ce) {
+					m_pr.setCurveSlack(((Double)aggCurve.getValue()).floatValue());
+					m_vis.run("aggLayout");
+					m_vis.repaint();
+				}
+			});
+			aggCurve.setPreferredSize(new Dimension(100, 30));
+
+
+			final JComboBox pr_presetPalettes = new JComboBox(PALETTE_LABELS);
+			ActionList draw = (ActionList)m_vis.getAction("draw");
+			final FlexDataColorAction aggrColorAction;
+			if (draw.get(draw.size() - 1) instanceof FlexDataColorAction) {
+				aggrColorAction = (FlexDataColorAction)draw.get(draw.size() - 1);
+			} else if (draw.get(draw.size() - 2) instanceof FlexDataColorAction) {
+				aggrColorAction = (FlexDataColorAction)draw.get(draw.size() - 2);
+			} else {
+				assert 1 == 0;
+				aggrColorAction = null;
+			}
+
+			int[] aggrPalette = aggrColorAction.getPalette();
+
+			final JButton aggrStartColorButton = new JButton("Start Color", new ColorSwatch(new Color(aggrPalette[0])));
+			aggrStartColorButton.addActionListener( new PaletteColorButtonActionListener(f, aggrStartColorButton,
+				aggrColorAction, PaletteColorButtonActionListener.START, pr_presetPalettes));
+
+			final JButton aggrEndColorButton = new JButton("End Color", new ColorSwatch(new Color(aggrPalette[aggrPalette.length-1])));
+			aggrEndColorButton.addActionListener( new PaletteColorButtonActionListener(f, aggrEndColorButton,
+				aggrColorAction, PaletteColorButtonActionListener.END, pr_presetPalettes));
+
+			pr_presetPalettes.addActionListener( new ActionListener() {
+				public void actionPerformed(ActionEvent ae) {
+					int[] palette;
+					switch (pr_presetPalettes.getSelectedIndex()) {
+						case 0:
+							Color start = ((ColorSwatch)aggrStartColorButton.getIcon()).getColor();
+							start = new Color(start.getRed(), start.getGreen(), start.getBlue(), 128);
+							Color end = ((ColorSwatch)aggrEndColorButton.getIcon()).getColor();
+							end = new Color(end.getRed(), end.getGreen(), end.getBlue(), 128);
+							palette = ColorLib.getInterpolatedPalette(start.getRGB(), end.getRGB());
+							break;
+						case 1:
+							palette = ColorLib.getCategoryPalette(50, 0.95f, .15f, .9f, .5f);
+							break;
+						case 2:
+							palette = ColorLib.getCoolPalette();
+							for (int i = 0; i < palette.length; ++i) {
+								palette[i] = (palette[i] | 0x80000000) & 0x8000ffff;
+							}
+							break;
+						case 3:
+							palette = ColorLib.getHotPalette();
+							for (int i = 0; i < palette.length; ++i) {
+								palette[i] = (palette[i] | 0x80000000) & 0x8000ffff;
+							}
+							break;
+						case 4:
+							palette = ColorLib.getGrayscalePalette();
+							for (int i = 0; i < palette.length; ++i) {
+								palette[i] = (palette[i] | 0x80000000) & 0x8000ffff;
+							}
+							break;
+						case 5:
+							palette = ColorLib.getHSBPalette();
+							for (int i = 0; i < palette.length; ++i) {
+								palette[i] = (palette[i] | 0x80000000) & 0x8000ffff;
+							}
+							break;
+						default:
+							return;
+					}
+					aggrColorAction.setPalette(palette);
+					m_vis.run("draw");
+					m_vis.repaint();
+				}
+			});
+
+			c = new GridBagConstraints();
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.gridx = 0;
+			c.gridy = 0;
+			c.gridwidth = 1;
+			pr_Panel.add(new JLabel("Aggregate Curve Slack: "), c);
+			c.gridx = 1;
+			pr_Panel.add(aggCurve, c);
+			c.insets = new Insets(10,0,0,0);
+			c.gridx = 0;
+			c.gridy = 1;
+			c.gridwidth = 1;
+			pr_Panel.add(aggrStartColorButton, c);
+			c.gridx = 1;
+			pr_Panel.add(aggrEndColorButton, c);
+			c.gridx = 2;
+			pr_Panel.add(pr_presetPalettes, c);
+			pr_Panel.setOpaque(false);
+		}
+
+
+
 
 		main.add(pane);
 		add(main);
@@ -631,7 +751,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		 * 
 		 * @param f parent component (can be NULL)
 		 * @param colorButton the button this action is being assigned to. If button has ColorSwatch object as its icon, it will be updated on color change
-		 * @param actions an arraylist of all the actions to set the new palette for. All should use identical palettes.
+		 * @param actions an ArrayList of all the actions to set the new palette for. All should use identical palettes.
 		 * @param end which end of the spectrum does this button set? Values must come from static constants in this class
 		 * @param presetPalette JComboBox that has palette presets so that adjusting the color on this button sets to "Interpolated" (can be NULL)
 		 */
