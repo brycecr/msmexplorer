@@ -83,7 +83,6 @@ import prefuse.action.Action;
 import prefuse.action.ActionList;
 import prefuse.action.RepaintAction;
 import prefuse.action.assignment.ColorAction;
-import prefuse.action.assignment.DataColorAction;
 import prefuse.action.assignment.DataSizeAction;
 import prefuse.action.assignment.StrokeAction;
 import prefuse.action.filter.GraphDistanceFilter;
