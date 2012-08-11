@@ -230,7 +230,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		// Amusing spalsh image
 		BufferedImage image;
 		try {
-			image = ImageIO.read(new File("../lib/splash.jpg"));
+			image = ImageIO.read(new File("./lib/splash.jpg"));
 		} catch (IOException ex) {
 			Logger.getLogger(MSMExplorer.class.getName()).log(Level.WARNING, null, ex);
 			image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
