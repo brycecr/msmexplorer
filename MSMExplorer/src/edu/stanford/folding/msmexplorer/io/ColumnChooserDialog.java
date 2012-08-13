@@ -9,7 +9,6 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.String;
 import java.util.Date;
 import java.util.Vector;
 import javax.swing.JButton;
@@ -87,8 +86,14 @@ public class ColumnChooserDialog extends JDialog implements MSMConstants {
 	}
 
 	private void loadButtonActionPerformed(java.awt.event.ActionEvent evt) {                                           
-		String ret = MSMIOLib.applyNewlineDelimitedFile(m_vis.getGroup((String)groupField.getSelectedItem()), nameField.getText(), 
-			getClassOf(typeComboBox.getSelectedIndex()));
+		String group = (String) groupField.getSelectedItem();
+		String ret = null;
+		if (group.equals(NODES) || group.equals(GRAPH) || group.equals(AGGR)) {
+			ret = MSMIOLib.applyNewlineDelimitedFile(m_vis.getGroup((String)groupField.getSelectedItem()), nameField.getText(), 
+				getClassOf(typeComboBox.getSelectedIndex()));
+		} else if (group.equals(EDGES)) {
+			ret = MSMIOLib.applyMatrixFile(group, nameField.getText(), getClassOf(typeComboBox.getSelectedIndex()));
+		}
 		if (ret != null) {
 			success = true;
 		}

@@ -4,6 +4,7 @@ import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
 import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyIOLib;
 import java.awt.Component;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Iterator;
@@ -14,8 +15,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import prefuse.data.Graph;
+import prefuse.data.Table;
 import prefuse.data.Tuple;
 import prefuse.data.io.DataIOException;
+import prefuse.data.io.DelimitedTextTableReader;
 import prefuse.data.io.GraphMLReader;
 import prefuse.data.io.GraphMLWriter;
 import prefuse.data.io.GraphReader;
@@ -32,6 +35,7 @@ import prefuse.util.io.SimpleFileFilter;
 public class MSMIOLib {
 
 	private static final String DEFAULT_DIRECTORY = "";
+
 
 	private MSMIOLib() {
 		// disallow instantiation
@@ -89,31 +93,12 @@ public class MSMIOLib {
 	 * @return string pathname for the folder where the file was opened
 	 */
 	public static String applyNewlineDelimitedFile(Component c, String path, TupleSet g, String name, Class<?> cls) {
-		if (g == null) {
-			JOptionPane.showMessageDialog(c, "Attempting to apply a newline"
-				+ " delimited file to a null group.", "Newline Delimited IO Error",
-				JOptionPane.ERROR_MESSAGE);
-			return null;
-		} else if (name == null) {
-			JOptionPane.showMessageDialog(c, "Please provide a name for the new data.", 
-				"Nameless Data Error", JOptionPane.ERROR_MESSAGE);
-			return null;
-		} else if (!g.isAddColumnSupported()) {
-			JOptionPane.showMessageDialog(c, "Cannot add a new column to this graph.", 
-				"New Column Error", JOptionPane.ERROR_MESSAGE);
+
+		if (!checkApplyFileParams(c, g, name)) {
 			return null;
 		}
 		
-		JFileChooser jfc = new JFileChooser(path);
-		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
-		jfc.setDialogTitle("Open newline delimited file...");
-
-		int opt = jfc.showOpenDialog(c);
-		if (opt != JFileChooser.APPROVE_OPTION) {
-			return null; // no file selected and okayed
-		}
-
-		File f = jfc.getSelectedFile();
+		File f = getFileFromUser(c, path, "Open newline delimited file...", new ArrayList<FileFilter>());
 		Object[] contents = NewlineDelimitedReader.read(f);
 
 		// if the type is recognized and specified, make a column
@@ -143,6 +128,72 @@ public class MSMIOLib {
 			tup.set(name, contents[tup.getRow()]);
 		}
 		return f.getParent();
+	}
+
+	public static String applyMatrixDelimitedFile(Component c, String path, TupleSet g, String name, Class<?> cls) {
+
+		if (!checkApplyFileParams(c, g, name)) {
+			return null;
+		}
+
+		ArrayList<FileFilter> filters = new ArrayList<FileFilter>();
+		SimpleFileFilter ff1 = new SimpleFileFilter("dat",
+			"DAT dense matrix (*.dat, *.txt)",
+			new DatGraphReader());
+		ff1.addExtension("txt");
+
+		SimpleFileFilter ff2 = new SimpleFileFilter("mtx",
+			"MTX Sparse Format (*.mtx)",
+			new MtxGraphReader());
+		filters.add(ff1);
+		filters.add(ff2);
+
+		File f = getFileFromUser(c, path, "Open matrix file...", filters);
+		String ext = getExtension(f);
+
+		if (ext.equals("mtx")) {
+
+		} else {
+			DelimitedTextTableReader  dttr = new DelimitedTextTableReader(" ");
+			Table t = dttr.readTable(f);
+		}
+
+	}
+
+	private static boolean checkApplyFileParams(Component c, TupleSet g, String name) {
+		if (g == null) {
+			JOptionPane.showMessageDialog(c, "Attempting to apply a newline"
+				+ " delimited file to a null group.", "Newline Delimited IO Error",
+				JOptionPane.ERROR_MESSAGE);
+			return false;
+		} else if (name == null) {
+			JOptionPane.showMessageDialog(c, "Please provide a name for the new data.", 
+				"Nameless Data Error", JOptionPane.ERROR_MESSAGE);
+			return false;
+		} else if (!g.isAddColumnSupported()) {
+			JOptionPane.showMessageDialog(c, "Cannot add a new column to this graph.", 
+				"New Column Error", JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+		return true;
+	}
+
+	private static File getFileFromUser(Component c, String path, String title, ArrayList<FileFilter> filters) {
+		JFileChooser jfc = new JFileChooser(path);
+		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
+		jfc.setDialogTitle("Open newline delimited file...");
+		for (FileFilter ff : filters) {
+			jfc.setFileFilter(ff);
+		}
+
+		int opt = jfc.showOpenDialog(c);
+		if (opt != JFileChooser.APPROVE_OPTION) {
+			return null; // no file selected and okayed
+		}
+		filters.clear();
+		filters.add(jfc.getFileFilter());
+
+		return jfc.getSelectedFile();
 	}
 
 	/**
@@ -298,5 +349,26 @@ public class MSMIOLib {
 
 		return loc;
 
+	}
+
+	
+	/**
+	 * Method from velocityreview.com. Yes, I'm that lazy.
+	 * @param f
+	 * @return 
+	 */
+	private static String getExtension(File f) {
+		String ext = null;
+		String s = f.getName();
+		int i = s.lastIndexOf('.');
+		
+		if (i > 0 && i < s.length() - 2) {
+			ext = s.substring(i+1).toLowerCase();
+		}
+		
+		if(ext == null) {
+			return "";
+		}
+		return ext;
 	}
 }
