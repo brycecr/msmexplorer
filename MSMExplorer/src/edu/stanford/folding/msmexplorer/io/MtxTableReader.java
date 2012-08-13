@@ -8,24 +8,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import prefuse.data.Table;
 import prefuse.data.io.AbstractTextTableReader;
 import prefuse.data.io.TableReadListener;
 import prefuse.data.parser.DataParseException;
 
 /**
+ * Reads a table from an MTX file, where the data
  *
- * @author gestalt
+ * @author brycecr
  */
 public class MtxTableReader extends AbstractTextTableReader {
 
-	protected Table m_table;
 	protected final static String DELIM = " ";
-
-	private void init (Class<?> type, int size) {
-		m_table = new Table(size, size);
-		setHasHeader(false);
-	}
 
 	@Override
 	protected void read(InputStream is, TableReadListener trl) 
@@ -34,6 +28,10 @@ public class MtxTableReader extends AbstractTextTableReader {
 		
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		while ( (line=br.readLine()) != null ) {
+
+			if (line.charAt(0) == '%') {
+				continue;
+			}
 			
 			// split on DELIM character
 			String[] cols = line.split(DELIM);
@@ -45,7 +43,4 @@ public class MtxTableReader extends AbstractTextTableReader {
 				Integer.parseInt(cols[1])-1, cols[2]);
 		}
 	}
-
-	
-	
 }

@@ -22,6 +22,7 @@ import prefuse.data.io.DelimitedTextTableReader;
 import prefuse.data.io.GraphMLReader;
 import prefuse.data.io.GraphMLWriter;
 import prefuse.data.io.GraphReader;
+import prefuse.data.io.TableReader;
 import prefuse.data.tuple.TupleSet;
 import prefuse.util.io.IOLib;
 import prefuse.util.io.SimpleFileFilter;
@@ -130,7 +131,7 @@ public class MSMIOLib {
 		return f.getParent();
 	}
 
-	public static String applyMatrixDelimitedFile(Component c, String path, TupleSet g, String name, Class<?> cls) {
+	public static String applyMatrixFile(Component c, String path, TupleSet g, String name, Class<?> cls) {
 
 		if (!checkApplyFileParams(c, g, name)) {
 			return null;
@@ -150,16 +151,35 @@ public class MSMIOLib {
 
 		File f = getFileFromUser(c, path, "Open matrix file...", filters);
 		String ext = getExtension(f);
-
-		if (ext.equals("mtx")) {
-
-		} else {
-			DelimitedTextTableReader  dttr = new DelimitedTextTableReader(" ");
-			Table t = dttr.readTable(f);
+		
+		Table t = null;
+		try {
+			if (ext.equals("mtx")) {
+				TableReader tr = new MtxTableReader();
+				t = tr.readTable(f);
+				
+			} else {
+				DelimitedTextTableReader  dttr = new DelimitedTextTableReader(" ");
+				t = dttr.readTable(f);
+			}
+		} catch (Exception ex) {
+			Logger.getLogger(MSMIOLib.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
-	}
+		if (t == null) {
+			return null;
+		}
 
+		g.addColumn(name, cls);
+
+		Iterator<Tuple> itr = g.tuples();
+		while (itr.hasNext()) {
+			Tuple tup = itr.next();
+			tup.set(name, t.get(tup.getInt("source"), tup.getInt("target")));
+		}
+		return name;
+	}
+	
 	private static boolean checkApplyFileParams(Component c, TupleSet g, String name) {
 		if (g == null) {
 			JOptionPane.showMessageDialog(c, "Attempting to apply a newline"

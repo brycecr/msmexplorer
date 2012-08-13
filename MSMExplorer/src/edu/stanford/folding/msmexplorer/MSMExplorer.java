@@ -728,6 +728,14 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		axisFields.add ("Load new...");
 		axisFields.add ("No Axis");
 
+		Table et = g.getEdgeTable();
+		final Vector<String> edgeFields = new Vector<String>(3);
+		for (int i = 0; i < et.getColumnCount(); ++i) {
+			edgeFields.add(et.getColumnName(i));
+		}
+		edgeFields.add ("Load new...");
+
+
 		final JComboBox yAxisSelector = new JComboBox(axisFields);
 		final JComboBox xAxisSelector = new JComboBox(axisFields);
 
@@ -1141,8 +1149,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 
-		final JMenuItem openTable = new JMenuItem("Open Node Table");
-		openTable.addActionListener( new ActionListener() {
+		final JMenuItem openNodeTable = new JMenuItem("Open Node Table");
+		openNodeTable.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				JPrefuseTable.showTableWindow(new 
 					CascadedTable(((Graph)m_vis.getGroup(GRAPH)).
@@ -1150,6 +1158,15 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					Arrays.copyOf(axisFields.toArray(), 
 					axisFields.size(), String[].class), true)));
 			}	
+		});
+
+		final JMenuItem openEdgeTable = new JMenuItem("Open Edge Table"); 
+		openEdgeTable.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				JPrefuseTable.showTableWindow(new 
+					CascadedTable(((Graph)m_vis.getGroup(GRAPH)).getEdgeTable(),
+					new NamedColumnProjection(edgeFields.toArray(new String[0]), true)));
+			}
 		});
 
 		// The following block is the gui boilerplate for a
@@ -1177,7 +1194,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		dataMenu.add(forcePanel);
 		dataMenu.add(statsPanel);
 		dataMenu.addSeparator();
-		dataMenu.add(openTable);
+		dataMenu.add(openNodeTable);
+		dataMenu.add(openEdgeTable);
 		//dataMenu.add(makeMovie); XXX put this back when implemented...
 
 		JMenuBar menubar = new JMenuBar();

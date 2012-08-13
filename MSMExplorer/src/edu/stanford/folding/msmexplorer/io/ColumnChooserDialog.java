@@ -92,7 +92,7 @@ public class ColumnChooserDialog extends JDialog implements MSMConstants {
 			ret = MSMIOLib.applyNewlineDelimitedFile(m_vis.getGroup((String)groupField.getSelectedItem()), nameField.getText(), 
 				getClassOf(typeComboBox.getSelectedIndex()));
 		} else if (group.equals(EDGES)) {
-			ret = MSMIOLib.applyMatrixFile(group, nameField.getText(), getClassOf(typeComboBox.getSelectedIndex()));
+			ret = MSMIOLib.applyMatrixFile(null, null, m_vis.getGroup((String)groupField.getSelectedItem()), nameField.getText(), getClassOf(typeComboBox.getSelectedIndex()));
 		}
 		if (ret != null) {
 			success = true;
