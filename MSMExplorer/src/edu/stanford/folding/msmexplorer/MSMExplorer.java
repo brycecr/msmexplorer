@@ -653,10 +653,9 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 				} else {
 					DataSizeAction nodeSize = (DataSizeAction)m_vis.getAction("nodeSize");
 					tr.setImageField("image");
-					double scale = 1.0d / m_vis.getDisplay(0).getScale();
-					nodeSize.setMinimumSize(1.0d * scale * scale);
-					nodeSize.setMaximumSize(1.0d * scale * scale);
-					tr.getImageFactory().setMaxImageDimensions((int) (150.0d * scale), (int) (150.0d * scale));
+					nodeSize.setMaximumSize(1.0);
+					nodeSize.setMinimumSize(1.0);
+					tr.getImageFactory().setMaxImageDimensions(150, 150);
 					m_vis.run("nodeSize");
 				}
 				m_vis.run("draw");
