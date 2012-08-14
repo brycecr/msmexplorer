@@ -96,7 +96,10 @@ public class ColumnChooserDialog extends JDialog implements MSMConstants {
 		}
 		if (ret != null) {
 			success = true;
-		}
+			if (!group.equals(NODES)) {
+				ret = null;
+			}
+		} 
 		setVisible(false);
 		dispose();
 	}                                          
