@@ -1152,20 +1152,14 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		final JMenuItem openNodeTable = new JMenuItem("Open Node Table");
 		openNodeTable.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				JPrefuseTable.showTableWindow(new 
-					CascadedTable(((Graph)m_vis.getGroup(GRAPH)).
-					getNodeTable(), new NamedColumnProjection(
-					Arrays.copyOf(axisFields.toArray(), 
-					axisFields.size(), String[].class), true)));
+				JPrefuseTable.showTableWindow(g.getNodeTable());
 			}	
 		});
 
 		final JMenuItem openEdgeTable = new JMenuItem("Open Edge Table"); 
 		openEdgeTable.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				JPrefuseTable.showTableWindow(new 
-					CascadedTable(((Graph)m_vis.getGroup(GRAPH)).getEdgeTable(),
-					new NamedColumnProjection(edgeFields.toArray(new String[0]), true)));
+				JPrefuseTable.showTableWindow(g.getEdgeTable());
 			}
 		});
 
@@ -1182,9 +1176,19 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		saveSVG.addActionListener(new ExportMSMImageAction(m_vis.getDisplay(0)));
 		saveSVG.setAccelerator(KeyStroke.getKeyStroke("ctrl shift S"));
 
+		JMenuItem importColumn = new JMenuItem("Add Data Column");
+		importColumn.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				ColumnChooserDialog ccd = new ColumnChooserDialog(frame, m_vis, null);
+				ccd.showDialog();
+			}
+		});
+
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.add(new OpenMSMAction(this));
 		fileMenu.add(new OpenHierarchyAction());
+		fileMenu.addSeparator();
+		fileMenu.add(importColumn);
 		fileMenu.addSeparator();
 		fileMenu.add(new SaveMSMAction(g, this));
 		fileMenu.add(saveSVG);
@@ -1492,7 +1496,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		SpringForce.setMinValue(0, .00000099f);
 		SpringForce.setParameter(0, .00001f);
 		SpringForce.setMaxValue(1, 3200f);
-		SpringForce.setParameter(1, 400f);
+		SpringForce.setParameter(1, 600f);
 	}
 
 	/**

@@ -100,11 +100,14 @@ public class MSMIOLib {
 		}
 		
 		File f = getFileFromUser(c, path, "Open newline delimited file...", new ArrayList<FileFilter>());
+		if (f == null) {
+			return null;
+		}
 		Object[] contents = NewlineDelimitedReader.read(f);
 
 		// if the type is recognized and specified, make a column
 		// of that type
-		if (((Tuple)g.tuples().next()).get(name) == null) {
+		if (((Tuple)g.tuples().next()).getColumnIndex(name) < 0) {
 			if (cls == String.class || cls == int.class || cls == double.class
 				|| cls == float.class || cls == long.class || cls == boolean.class
 				|| cls == Date.class) {
@@ -150,16 +153,20 @@ public class MSMIOLib {
 		filters.add(ff2);
 
 		File f = getFileFromUser(c, path, "Open matrix file...", filters);
+		if (f == null) {
+			return null;
+		}
 		String ext = getExtension(f);
 		
 		Table t = null;
 		try {
 			if (ext.equals("mtx")) {
-				TableReader tr = new MtxTableReader();
+				MtxTableReader tr = new MtxTableReader();
 				t = tr.readTable(f);
 				
 			} else {
 				DelimitedTextTableReader  dttr = new DelimitedTextTableReader(" ");
+				dttr.setHasHeader(false);
 				t = dttr.readTable(f);
 			}
 		} catch (Exception ex) {
@@ -172,10 +179,20 @@ public class MSMIOLib {
 
 		g.addColumn(name, cls);
 
+		int tRows = t.getRowCount();
+		int tCols = t.getColumnCount();
+		Object def = t.getColumn(0).getDefaultValue();
+
 		Iterator<Tuple> itr = g.tuples();
 		while (itr.hasNext()) {
 			Tuple tup = itr.next();
-			tup.set(name, t.get(tup.getInt("source"), tup.getInt("target")));
+			int row = tup.getInt("source");
+			int col = tup.getInt("target");
+			if (row >= tRows || col >= tCols) {
+				tup.set(name, def);
+			} else {
+				tup.set(name, t.get(row, col));
+			}
 		}
 		return name;
 	}
@@ -201,7 +218,7 @@ public class MSMIOLib {
 	private static File getFileFromUser(Component c, String path, String title, ArrayList<FileFilter> filters) {
 		JFileChooser jfc = new JFileChooser(path);
 		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
-		jfc.setDialogTitle("Open newline delimited file...");
+		jfc.setDialogTitle(title);
 		for (FileFilter ff : filters) {
 			jfc.setFileFilter(ff);
 		}
