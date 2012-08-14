@@ -944,34 +944,6 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		fpanel.add(axisPane);
 		/* -------------- AXIS GUI ELEMENTS ------------------------ */
 
-
-		g.getNodeTable().addTableListener(new TableListener() {
-			public void tableChanged(Table t, int start, int end, int col, int type) {
-				Table nt = g.getNodeTable();
-				for (int i = axisFields.size(); i < nt.getColumnCount(); ++i) {
-					axisFields.add(nt.getColumnName(i));
-				}
-				xAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
-				yAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
-			}
-		});
-
-		Table et = g.getEdgeTable();
-		final Vector<String> edgeFields = new Vector<String>(3);
-		for (int i = 0; i < et.getColumnCount(); ++i) {
-			edgeFields.add(et.getColumnName(i));
-		}
-		edgeFields.add ("Load new...");
-
-		g.getEdgeTable().addTableListener(new TableListener() {
-			public void tableChanged(Table t, int start, int end, int col, int type) {
-				Table et = g.getEdgeTable();
-				for (int i = edgeFields.size(); i < et.getColumnCount(); ++i) {
-					edgeFields.add(et.getColumnName(i));
-				}
-			}
-		});
-
 		/* -------------- AESTHETIC ADJUST ELEMENTS ---------------- */
 
 
@@ -1202,7 +1174,12 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		importColumn.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				ColumnChooserDialog ccd = new ColumnChooserDialog(frame, m_vis, null);
-				ccd.showDialog();
+				String ret = ccd.showDialog();
+				if (ret != null) {
+					axisFields.insertElementAt(ret, axisFields.size() - 2);
+					xAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
+					yAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
+				}
 			}
 		});
 
