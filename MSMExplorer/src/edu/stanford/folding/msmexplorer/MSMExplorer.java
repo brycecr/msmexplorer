@@ -1182,6 +1182,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 				}
 			}
 		});
+		importColumn.setAccelerator(KeyStroke.getKeyStroke("ctrl I"));
 
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.add(new OpenMSMAction(this));

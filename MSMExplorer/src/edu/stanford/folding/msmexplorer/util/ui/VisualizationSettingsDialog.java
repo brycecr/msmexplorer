@@ -509,6 +509,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 			etFields.add(et.getColumnName(i));
 		}
+
 		final JComboBox edgeColorField = new JComboBox(etFields);
 		edgeColorField.setSelectedItem(edgeColorAction.getDataField());
 		edgeColorField.addActionListener( new ActionListener() {
