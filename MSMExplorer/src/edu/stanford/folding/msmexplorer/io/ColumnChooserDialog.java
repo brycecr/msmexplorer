@@ -17,6 +17,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import prefuse.Visualization;
+import prefuse.data.tuple.TupleSet;
 
 /**
  *
@@ -88,9 +89,17 @@ public class ColumnChooserDialog extends JDialog implements MSMConstants {
 	private void loadButtonActionPerformed(java.awt.event.ActionEvent evt) {                                           
 		String group = (String) groupField.getSelectedItem();
 		String ret = null;
-		if (group.equals(NODES) || group.equals(GRAPH) || group.equals(AGGR)) {
-			ret = MSMIOLib.applyNewlineDelimitedFile(m_vis.getSourceData((String)groupField.getSelectedItem()), nameField.getText(), 
-				getClassOf(typeComboBox.getSelectedIndex()));
+		if (group.equals(NODES) || group.equals(AGGR)) {
+			TupleSet g;
+			if (group.equals(AGGR)) {
+				g = m_vis.getGroup(AGGR);
+			} else if (group.equals(NODES)) {
+				g = m_vis.getSourceData(NODES);
+			} else {
+				g = null;
+				assert false;
+			}
+			ret = MSMIOLib.applyNewlineDelimitedFile(g, nameField.getText(), getClassOf(typeComboBox.getSelectedIndex()));
 		} else if (group.equals(EDGES)) {
 			ret = MSMIOLib.applyMatrixFile(null, null, m_vis.getSourceData((String)groupField.getSelectedItem()), nameField.getText(), getClassOf(typeComboBox.getSelectedIndex()));
 		}
