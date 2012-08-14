@@ -130,8 +130,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			large = 1;
 		}
 		final JRangeSlider nodeSizeSlider = new JRangeSlider(1, 2000, 
-			(int)nodeSizeAction.getMinimumSize(), (int)nodeSizeAction.getMaximumSize(), 
-			JRangeSlider.HORIZONTAL);
+			small, large, JRangeSlider.HORIZONTAL);
 		nodeSizeSlider.addChangeListener( new ChangeListener() {
 			public void stateChanged(ChangeEvent ce) {
 				int lowVal = nodeSizeSlider.getLowValue();
@@ -159,6 +158,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				m_vis.run("nodeSize");
 				m_vis.run("aggLayout");
 				m_vis.run("animate");
+				m_vis.repaint();
 			}
 		});
 
@@ -591,7 +591,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		int largew = (int)edgeWeightAction.getMaximumSize();
 		smallw = (smallw > 0) ? smallw : 1;
 		largew = (largew > 0) ? largew : 1;
-		final JRangeSlider edgeWeightSlider = new JRangeSlider(1, 80000, smallw, largew, Constants.ORIENT_TOP_BOTTOM);
+		final JRangeSlider edgeWeightSlider = new JRangeSlider(1, 100000, smallw, largew, Constants.ORIENT_TOP_BOTTOM);
 		edgeWeightSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				JRangeSlider slider = (JRangeSlider) e.getSource();

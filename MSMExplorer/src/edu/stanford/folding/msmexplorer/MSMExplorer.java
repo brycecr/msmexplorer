@@ -83,7 +83,6 @@ import prefuse.action.Action;
 import prefuse.action.ActionList;
 import prefuse.action.RepaintAction;
 import prefuse.action.assignment.ColorAction;
-import prefuse.action.assignment.DataColorAction;
 import prefuse.action.assignment.DataSizeAction;
 import prefuse.action.assignment.StrokeAction;
 import prefuse.action.filter.GraphDistanceFilter;
@@ -99,6 +98,7 @@ import prefuse.data.Graph;
 import prefuse.data.Node;
 import prefuse.data.Table;
 import prefuse.data.Tuple;
+import prefuse.data.event.TableListener;
 import prefuse.data.event.TupleSetListener;
 import prefuse.data.expression.OrPredicate;
 import prefuse.data.io.GraphMLReader;
@@ -234,7 +234,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			image = ImageIO.read(new File("./lib/splash.jpg"));
 		} catch (IOException ex) {
 			Logger.getLogger(MSMExplorer.class.getName()).log(Level.WARNING, null, ex);
-			image = new BufferedImage(0, 0, BufferedImage.TYPE_INT_RGB);
+			image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
 		}
 		ImageIcon splash = new ImageIcon(image);
 		selector.add(new JLabel(splash), BorderLayout.CENTER);
@@ -654,10 +654,9 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 				} else {
 					DataSizeAction nodeSize = (DataSizeAction)m_vis.getAction("nodeSize");
 					tr.setImageField("image");
-					double scale = 1.0d / m_vis.getDisplay(0).getScale();
-					nodeSize.setMinimumSize(1.0d * scale * scale);
-					nodeSize.setMaximumSize(1.0d * scale * scale);
-					tr.getImageFactory().setMaxImageDimensions((int) (150.0d * scale), (int) (150.0d * scale));
+					nodeSize.setMaximumSize(1.0);
+					nodeSize.setMinimumSize(1.0);
+					tr.getImageFactory().setMaxImageDimensions(150, 150);
 					m_vis.run("nodeSize");
 				}
 				m_vis.run("draw");
@@ -729,6 +728,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		}
 		axisFields.add ("Load new...");
 		axisFields.add ("No Axis");
+
 
 		final JComboBox yAxisSelector = new JComboBox(axisFields);
 		final JComboBox xAxisSelector = new JComboBox(axisFields);
@@ -1143,15 +1143,18 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			}
 		});
 
-		final JMenuItem openTable = new JMenuItem("Open Node Table");
-		openTable.addActionListener( new ActionListener() {
+		final JMenuItem openNodeTable = new JMenuItem("Open Node Table");
+		openNodeTable.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				JPrefuseTable.showTableWindow(new 
-					CascadedTable(((Graph)m_vis.getGroup(GRAPH)).
-					getNodeTable(), new NamedColumnProjection(
-					Arrays.copyOf(axisFields.toArray(), 
-					axisFields.size(), String[].class), true)));
+				JPrefuseTable.showTableWindow(g.getNodeTable());
 			}	
+		});
+
+		final JMenuItem openEdgeTable = new JMenuItem("Open Edge Table"); 
+		openEdgeTable.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				JPrefuseTable.showTableWindow(g.getEdgeTable());
+			}
 		});
 
 		// The following block is the gui boilerplate for a
@@ -1167,9 +1170,24 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		saveSVG.addActionListener(new ExportMSMImageAction(m_vis.getDisplay(0)));
 		saveSVG.setAccelerator(KeyStroke.getKeyStroke("ctrl shift S"));
 
+		JMenuItem importColumn = new JMenuItem("Add Data Column");
+		importColumn.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				ColumnChooserDialog ccd = new ColumnChooserDialog(frame, m_vis, null);
+				String ret = ccd.showDialog();
+				if (ret != null) {
+					axisFields.insertElementAt(ret, axisFields.size() - 2);
+					xAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
+					yAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
+				}
+			}
+		});
+
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.add(new OpenMSMAction(this));
 		fileMenu.add(new OpenHierarchyAction());
+		fileMenu.addSeparator();
+		fileMenu.add(importColumn);
 		fileMenu.addSeparator();
 		fileMenu.add(new SaveMSMAction(g, this));
 		fileMenu.add(saveSVG);
@@ -1179,7 +1197,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		dataMenu.add(forcePanel);
 		dataMenu.add(statsPanel);
 		dataMenu.addSeparator();
-		dataMenu.add(openTable);
+		dataMenu.add(openNodeTable);
+		dataMenu.add(openEdgeTable);
 		//dataMenu.add(makeMovie); XXX put this back when implemented...
 
 		JMenuBar menubar = new JMenuBar();
@@ -1476,7 +1495,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		SpringForce.setMinValue(0, .00000099f);
 		SpringForce.setParameter(0, .00001f);
 		SpringForce.setMaxValue(1, 3200f);
-		SpringForce.setParameter(1, 400f);
+		SpringForce.setParameter(1, 600f);
 	}
 
 	/**
