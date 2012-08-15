@@ -192,9 +192,9 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		nodeSizeActionField.setSelectedItem(nodeSizeAction.getDataField());
 
 		final JComboBox nodeSizeScaleField = new JComboBox(SCALE_LABELS);
-		nodeSizeScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeSizeAction.getScale()));
 		nodeSizeScaleField.addActionListener( new ScaleComboxActionListener(nodeSizeScaleField,
 			nodeSizeAction, m_vis.getAction("nodeSize")));
+		nodeSizeScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeSizeAction.getScale()));
 
 		final FlexDataColorAction nodeColorAction = (FlexDataColorAction)m_vis.getAction("nodeFill");
 		final JComboBox nodeColorActionField = new JComboBox(fields);
@@ -214,9 +214,9 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		nodeColorActionField.setSelectedItem(nodeColorAction.getDataField());
 
 		JComboBox nodeColorScaleField = new JComboBox(SCALE_LABELS);
-		nodeColorScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeColorAction.getScale()));
 		nodeColorScaleField.addActionListener( new ScaleComboxActionListener(nodeColorScaleField,
 				nodeColorAction, m_vis.getAction("nodeFill")));
+		nodeColorScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeColorAction.getScale()));
 
 		int[] palette = nodeColorAction.getPalette();
 		final JComboBox presetPalettes = new JComboBox(PALETTE_LABELS);
@@ -616,9 +616,9 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		});
 
 		final JComboBox edgeWeightScaleField = new JComboBox(SCALE_LABELS);
-		edgeWeightScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeColorAction.getScale()));
 		edgeWeightScaleField.addActionListener( new ScaleComboxActionListener(edgeWeightScaleField,
 			edgeWeightAction, m_vis.getAction("animate")));
+		edgeWeightScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeColorAction.getScale()));
 
 		c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;

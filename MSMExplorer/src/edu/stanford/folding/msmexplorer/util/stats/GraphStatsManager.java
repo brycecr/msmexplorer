@@ -1,6 +1,5 @@
 package edu.stanford.folding.msmexplorer.util.stats;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import prefuse.data.Edge;
@@ -104,7 +103,6 @@ public class GraphStatsManager {
 			+ "Avg Deg: " + avgDegree + '\n'
 			+ "Avg In/Out Deg" + avgDegree / 2. + '\n'
 			+ "Eigenvector Centrality: " + evCentrality;
-		System.out.println(stats);
 
 		return stats;
 	}
@@ -178,8 +176,6 @@ public class GraphStatsManager {
 			}
 		}
 
-		//System.out.println(Arrays.toString(centralities));
-		//System.out.println("Max: " + max(centralities));
 		return max(centralities);
 	}
 

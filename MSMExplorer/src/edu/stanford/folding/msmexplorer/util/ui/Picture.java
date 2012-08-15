@@ -253,7 +253,7 @@ public final class Picture implements ActionListener {
 				e.printStackTrace();
 			}
 		} else {
-			System.out.println("Error: filename must end in .jpg or .png");
+			assert false;
 		}
 	}
 
@@ -275,7 +275,6 @@ public final class Picture implements ActionListener {
 	 */
 	public static void main(String[] args) {
 		Picture pic = new Picture("/images/macro1.png");
-		System.out.printf("%d-by-%d\n", pic.width(), pic.height());
 		pic.show();
 	}
 }

@@ -1,7 +1,7 @@
 package edu.stanford.folding.msmexplorer.tpt;
 
+import edu.stanford.folding.msmexplorer.MSMExplorer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.ArrayDeque;
 import java.util.PriorityQueue;
@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Comparator;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 import prefuse.data.Graph;
@@ -106,25 +108,18 @@ public class TPTFactoryCM {
 		this.m_target = target;
 		this.kMatSize = m_graph.getNodeCount();
 
-		System.out.println("Factory established");
 		this.m_tProb = transitionMatrix();
-		System.out.println("tProb reconstructed");
 
 
 		this.kNumKStates = target.getTupleCount();
 
 		double[] forwardCommittors = getForwardCommittors();
-		System.out.println("q+ obtained");
 		double[] backwardCommittors = getBackwardCommittors(forwardCommittors);
-		System.out.println("q- obtained");
 		double[] eqProbs = getEqProbs();
 		eqProbs = normalize(eqProbs);
-		System.out.println("eqProbs reconstructed");
 
 		this.m_old_fFluxes = getFluxes(forwardCommittors, backwardCommittors, eqProbs);
-		System.out.println("fluxes obtained");
 		this.m_fFluxes = deepCopy(m_old_fFluxes);
-		System.out.println("fluxes copied");
 
 	}
 
@@ -190,7 +185,6 @@ public class TPTFactoryCM {
 	 */
 	private double[] getForwardCommittors() {
 
-		System.out.println("fc start");
 		ArrayList<Integer> source = getIndicies(m_source);
 		ArrayList<Integer> target = getIndicies(m_target);
 
@@ -198,13 +192,11 @@ public class TPTFactoryCM {
 		OpenMapRealMatrix tProbRM = new OpenMapRealMatrix(m_tProb.copy());
 
 		RealVector aug = new ArrayRealVector(kMatSize); //Holds "augmented" col
-		System.out.println("init done");
 
 		for (int i = 0; i < kMatSize; ++i)
 			tProbRM.addToEntry(i, i, -1);
 		//        tProbRM.subtract(MatrixUtils.createRealIdentityMatrix(kMatSize));
 
-		System.out.println("enter loop");
 		for (int i = 0; i < kMatSize; ++i) {
 
 			if ( target.contains(new Integer(i)) ) {
@@ -223,11 +215,9 @@ public class TPTFactoryCM {
 			}
 		}
 
-		System.out.println("to make solver");
 
 		DecompositionSolver solver = new LUDecompositionImpl(tProbRM).getSolver();
 
-		System.out.println("to solve");
 		return (solver.solve(aug)).getData();
 	}
 
@@ -348,7 +338,6 @@ public class TPTFactoryCM {
 		} while ( (!(indicies.contains(index))) );
 
 		double f = fluxList.get(argmin(fluxList)).doubleValue();
-		System.out.println(f);
 
 		ArrayList<Edge> edgeList = new ArrayList<Edge>();
 
@@ -404,7 +393,6 @@ public class TPTFactoryCM {
 						"TPT Overflow",
 						JOptionPane.ERROR_MESSAGE);
 				this.error = true;
-				System.err.println ("Stack Overflow From TPT");
 			}
 		}
 		if ( hasPath == false )
@@ -413,7 +401,6 @@ public class TPTFactoryCM {
 		iList.add(index);
 
 		double f = fluxList.get(argmin(fluxList)).doubleValue();
-		System.out.println (f);
 
 		ArrayList<Edge> edgeList = new ArrayList<Edge>();
 
@@ -430,7 +417,6 @@ public class TPTFactoryCM {
 
 			source.setDouble("flux", source.getDouble("flux") + f);
 			target.setDouble("flux", target.getDouble("flux") + f);
-			System.out.println("flux: " + e.getDouble("flux"));
 			e.setDouble("flux", fluxList.get(k) + f);
 
 			edgeList.add(e);
@@ -499,8 +485,9 @@ FIND_PATH:
 						dead_index = iList.pop();
 						fList.pop();
 					} catch (NoSuchElementException nsee) {
-						System.err.println ("TPT tried to remove element on empty stack."
-								+ "Stack should not be empty");
+						//TPT tried to remove element on empty stack.
+						//Stack should not be empty
+						Logger.getLogger(MSMExplorer.class.getName()).log(Level.WARNING, null, nsee);
 					}
 
 					if (iList.isEmpty()) {
@@ -536,7 +523,6 @@ FIND_PATH:
 		//iList.addLast(index); //XXX not needed???
 
 		double f = min(fList);
-		System.out.println (f);
 
 		ArrayList<Edge> edgeList = new ArrayList<Edge>();
 

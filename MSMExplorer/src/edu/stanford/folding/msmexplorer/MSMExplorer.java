@@ -1404,14 +1404,14 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			  ColorLib.rgb(200, 40, 55));
 
 		FlexDataColorAction edgeColor = new FlexDataColorAction(EDGES, TPROB,
-			Constants.NOMINAL, VisualItem.STROKECOLOR,
+			Constants.NUMERICAL, VisualItem.STROKECOLOR,
 			ColorLib.getGrayscalePalette(100));
 		edgeColor.add(VisualItem.HOVER, ColorLib.rgb(200, 40, 60));
 		edgeColor.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 150, 68));
 		edgeColor.setFilterPredicate(new VisiblePredicate());
 
 		FlexDataColorAction edgeFill = new FlexDataColorAction(EDGES, TPROB,
-			Constants.NOMINAL, VisualItem.FILLCOLOR,
+			Constants.NUMERICAL, VisualItem.FILLCOLOR,
 			ColorLib.getGrayscalePalette(100));
 		edgeFill.add(VisualItem.HOVER, ColorLib.rgb(200, 40, 60));
 		edgeFill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 150, 68));
@@ -1496,7 +1496,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		SpringForce.setMinValue(0, .00000099f);
 		SpringForce.setParameter(0, .00001f);
 		SpringForce.setMaxValue(1, 3200f);
-		SpringForce.setParameter(1, 600f);
+		SpringForce.setParameter(1, 450f);
 	}
 
 	/**
