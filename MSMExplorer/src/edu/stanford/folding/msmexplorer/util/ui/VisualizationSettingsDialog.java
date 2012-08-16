@@ -192,9 +192,9 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		nodeSizeActionField.setSelectedItem(nodeSizeAction.getDataField());
 
 		final JComboBox nodeSizeScaleField = new JComboBox(SCALE_LABELS);
-		nodeSizeScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeSizeAction.getScale()));
 		nodeSizeScaleField.addActionListener( new ScaleComboxActionListener(nodeSizeScaleField,
 			nodeSizeAction, m_vis.getAction("nodeSize")));
+		nodeSizeScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeSizeAction.getScale()));
 
 		final FlexDataColorAction nodeColorAction = (FlexDataColorAction)m_vis.getAction("nodeFill");
 		final JComboBox nodeColorActionField = new JComboBox(fields);
@@ -214,9 +214,9 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		nodeColorActionField.setSelectedItem(nodeColorAction.getDataField());
 
 		JComboBox nodeColorScaleField = new JComboBox(SCALE_LABELS);
-		nodeColorScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeColorAction.getScale()));
 		nodeColorScaleField.addActionListener( new ScaleComboxActionListener(nodeColorScaleField,
 				nodeColorAction, m_vis.getAction("nodeFill")));
+		nodeColorScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeColorAction.getScale()));
 
 		int[] palette = nodeColorAction.getPalette();
 		final JComboBox presetPalettes = new JComboBox(PALETTE_LABELS);
@@ -489,8 +489,8 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		showSelfEdges.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				m_er.setRenderSelfEdges(showSelfEdges.isSelected());
-				m_vis.run("draw");
 				m_vis.run("animate");
+				m_vis.repaint();
 			}
 		});
 
@@ -510,6 +510,8 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			etFields.add(et.getColumnName(i));
 		}
 
+		final JComboBox edgeColorScaleField = new JComboBox(SCALE_LABELS);
+
 		final JComboBox edgeColorField = new JComboBox(etFields);
 		edgeColorField.setSelectedItem(edgeColorAction.getDataField());
 		edgeColorField.addActionListener( new ActionListener() {
@@ -519,7 +521,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				if (isNumerical(et.getColumn(col))) {
 					dataType = Constants.NUMERICAL;
 					edgeColorAction.setBinCount(10);
-					edgeColorAction.setScale(Constants.QUANTILE_SCALE);
+					edgeColorAction.setScale(SCALE_TYPES[edgeColorScaleField.getSelectedIndex()]);
 				}
 				edgeColorAction.setDataField(col);
 				edgeColorAction.setDataType(dataType);
@@ -530,7 +532,6 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		});
 
-		final JComboBox edgeColorScaleField = new JComboBox(SCALE_LABELS);
 		edgeColorScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeColorAction.getScale()));
 		edgeColorScaleField.addActionListener( new ScaleComboxActionListener(edgeColorScaleField,
 				new ArrayList<EncoderAction>(2){{add(edgeColorAction);add(edgeArrowColorAction);}}, 
@@ -616,9 +617,9 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		});
 
 		final JComboBox edgeWeightScaleField = new JComboBox(SCALE_LABELS);
-		edgeWeightScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeColorAction.getScale()));
 		edgeWeightScaleField.addActionListener( new ScaleComboxActionListener(edgeWeightScaleField,
 			edgeWeightAction, m_vis.getAction("animate")));
+		edgeWeightScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeColorAction.getScale()));
 
 		c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
