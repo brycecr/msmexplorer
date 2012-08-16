@@ -116,14 +116,14 @@ BUTTONS AND GUI COMPONENTS:
 			> Input a label. Will report if any matches were found and will center the screen on the highlighted matching node (if any).		
 		Axis Controls:
 			> X-Axis and Y-Axis: select which node data field to use to plot the nodes along the corresponding axis. "Load new..." allows users to add new data files (must be tab delimited, same length as number of nodes in graph) to plot, via a couple dialogs that ask for the new columns name, data type, and file source. 
-			> Axis settings opens a dialog to modify some visual setting for the axis layout. Currently, for numerical column type axis (others are disabled in the dialog), the user can choose whether to set the layout bounds manually or have them calculated automatically to fit.
+			> Axis settings opens a dialog to modify some visual setting for the axis layout. For numerical column type axis (others are disabled in the dialog), the user can choose whether to set the layout bounds manually or have them calculated automatically to fit. Additionally, this panel can add axis labels, change label (and grid label) font size, and alter the spacing of gridlines.
 			> Show Axis will run the axis layout for the axes specified in the drop-down menus and in Axis Settings. May be necessary to toggle this on an off to cause alterations to the axis settings to take effect.
 	
 		Aesthetic:
 			> Hide Edges: don't show edges; useful for schematics (especially axis-based graphs) where edges are distracting.
 			> Show Edges: show edges after they have been hidden. Does nothing if edges are already visible. Some other operatios (such a Run Layout or Edge Type) may also cause edges to re-display.
-			> Node Color: Open a dialog to select a new color for edges.
 			> Force Panel: Open a panel to adjust the force parameters used to layout the graph automatically. Can result in better (especially more spaced-out) layouts or different interactive behavior.
+			> Vis Settings: A whole boatload of visual tweaks possible here, including disabling self-edges, changing node color to scale with any data type, changing node size, edge weight, edge color, aggregate color, label font size, node shape, and more...
 Hierarchy Controls (Upper left, visible only when hierarchy loaded):
 		Level Slider: 
 			> Indicates which level of the hierarchy is viewed as the current graph.

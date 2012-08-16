@@ -489,8 +489,8 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		showSelfEdges.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				m_er.setRenderSelfEdges(showSelfEdges.isSelected());
-				m_vis.run("draw");
 				m_vis.run("animate");
+				m_vis.repaint();
 			}
 		});
 
@@ -510,6 +510,8 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			etFields.add(et.getColumnName(i));
 		}
 
+		final JComboBox edgeColorScaleField = new JComboBox(SCALE_LABELS);
+
 		final JComboBox edgeColorField = new JComboBox(etFields);
 		edgeColorField.setSelectedItem(edgeColorAction.getDataField());
 		edgeColorField.addActionListener( new ActionListener() {
@@ -519,7 +521,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				if (isNumerical(et.getColumn(col))) {
 					dataType = Constants.NUMERICAL;
 					edgeColorAction.setBinCount(10);
-					edgeColorAction.setScale(Constants.QUANTILE_SCALE);
+					edgeColorAction.setScale(SCALE_TYPES[edgeColorScaleField.getSelectedIndex()]);
 				}
 				edgeColorAction.setDataField(col);
 				edgeColorAction.setDataType(dataType);
@@ -530,7 +532,6 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			}
 		});
 
-		final JComboBox edgeColorScaleField = new JComboBox(SCALE_LABELS);
 		edgeColorScaleField.setSelectedIndex(Arrays.binarySearch(SCALE_TYPES, nodeColorAction.getScale()));
 		edgeColorScaleField.addActionListener( new ScaleComboxActionListener(edgeColorScaleField,
 				new ArrayList<EncoderAction>(2){{add(edgeColorAction);add(edgeArrowColorAction);}}, 

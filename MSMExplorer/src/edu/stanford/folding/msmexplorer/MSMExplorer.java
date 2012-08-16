@@ -1405,14 +1405,18 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 
 		FlexDataColorAction edgeColor = new FlexDataColorAction(EDGES, TPROB,
 			Constants.NUMERICAL, VisualItem.STROKECOLOR,
-			ColorLib.getGrayscalePalette(100));
+			ColorLib.getGrayscalePalette());
+		edgeColor.setBinCount(10);
+		edgeColor.setScale(Constants.QUANTILE_SCALE);
 		edgeColor.add(VisualItem.HOVER, ColorLib.rgb(200, 40, 60));
 		edgeColor.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 150, 68));
 		edgeColor.setFilterPredicate(new VisiblePredicate());
 
 		FlexDataColorAction edgeFill = new FlexDataColorAction(EDGES, TPROB,
 			Constants.NUMERICAL, VisualItem.FILLCOLOR,
-			ColorLib.getGrayscalePalette(100));
+			ColorLib.getGrayscalePalette());
+		edgeFill.setBinCount(10);
+		edgeFill.setScale(Constants.QUANTILE_SCALE);
 		edgeFill.add(VisualItem.HOVER, ColorLib.rgb(200, 40, 60));
 		edgeFill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(255, 150, 68));
 		edgeFill.setFilterPredicate(new VisiblePredicate());
@@ -1420,11 +1424,6 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		DataSizeAction edgeWeight = new DataSizeAction(EDGES, "probability", 100, Constants.LOG_SCALE);
 		edgeWeight.setMaximumSize(1.0);
 		edgeWeight.setMinimumSize(1.0);
-
-		//currently unused
-		StrokeAction nodeWeight = new StrokeAction(NODES,
-			StrokeLib.getStroke(1.0f));
-		//nodeWeight.add(new InGroupPredicate(Visualization.FOCUS_ITEMS), StrokeLib.getStroke(2.0f));
 
 		final DataSizeAction nodeSize = new DataSizeAction(NODES,
 			EQPROB, 50, Constants.LOG_SCALE);
