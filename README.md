@@ -19,6 +19,8 @@ Primary contact: msmexplorer@gmail.com
 
 Please report bugs, comments, and feature requests on MSMExplorer's smitk page, or email msmexplorer@gmail.com directly.
 
+NOTE: The information contained herein is also explained in REFERENCE_TUTORIAL.pdf, which is recommended instead of this if you have the facility for opening it. A bit more detail is provided there.
+
 Introduction
 ------------
 MSMExplorer is a java-based visualization package for protein folding Markov State Models (MSMs) that have been produced using MSMBuilder. This software hopes to provide a simple and intuitive interface for visual analysis of MSMs, including the production of publication-quality visualizations.
@@ -28,6 +30,7 @@ This program is released under the terms of the GNU GPL. Copyright Pande Lab 201
 The default branch is master, which will generally be updated once a feature is some version of fully implemented. 
 The branch acacia is the primary development branch for work in progress. 
 If you want to mess around with writing Python for MSMExplorer via Jython, checkout out the kulkulkan branch (which should follow master in terms of Java code).
+Additionally, the indd file for the pdf REFERENCE_TUTORIAL is in another repository, github.com/brycecr/msmexplorer_doc
 
 NOTE: This program is currently an ALPHA release. Please forward all feature requests and bug reports to msmexplorer@gmail.com
 
@@ -85,6 +88,10 @@ BUTTONS AND GUI COMPONENTS:
 			> Open a dialog box to select a new graph to display. After a graph is selected, the user will be prompted to select an equilibrium probability file (recommended) and then the image directory for the new graph (optional). MSMExplorer can open normal dense, space-delimited .dat matrices, .mtx sparse format matrices, and .graphml files. 
 		Open Hierarchy:
 			> Open a dialog to select a folder containing an hierarchical MSM to load. A minimal example of the required format can be browsed in the simple_hierarchy folder. Note that the filenames (tProb, Populations, and MacroMapping) are important for loading correctly, although MSMExplorer attempts to provide some flexibility. In particular, each subfolder participating in the hierarchy must contain a transition probability matrix (called tProb with an extension specifying the format) and a file specifying the mapping from a hierarchy-common base (the most populated MSM in the hierarchy) to the macrostates in the transition probability matrix (mapping file called MacroMapping). These should be MSMBuilder defaults. Equilibrium probabilities may be optionally provided (recommended) 
+		Import Data Column:
+			> Open a dialog to import a new data column for either the nodes, edges, or aggregates.
+		Save Image: 
+			> Export a raster or vector image of the current display. Vector (svg) will rescale infinitely, but may result in some weird font appearance on occasion.
 		Save File: 
 			> Open a dialog to save the current graph (in its entirety) as a .graphml file, which are convenient because they package all data loaded into the table (though support for their handling is not complete).
 >	The Panels Menu:
@@ -92,6 +99,9 @@ BUTTONS AND GUI COMPONENTS:
 			> Opens a panel to adjust the force parameters of the graph layout algorithm.
 		Stats Panel:
 			> Opens a panel that contains some simple graph statics about the current graph: the number of nodes, the number of edges, the graph density, average node degree measures, and eigenvector centrality. 
+		Open Node Table:
+		Open Edge Table:
+			> These two buttons open panels to view the respective backing data tables. Some data (most String data) -- especially the "label" field for nodes -- is modifiable.	
 >	The Control Panel (right) :
 		Press the small arrows at the top of the divider to collapse or expand the panel.
 		Connectivity Filter: The following filters act together, as if they're logical ANDed together.
@@ -123,7 +133,7 @@ BUTTONS AND GUI COMPONENTS:
 			> Hide Edges: don't show edges; useful for schematics (especially axis-based graphs) where edges are distracting.
 			> Show Edges: show edges after they have been hidden. Does nothing if edges are already visible. Some other operatios (such a Run Layout or Edge Type) may also cause edges to re-display.
 			> Force Panel: Open a panel to adjust the force parameters used to layout the graph automatically. Can result in better (especially more spaced-out) layouts or different interactive behavior.
-			> Vis Settings: A whole boatload of visual tweaks possible here, including disabling self-edges, changing node color to scale with any data type, changing node size, edge weight, edge color, aggregate color, label font size, node shape, and more...
+			> Vis Settings: A whole boatload of visual tweaks possible here, including disabling self-edges, changing node color to scale with any data type, changing node size, edge weight, edge color, aggregate color, label font size, node shape, and more...see REFERENCE_TUTORIAL.pdf for more information
 Hierarchy Controls (Upper left, visible only when hierarchy loaded):
 		Level Slider: 
 			> Indicates which level of the hierarchy is viewed as the current graph.
