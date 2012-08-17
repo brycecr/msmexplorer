@@ -1,0 +1,6 @@
+Ala2RMSD_Hierarchical -- A complete, substantial hierarchical mode.
+data.mtx -- a sample aux data column in mtx form for the default 5macro.xml MSM
+jmacro200.xml -- a sample GraphML format MSM
+simple_hierarchy -- a simple, minimal example of MSM Hierarchical structure
+tProb_200a.macro.dat -- a dense matrix MSM with 200 states
+Populations200.dat -- the equilibrium probabilities for tProb_200a.macro.dat

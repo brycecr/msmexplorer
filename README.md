@@ -28,6 +28,7 @@ This program is released under the terms of the GNU GPL. Copyright Pande Lab 201
 The default branch is master, which will generally be updated once a feature is some version of fully implemented. 
 The branch acacia is the primary development branch for work in progress. 
 If you want to mess around with writing Python for MSMExplorer via Jython, checkout out the kulkulkan branch (which should follow master in terms of Java code).
+Additionally, the indd file for the pdf REFERENCE_TUTORIAL is in another repository, github.com/brycecr/msmexplorer_doc
 
 NOTE: This program is currently an ALPHA release. Please forward all feature requests and bug reports to msmexplorer@gmail.com
 
