@@ -903,6 +903,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					m_vis.putAction("axes", axes);
 					m_vis.run("axes");
 					m_vis.run("aggLayout");
+					m_vis.repaint();
 					Rectangle2D lbounds = m_vis.getBounds(GRAPH);
 					GraphicsLib.expand(lbounds, 100 + (int) (1 / display.getScale()));
 					DisplayLib.fitViewToBounds(display, lbounds, 1000);
