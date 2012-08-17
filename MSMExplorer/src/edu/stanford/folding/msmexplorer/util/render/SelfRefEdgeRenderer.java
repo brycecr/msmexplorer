@@ -1,22 +1,35 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2012 Pande Lab
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
 package edu.stanford.folding.msmexplorer.util.render;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
-import prefuse.Constants;
+import prefuse.data.Edge;
 import prefuse.render.EdgeRenderer;
 import prefuse.util.ColorLib;
 import prefuse.visual.VisualItem;
 import prefuse.visual.EdgeItem;
 
 /**
+ * Renders self edges as circles...
  *
- * @author gestalt
+ * @author pap forums
  */
 public class SelfRefEdgeRenderer extends EdgeRenderer {
 	private Ellipse2D m_ellipse = new Ellipse2D.Float();
@@ -65,4 +78,35 @@ public class SelfRefEdgeRenderer extends EdgeRenderer {
 		
 		return super.getRawShape(item);
 	} //getRawShape
+	
+	
+	/**
+	 * @see prefuse.render.Renderer#render(java.awt.Graphics2D, prefuse.visual.VisualItem)
+	 */
+	public void render(Graphics2D g, VisualItem item) {
+		// render the edge line
+		super.render(g, item);
+		// render the edge arrow head, if appropriate
+		if ( m_curArrow != null && !isSelfEdge(item)) {
+			g.setPaint(ColorLib.getColor(item.getFillColor()));
+			g.fill(m_curArrow);
+		}
+	}
+
+	/**
+	 * Does not assume item is an edge; returns whether item is a self-edge.
+	 * 
+	 * @param item in question
+	 * @return boolean indicating whether item is a self-edge
+	 */
+	protected boolean isSelfEdge(VisualItem item) {
+		if (item instanceof EdgeItem) {
+			VisualItem source = ((EdgeItem)item).getSourceItem();
+			VisualItem target = ((EdgeItem)item).getTargetItem();
+			if (source.equals(target)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
