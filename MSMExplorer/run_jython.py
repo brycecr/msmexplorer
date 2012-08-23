@@ -1,6 +1,7 @@
 # This class takes care of your classpath and
 # simply launches an instance of MSMExplorer on Jython.
-# Jython required to run.
+# Jython required to run. Note that Jython does not
+# support C-extensions
 
 import sys
 
