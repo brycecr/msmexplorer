@@ -38,6 +38,7 @@ import edu.stanford.folding.msmexplorer.util.axis.AxisRotateRenderer;
 import edu.stanford.folding.msmexplorer.util.axis.AxisSettingsDialog;
 import edu.stanford.folding.msmexplorer.util.ui.FocusControlWithDeselect;
 import edu.stanford.folding.msmexplorer.util.ui.JValueSliderFlammable;
+import edu.stanford.folding.msmexplorer.util.ui.PDBServer;
 import edu.stanford.folding.msmexplorer.util.ui.Picture;
 import edu.stanford.folding.msmexplorer.util.ui.VisualizationSettingsDialog;
 import java.awt.BorderLayout;
@@ -855,10 +856,12 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 						if (xaxis.getDataType() == Constants.NUMERICAL
 							|| isNumerical(xAxisSelector)) {
 							xaxis.setRangeModel(xAxisRange);
+							xaxis.setDataType(Constants.NUMERICAL);
 						}
 						if (yaxis.getDataType() == Constants.NUMERICAL
 							|| isNumerical(yAxisSelector)) {
 							yaxis.setRangeModel(yAxisRange);
+							yaxis.setDataType(Constants.NUMERICAL);
 						}
 					}
 					
@@ -1021,6 +1024,23 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		aesPane.setOpaque(false);
 
 		fpanel.add(aesPane);
+
+		JButton openPDB = new JButton("Open PDB");
+		openPDB.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				Tuple focus = (Tuple) m_vis.getGroup(Visualization.FOCUS_ITEMS).tuples().next();
+				try {
+					PDBServer.openPDB(focus.getRow(),"/Users/gestalt/Downloads/msmbuilder/Tutorial/PDBs/");
+				} catch (InterruptedException ex) {
+					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, ex);
+				} catch (IOException ex) {
+					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				
+			}
+		});
+		fpanel.add(openPDB);
+
 
 		/* ----------- HIERARCHY GUI ELEMENTS ------------ */
 		final JSlider zoomSlider = new JSlider(SwingConstants.VERTICAL, 0, 0, 0);
