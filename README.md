@@ -116,9 +116,9 @@ BUTTONS AND GUI COMPONENTS:
 				> Circle: Empty circle. This reflects the general tradition in literature.
 		Run Control:
 			Start or stop the graph layout algorithm. The stop setting is useful to position individual nodes or to make viewing easier or interaction more smooth. The algorithm must be showing to activlely "minimize" the graph or to realize force parameter changes fro the Force Panel.
-		Image Controls:
+		Assoc. Node Files:
 			> Open Image: If images are provided, opens the image corresponding to the selected state and displays it in a new window at its original size.
-			> Save Image: Opens a dialog box to save a raster image of the display. A range of output magnifications/resolutions and file formats are avaliable.
+			> Open PDB: Attempts to open the PDB correspondng to the selected node in PyMol. You must have pymol installed as a command line utility for this to work (i.e. I can run "pymol native.pdb" on your terminal). If you haven't specified the location of the PDB files previously, you'll be presented with a dialog to select the file they reside in. Note that MSMExplorer expects these files to be of the form "StateN-0.pdb" where N is the row number of the state. So state 0 should have filename "State0-0.pdb".
 		Function Control:
 			> Show Images: Places images corresponding to each node on top of the nodes, if and image directory was provided. Small text labels are also included on the nodes. 
 			> Open a TPT Selector window to allow selection of source and target sets to run TPT on.
