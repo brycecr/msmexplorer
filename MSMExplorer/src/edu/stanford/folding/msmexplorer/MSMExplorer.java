@@ -649,16 +649,9 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			+ "<br>corresponding to this node. Only works correctly if the location"
 			+ "<br>of that image has been correctly specified.</html>");
 
-		//Save raster image file
-		JButton exportDisplay = new JButton("Save Image");
-		exportDisplay.addActionListener(new ExportMSMImageAction(display));
-		exportDisplay.setToolTipText("<html>Save the current visualization as an"
-			+ "<br>image file. Vector (svg) and various raster formats available.</html>");
-
 		Box imgControls = new Box(BoxLayout.X_AXIS);
-		imgControls.setBorder(BorderFactory.createTitledBorder("Image Controls"));
+		imgControls.setBorder(BorderFactory.createTitledBorder("Assoc. Node Files"));
 		imgControls.add(openImg);
-		imgControls.add(exportDisplay);
 		fpanel.add(imgControls);
 
 		//Show images on node
@@ -1039,12 +1032,12 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 				} catch (InterruptedException ex) {
 					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (IOException ex) {
-					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, ex);
+					Logger.getLogger(MSMExplorer.class.getName()).log(Level.WARNING, null, ex);
 				}
 				
 			}
 		});
-		fpanel.add(openPDB);
+		imgControls.add(openPDB);
 
 
 		/* ----------- HIERARCHY GUI ELEMENTS ------------ */

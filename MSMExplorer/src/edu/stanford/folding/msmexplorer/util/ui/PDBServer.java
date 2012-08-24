@@ -24,25 +24,29 @@ import java.io.InputStreamReader;
 import javax.swing.JFileChooser;
 
 /**
+ * A class that manages opening corresponding PDB files for an
+ * MSMExplorer instance. 
  *
- * @author gestalt
+ * @author brycecr
  */
 public class PDBServer {
 	
 	String location = null;
 	
-	public PDBServer(Component c, String path) {
+	public PDBServer(Component c, String path) 
+		throws IOException {
+
 		JFileChooser jfc = new JFileChooser(path);
 		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
-		jfc.setDialogTitle("Open Hierarchical MSM Directory");
+		jfc.setDialogTitle("Select Location of PDB file folder");
 		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		
 		int opt = jfc.showOpenDialog(c);
 		if (opt != JFileChooser.APPROVE_OPTION) {
-			return;
+			throw new IOException("No PDB file selected.");
+		} else {
+			location = jfc.getSelectedFile().getAbsolutePath()+'/';
 		}
-		
-		location = jfc.getSelectedFile().getAbsolutePath()+'/';
 	}
 	
 	/*
