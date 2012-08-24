@@ -190,6 +190,8 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 
 	private boolean autoRange = true; //whether to set axis ranges automatically
 
+	private PDBServer pdbServer = null;
+
 	/**
 	 * Initial program constructor; creates the initial splash screen
 	 * and all that good stuff.
@@ -1030,7 +1032,10 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			public void actionPerformed(ActionEvent ae) {
 				Tuple focus = (Tuple) m_vis.getGroup(Visualization.FOCUS_ITEMS).tuples().next();
 				try {
-					PDBServer.openPDB(focus.getRow(),"/Users/gestalt/Downloads/msmbuilder/Tutorial/PDBs/");
+					if (pdbServer == null) {
+						pdbServer = new PDBServer(MSMExplorer.this, "");
+					}
+					pdbServer.openPDB(focus.getRow());
 				} catch (InterruptedException ex) {
 					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (IOException ex) {

@@ -17,44 +17,61 @@
  */
 package edu.stanford.folding.msmexplorer.util.ui;
 
+import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Map;
+import javax.swing.JFileChooser;
 
 /**
  *
  * @author gestalt
  */
 public class PDBServer {
-
-	/*
-	 * Opens the correspondig pdb in pymol or vmd
-	 * 
-	 */
-	public static void openPDB (int row, String location) 
-		throws InterruptedException, IOException {
-
-/*
+	
+	String location = null;
+	
+	public PDBServer(Component c, String path) {
+		JFileChooser jfc = new JFileChooser(path);
+		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
+		jfc.setDialogTitle("Open Hierarchical MSM Directory");
+		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		
-		ProcessBuilder builder = new ProcessBuilder("pymol", location+"State-"+row+"-0.pdb");
-
-		Map<String,String> environ = builder.environment();
-		environ.put("PATH", "/opt/local/bins);
-		//builder.directory(new File(System.getProperty("user.home")));
-
-		final Process godot = builder.start();
-		godot.waitFor();
- * 
- */
-		Process proc = Runtime.getRuntime().exec("pymol "+location+"State"+row+"-0.pdb");
-
-		BufferedReader read=new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			
-			while(read.ready())
-			{
-				System.out.println(read.readLine());
-			}
+		int opt = jfc.showOpenDialog(c);
+		if (opt != JFileChooser.APPROVE_OPTION) {
+			return;
+		}
+		
+		location = jfc.getSelectedFile().getAbsolutePath()+'/';
 	}
 	
+	/*
+	 * Opens the correspondig pdb in pymol or vmd
+	 *
+	 */
+	public void openPDB (int row)
+		throws InterruptedException, IOException {
+		
+		/*
+		 * 
+		 * ProcessBuilder builder = new ProcessBuilder("pymol", location+"State-"+row+"-0.pdb");
+		 * 
+		 * Map<String,String> environ = builder.environment();
+		 * environ.put("PATH", "/opt/local/bins);
+		 * //builder.directory(new File(System.getProperty("user.home")));
+		 * 
+		 * final Process godot = builder.start();
+		 * godot.waitFor();
+		 *
+		 */
+		Process proc = Runtime.getRuntime().exec("pymol "+location+"State"+row+"-0.pdb");
+		
+		BufferedReader read=new BufferedReader(new InputStreamReader(proc.getInputStream()));
+		
+		while(read.ready())
+		{
+			System.out.println(read.readLine());
+		}
+	}
+
 }
