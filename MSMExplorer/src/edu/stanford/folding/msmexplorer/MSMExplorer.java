@@ -1033,6 +1033,9 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (IOException ex) {
 					Logger.getLogger(MSMExplorer.class.getName()).log(Level.WARNING, null, ex);
+					JOptionPane.showMessageDialog(this, "We encountered a problem running pymol "
+						+"on your system...check that you can run pymol from the command line. "
+						+"If you can and this problem persists, email msmexplorer@gmail.com for support.");
 				}
 				
 			}
