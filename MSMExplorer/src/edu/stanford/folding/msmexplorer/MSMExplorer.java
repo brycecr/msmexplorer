@@ -101,7 +101,6 @@ import prefuse.action.ActionList;
 import prefuse.action.RepaintAction;
 import prefuse.action.assignment.ColorAction;
 import prefuse.action.assignment.DataSizeAction;
-import prefuse.action.assignment.StrokeAction;
 import prefuse.action.filter.GraphDistanceFilter;
 import prefuse.action.layout.AxisLayout;
 import prefuse.action.layout.graph.ForceDirectedLayout;
@@ -110,12 +109,10 @@ import prefuse.controls.PanControl;
 import prefuse.controls.WheelZoomControl;
 import prefuse.controls.ZoomControl;
 import prefuse.controls.ZoomToFitControl;
-import prefuse.data.CascadedTable;
 import prefuse.data.Graph;
 import prefuse.data.Node;
 import prefuse.data.Table;
 import prefuse.data.Tuple;
-import prefuse.data.event.TableListener;
 import prefuse.data.event.TupleSetListener;
 import prefuse.data.expression.OrPredicate;
 import prefuse.data.io.GraphMLReader;
@@ -125,7 +122,6 @@ import prefuse.data.search.KeywordSearchTupleSet;
 import prefuse.data.search.SearchTupleSet;
 import prefuse.data.tuple.DefaultTupleSet;
 import prefuse.data.tuple.TupleSet;
-import prefuse.data.util.NamedColumnProjection;
 import prefuse.render.DefaultRendererFactory;
 import prefuse.render.EdgeRenderer;
 import prefuse.render.PolygonRenderer;
@@ -135,7 +131,6 @@ import prefuse.util.ColorLib;
 import prefuse.util.FontLib;
 import prefuse.util.GraphicsLib;
 import prefuse.util.PrefuseLib;
-import prefuse.util.StrokeLib;
 import prefuse.util.display.DisplayLib;
 import prefuse.util.force.Force;
 import prefuse.util.force.ForceSimulator;
@@ -732,7 +727,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		/* ------------- END SEARCH GUI ELEMENTS ------------------- */
 
 		/* -------------- AXIS GUI ELEMENTS ------------------------ */
-		Table nt = g.getNodeTable();
+		final Table nt = g.getNodeTable();
 		int numCols = nt.getColumnCount();
 		final Vector<String> axisFields = new Vector<String>(numCols);
 		for (int i = 0; i < numCols; ++i) {
@@ -748,6 +743,18 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		xAxisSelector.setSelectedIndex(0);
 		xAxisSelector.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
+				boolean changed = false;
+				for (int i = axisFields.size()-2; i < nt.getColumnCount(); ++i) {
+					if (!axisFields.contains(nt.getColumnName(i))) {
+						axisFields.insertElementAt(nt.getColumnName(i), axisFields.size()-2);
+						changed = true;
+					}
+				}
+				if (changed) {
+					xAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
+					yAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
+					xAxisSelector.revalidate();
+				}
 				String selected = (String)xAxisSelector.getSelectedItem();
 				if (selected.equals("Load new...")) {
 					ColumnChooserDialog ccf = new ColumnChooserDialog(frame, m_vis, NODES);
@@ -776,6 +783,18 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		yAxisSelector.setSelectedIndex(0);
 		yAxisSelector.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
+				boolean changed = false;
+				for (int i = axisFields.size()-2; i < nt.getColumnCount(); ++i) {
+					if (!axisFields.contains(nt.getColumnName(i))) {
+						axisFields.insertElementAt(nt.getColumnName(i), axisFields.size()-2);
+						changed = true;
+					}
+				}
+				if (changed) {
+					xAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
+					yAxisSelector.setModel(new DefaultComboBoxModel(axisFields));
+					yAxisSelector.repaint();
+				}
 				String selected = (String)yAxisSelector.getSelectedItem();
 				if (selected.equals("Load new...")) {
 					ColumnChooserDialog ccf = new ColumnChooserDialog(frame, m_vis, NODES);
@@ -1033,9 +1052,10 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					Logger.getLogger(MSMExplorer.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (IOException ex) {
 					Logger.getLogger(MSMExplorer.class.getName()).log(Level.WARNING, null, ex);
-					JOptionPane.showMessageDialog(this, "We encountered a problem running pymol "
+					JOptionPane.showMessageDialog(MSMExplorer.this, "We encountered a problem running pymol "
 						+"on your system...check that you can run pymol from the command line. "
-						+"If you can and this problem persists, email msmexplorer@gmail.com for support.");
+						+"If you can and this problem persists, email msmexplorer@gmail.com for support.", 
+						"Pymol Execution Failure", JOptionPane.ERROR_MESSAGE);
 				}
 				
 			}
@@ -1208,6 +1228,13 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		saveSVG.addActionListener(new ExportMSMImageAction(m_vis.getDisplay(0)));
 		saveSVG.setAccelerator(KeyStroke.getKeyStroke("ctrl shift S"));
 
+		JMenuItem setImageLoc = new JMenuItem("Set Image Location");
+		setImageLoc.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				MSMExplorer.this.getImagePath();
+			}
+		});
+
 		JMenuItem importColumn = new JMenuItem("Add Data Column");
 		importColumn.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -1227,6 +1254,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		fileMenu.add(new OpenHierarchyAction());
 		fileMenu.addSeparator();
 		fileMenu.add(importColumn);
+		fileMenu.add(setImageLoc);
 		fileMenu.addSeparator();
 		fileMenu.add(new SaveMSMAction(g, this));
 		fileMenu.add(saveSVG);
@@ -1468,13 +1496,16 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		nodeSize.setMaximumSize(50.0);
 
 		if (g.getNodeTable().getColumnNumber("image") < 0) {
-			String expression = "CONCAT(" + imageLocation + ",'/State',label,'.png')";
-			g.getNodes().addColumn("image", expression);
+			g.getNodes().addColumn("image", String.class);
+			Table nt = (Table)g.getNodes();
+			for (int i = 0; i < nt.getRowCount(); ++i) {
+				nt.setString(i, "image", imageLocation+"/State"+i+".png");
+			}
 		}
 
 		// Set up filter
 		//int hops = 5;
-		final GraphDistanceFilter distFilter = new GraphDistanceFilter(GRAPH, 40);
+		final GraphDistanceFilter distFilter = new GraphDistanceFilter(GRAPH, 10);
 		//Predicate eqProbPredicate = ExpressionParser.predicate("NOT(ISNODE() AND [eqProb] > .5)");
 		//final VisibilityFilter eqProbFilter = new VisibilityFilter(eqProbPredicate);
 
@@ -1619,27 +1650,37 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				imageLocation = chooser.getSelectedFile().getAbsolutePath();
 			}
+			
+			Graph g = (Graph)m_vis.getGroup(GRAPH);
+			if (g.getNodeTable().getColumnNumber("image") < 0) {
+				g.getNodes().addColumn("image", String.class);
+			}
+			Table nt = (Table)g.getNodes();
+			nt.getColumn("image").setReadOnly(false);
+			for (int i = 0; i < nt.getRowCount(); ++i) {
+				nt.setString(i, "image", imageLocation+"/State"+i+".png");
+			}
 		}
 	}
-
+	
 	// ------------------------------------------------------------------------
 	//  Utility classes
 	// ------------------------------------------------------------------------
 	private class OpenHierarchyAction extends AbstractAction {
-
+		
 		public OpenHierarchyAction() {
 			this.putValue(AbstractAction.NAME, "Open Hierarchy");
 			this.putValue(AbstractAction.ACCELERATOR_KEY,
 				KeyStroke.getKeyStroke("ctrl shift O"));
 		}
-
+		
 		public void actionPerformed(ActionEvent ae) {
 			hierarchy = MSMIOLib.openMSMHierarchy(MSMExplorer.this);
 			if (hierarchy == null || hierarchy.graphs == null
 				|| hierarchy.mappings == null || hierarchy.graphs.length < 1) {
 				return;
 			}
-
+			
 			//MSMExplorer.this.getImagePath();
 			MSMExplorer.this.frame.dispose();
 			MSMExplorer msme = graphView(hierarchy.graphs[0], "label");

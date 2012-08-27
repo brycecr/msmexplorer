@@ -90,6 +90,8 @@ BUTTONS AND GUI COMPONENTS:
 			> Open a dialog to select a folder containing an hierarchical MSM to load. A minimal example of the required format can be browsed in the simple_hierarchy folder. Note that the filenames (tProb, Populations, and MacroMapping) are important for loading correctly, although MSMExplorer attempts to provide some flexibility. In particular, each subfolder participating in the hierarchy must contain a transition probability matrix (called tProb with an extension specifying the format) and a file specifying the mapping from a hierarchy-common base (the most populated MSM in the hierarchy) to the macrostates in the transition probability matrix (mapping file called MacroMapping). These should be MSMBuilder defaults. Equilibrium probabilities may be optionally provided (recommended) 
 		Import Data Column:
 			> Open a dialog to import a new data column for either the nodes, edges, or aggregates.
+		Set Image Location
+			> Specify the location of the folder containing images. Each node should have a corresponding image named "State[node row].png"
 		Save Image: 
 			> Export a raster or vector image of the current display. Vector (svg) will rescale infinitely, but may result in some weird font appearance on occasion.
 		Save File: 

@@ -152,6 +152,13 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			public void stateChanged(ChangeEvent ce) {
 				int lowVal = nodeSizeSlider.getLowValue();
 				int highVal = nodeSizeSlider.getHighValue();
+				if (lowVal < 1) {
+					lowVal = 1;
+				} 
+				if (highVal < 1) {
+					highVal = 1;
+
+				}
 
 				if (m_lr.getImageField() == null) {
 					nodeSizeAction.setMaximumSize(highVal);
@@ -625,9 +632,18 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		final JComboBox edgeWeightField = new JComboBox(etNumFields);
 		edgeWeightField.addActionListener( new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
+				double lowVal = edgeWeightSlider.getLowValue();
+				double highVal = edgeWeightSlider.getHighValue();
+				if (lowVal < 1) {
+					lowVal = 1;
+				}
+				if (highVal < 1) {
+					highVal = 1;
+				}
+				
 				edgeWeightAction.setDataField((String)edgeWeightField.getSelectedItem());
-				edgeWeightAction.setMinimumSize(edgeWeightSlider.getLowValue());
-				edgeWeightAction.setMaximumSize(edgeWeightSlider.getHighValue());
+				edgeWeightAction.setMinimumSize(lowVal);
+				edgeWeightAction.setMaximumSize(highVal);
 				m_vis.run("animate");
 				m_vis.repaint();
 			}
