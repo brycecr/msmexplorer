@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Pande Lab
+ * Copyright (C) 2012 Stanford University
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -1635,6 +1635,11 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		return view;
 	}   //end of class graphView(Graph, String)
 
+	/**
+	 * Ask the user whether they want to select an image folder,
+	 * and open a dialog to do so if they consent.
+	 * Re-sets the values in the "image" column.
+	 */
 	private void getImagePath() {
 
 		int response = JOptionPane.showConfirmDialog(frame, "Would you like to"
