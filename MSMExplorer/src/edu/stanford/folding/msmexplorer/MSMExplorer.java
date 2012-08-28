@@ -23,6 +23,7 @@ import edu.stanford.folding.msmexplorer.io.MSMIOLib;
 import edu.stanford.folding.msmexplorer.io.hierarchy.HierarchyBundle;
 import edu.stanford.folding.msmexplorer.tpt.TPTSetupBox;
 import edu.stanford.folding.msmexplorer.tpt.TPTWindow;
+import edu.stanford.folding.msmexplorer.util.AggForceDirectedLayout;
 import edu.stanford.folding.msmexplorer.util.FlexDataColorAction;
 import edu.stanford.folding.msmexplorer.util.MutableDouble;
 import edu.stanford.folding.msmexplorer.util.aggregate.AggregateDragControl;
@@ -1427,6 +1428,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		((ActionList) m_vis.getAction("lll")).add(aggLayout);
 		m_vis.run("draw");
 		m_vis.run("aggLayout");
+		m_vis.run("lll");
 	}
 
 	/**
@@ -1528,10 +1530,10 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		//If graph is "large",
 		if (g.getNodeCount() > SIZE_THRESHOLD
 			|| GraphStatsManager.calcAvgDegree(g) > DEGREE_THRESHOLD) {
-			lll.add(new ForceDirectedLayout(GRAPH, false, true)); //Then run-once
+			lll.add(new AggForceDirectedLayout(GRAPH, false, true)); //Then run-once
 		} else {
 			lll.setDuration(ActionList.INFINITY);
-			lll.add(new ForceDirectedLayout(GRAPH));              //Else, continually animate
+			lll.add(new AggForceDirectedLayout(GRAPH));              //Else, continually animate
 		}
 
 
