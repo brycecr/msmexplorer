@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Pande Lab
+ * Copyright (C) 2012 Stanford University
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -24,6 +24,7 @@ import javax.swing.UIManager;
  * the application. This was built to replace the main class
  * in the MSMExplorer class, because for some reason the OSX
  * native Menu Bar name has to be set from a main loop before
+ * the main GUI thread starts.
  * 
  * @author brycecr
  */
