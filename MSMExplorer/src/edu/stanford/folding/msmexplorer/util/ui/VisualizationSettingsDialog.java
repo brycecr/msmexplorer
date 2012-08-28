@@ -19,6 +19,7 @@ package edu.stanford.folding.msmexplorer.util.ui;
 
 import edu.stanford.folding.msmexplorer.MSMConstants;
 import edu.stanford.folding.msmexplorer.MSMExplorer;
+import edu.stanford.folding.msmexplorer.util.AggForceDirectedLayout;
 import edu.stanford.folding.msmexplorer.util.FlexDataColorAction;
 import edu.stanford.folding.msmexplorer.util.render.SelfRefEdgeRenderer;
 import java.awt.Color;
@@ -737,6 +738,17 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			aggrEndColorButton.addActionListener( new PaletteColorButtonActionListener(f, aggrEndColorButton,
 				aggrColorAction, PaletteColorButtonActionListener.END, pr_presetPalettes));
 
+			ActionList lll = ((ActionList) m_vis.getAction("lll"));
+			final AggForceDirectedLayout afdl = ((AggForceDirectedLayout)lll.get(0));
+			
+			final JToggleButton aggrLayoutMode = new JToggleButton("Agg-Lump Layout", afdl.isAggLump());
+			aggrLayoutMode.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ae) {
+					afdl.setAggLump(aggrLayoutMode.isSelected());
+					m_vis.run("lll");
+				}
+			});
+
 			pr_presetPalettes.addActionListener( new ActionListener() {
 				public void actionPerformed(ActionEvent ae) {
 					int[] palette;
@@ -793,6 +805,10 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 			pr_Panel.add(aggrEndColorButton, c);
 			c.gridx = 2;
 			pr_Panel.add(pr_presetPalettes, c);
+			c.gridy = 2;
+			c.gridx = 0;
+			c.gridwidth = 2;
+			pr_Panel.add(aggrLayoutMode, c);
 			pr_Panel.setOpaque(false);
 		}
 

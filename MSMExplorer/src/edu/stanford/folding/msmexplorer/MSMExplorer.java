@@ -1425,7 +1425,9 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		
 		final Action aggLayout = new AggregateLayout(AGGR, m_vis);
 		m_vis.putAction("aggLayout", aggLayout);
-		((ActionList) m_vis.getAction("lll")).add(aggLayout);
+		ActionList lll = ((ActionList) m_vis.getAction("lll"));
+		lll.add(aggLayout);
+		((AggForceDirectedLayout)lll.get(0)).setAggLump(true);
 		m_vis.run("draw");
 		m_vis.run("aggLayout");
 		m_vis.run("lll");
@@ -1535,7 +1537,6 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			lll.setDuration(ActionList.INFINITY);
 			lll.add(new AggForceDirectedLayout(GRAPH));              //Else, continually animate
 		}
-
 
 		// finally, we register our ActionList with the Visualization.
 		// we can later execute our Actions by invoking a method on our
