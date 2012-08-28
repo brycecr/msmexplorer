@@ -26,6 +26,7 @@ import prefuse.visual.EdgeItem;
  * @author gestalt
  */
 public class AggForceDirectedLayout extends ForceDirectedLayout {
+	private boolean m_lump = false;
 
     /**
      * Create a new AggForceDirectedLayout. By default, this layout will not
@@ -54,16 +55,52 @@ public class AggForceDirectedLayout extends ForceDirectedLayout {
 	    super(group, enforceBounds, runonce);
     }
 
+    /**
+     * Set whether to treat edges between nodes in the same aggregate
+     * differently in order to separate aggregates from each-other by
+     * lumping their nodes together more tightly.
+     * 
+     * @param lump to lump or not to lump?
+     */
+    public void setAggLump(boolean lump) {
+	    m_lump = lump;
+    }
+
+
+    /**
+     * Returns whether aggregates will be lumped together
+     * by modifying the forces between nodes in the same mapping
+     * @return 
+     */
+    public boolean isAggLump() {
+	    return m_lump;
+    }
+
     @Override
     protected float getSpringCoefficient(EdgeItem e) {
-	    return multiplyIfSameMapping(e, 0, 2.f);
+	    if (m_lump) {
+		    return multiplyIfSameMapping(e, 0, 2.f);
+	    }
+	    return -1.f;
     }
 
     @Override
     protected float getSpringLength(EdgeItem e) {
-	    return multiplyIfSameMapping(e, 1, 0.4f);
+	    if (m_lump) {
+		    return multiplyIfSameMapping(e, 1, 0.4f);
+	    }
+	    return -1.f;
     }
 
+    /**
+     * We could decide here not to check the existence of a mapping column
+     * and just assume the user will behave itself...but it's the safe thing 
+     * to do,  I suppose.
+     * @param e
+     * @param param
+     * @param multiplier
+     * @return 
+     */
     private float multiplyIfSameMapping(EdgeItem e, int param, float multiplier) {
 	    ForceSimulator fsim = this.getForceSimulator();
 	    float val = fsim.getForces()[2].getParameter(param);
