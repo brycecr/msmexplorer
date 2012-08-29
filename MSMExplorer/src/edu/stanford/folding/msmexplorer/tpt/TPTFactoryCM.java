@@ -584,8 +584,26 @@ FIND_PATH:
 			new PriorityQueue< ArrayDeque<DijkstraEdge> >(kDEFAULT_PQUEUE_SIZE, new DPathComparator());
 		HashMap<Integer, Double> fixed = new HashMap<Integer, Double>();
 
+		int index;
 		ArrayList<Integer> target = getIndicies(m_target);
-		int index = getIndicies(m_source).get(0).intValue();
+		for (int i = 0; i < m_source.getTupleCount(); ++i) {
+			index = getIndicies(m_source).get(i).intValue();
+			
+			if (!fixed.containsKey(index)) {
+				fixed.put(index, getCost(path));
+				
+				//For each edge leaving from index
+				OpenMapRealMatrix outedges = (OpenMapRealMatrix)this.m_fFluxes.getRowMatrix(index);
+				DijkstraRowVisitor drv = new DijkstraRowVisitor();
+				drv.path = path;
+				drv.queue = queue;
+				drv.fixed = fixed;
+				drv.index = index;
+				outedges.walkInOptimizedOrder(drv);
+			}
+		}
+		path = queue.remove();
+		index = path.peekLast().col; 
 
 		while (!target.contains(index)) {
 			if (!fixed.containsKey(index)) {

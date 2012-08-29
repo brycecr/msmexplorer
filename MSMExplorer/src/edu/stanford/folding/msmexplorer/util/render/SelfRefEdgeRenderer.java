@@ -20,7 +20,7 @@ package edu.stanford.folding.msmexplorer.util.render;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
-import prefuse.data.Edge;
+import prefuse.render.AbstractShapeRenderer;
 import prefuse.render.EdgeRenderer;
 import prefuse.util.ColorLib;
 import prefuse.visual.VisualItem;
@@ -83,16 +83,19 @@ public class SelfRefEdgeRenderer extends EdgeRenderer {
 	/**
 	 * @see prefuse.render.Renderer#render(java.awt.Graphics2D, prefuse.visual.VisualItem)
 	 */
+	@Override
 	public void render(Graphics2D g, VisualItem item) {
 		// render the edge line
-		super.render(g, item);
+		Shape shape = getShape(item);
+		if (shape != null)
+			drawShape(g, item, shape);
 		// render the edge arrow head, if appropriate
 		if ( m_curArrow != null && !isSelfEdge(item)) {
 			g.setPaint(ColorLib.getColor(item.getFillColor()));
 			g.fill(m_curArrow);
 		}
 	}
-
+	
 	/**
 	 * Does not assume item is an edge; returns whether item is a self-edge.
 	 * 
