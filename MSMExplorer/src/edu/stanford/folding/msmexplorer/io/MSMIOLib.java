@@ -54,6 +54,9 @@ public class MSMIOLib {
 
 	private static final String DEFAULT_DIRECTORY = "";
 
+	/** It's kinda funky that this is static...but it's cool I guess */
+	private static final JFileChooser jfc = new JFileChooser();
+
 
 	private MSMIOLib() {
 		// disallow instantiation
@@ -233,7 +236,6 @@ public class MSMIOLib {
 	}
 
 	private static File getFileFromUser(Component c, String path, String title, ArrayList<FileFilter> filters) {
-		JFileChooser jfc = new JFileChooser(path);
 		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
 		jfc.setDialogTitle(title);
 		for (FileFilter ff : filters) {
@@ -271,7 +273,6 @@ public class MSMIOLib {
 	 * @return the opened graph, or null if no new graph successfully opened
 	 */
 	public static Graph getMSMFile(Component c, String path) {
-		JFileChooser jfc = new JFileChooser(path);
 		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
 		jfc.setDialogTitle("Open GraphML or MSM file");
 
@@ -370,7 +371,6 @@ public class MSMIOLib {
 	 * @return string of location at which file saved.
 	 */
 	public static String saveGML(Component c, String path, Graph g) {
-		JFileChooser jfc = new JFileChooser(path);
 		jfc.setDialogType(JFileChooser.SAVE_DIALOG);
 		jfc.setDialogTitle("Save MSM as GraphML");
 
