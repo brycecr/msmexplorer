@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import javax.swing.JOptionPane;
 import prefuse.data.Graph;
 import prefuse.data.Table;
 import prefuse.data.io.DataIOException;
@@ -82,19 +83,29 @@ public class MtxGraphReader extends AbstractMSMReader {
 				throw new DataIOException("Integer Parse Failure On: " + line);
 			}
 
+			boolean notify = false;
+
 			int edgeNum = 0;
 			while ((line = br.readLine()) != null) {
 				if (edgeNum >= m_edgeTable.getRowCount())
 					throw new DataIOException("More edges than specified");
 				String[] splits = line.split(" ");
 				try {
+					double prob = Double.parseDouble(splits[2]);
+					if (prob > 1.0 || prob < 0.0) {
+						notify = true;
+					}
 					m_edgeTable.set(edgeNum, 0, Integer.parseInt(splits[0])-1);
 					m_edgeTable.set(edgeNum, 1, Integer.parseInt(splits[1])-1);
-					m_edgeTable.set(edgeNum, 2, Double.parseDouble(splits[2]));
+					m_edgeTable.set(edgeNum, 2, prob);
 					edgeNum++;
 				} catch (NumberFormatException nfe) {
 					throw new DataIOException("Parse failure on: " + line, nfe);
 				}
+			}
+			if (notify) {
+				JOptionPane.showMessageDialog(null, "Some of your transition probabilities are not between 0 and 1..."
+					+ "\nIf that sounds wrong, check the graph you're loading.", "Wonky TProbs", JOptionPane.WARNING_MESSAGE);
 			}
 			return new Graph(m_nodeTable, m_edgeTable, true);
 		} catch (IOException ioex) {

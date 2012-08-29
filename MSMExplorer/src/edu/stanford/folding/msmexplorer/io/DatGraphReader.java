@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import javax.swing.JOptionPane;
 import prefuse.data.Graph;
 import prefuse.data.Table;
 import prefuse.data.io.DataIOException;
@@ -77,6 +78,7 @@ public class DatGraphReader extends AbstractMSMReader {
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			DoubleArrayParser dap = new DoubleArrayParser();
 
+			boolean notify = false;
 			String line = null;
 			int edgeId = 0;
 			int node = 0;
@@ -90,6 +92,10 @@ public class DatGraphReader extends AbstractMSMReader {
 							if (d[target] == 0.) 
 								continue;
 
+							if (d[target] > 1.0 || d[target] < 0.0) {
+								notify = true;
+							}
+
 							m_edgeTable.addRow();
 							m_edgeTable.set(edgeId, 0, node);
 							m_edgeTable.set(edgeId, 1, target);
@@ -101,6 +107,10 @@ public class DatGraphReader extends AbstractMSMReader {
 						throw new DataIOException("Double Parse Failure", dioe);
 					}
 				node++;
+			}
+			if (notify) {
+				JOptionPane.showMessageDialog(null, "Some of your transition probabilities are not between 0 and 1..."
+					+ "\nIf that sounds wrong, check the graph you're loading.", "Wonky TProbs", JOptionPane.WARNING_MESSAGE);
 			}
 			return new Graph(m_nodeTable, m_edgeTable, true);
 		} catch (Exception ex) {

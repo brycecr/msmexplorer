@@ -1722,7 +1722,6 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 				frame.dispose();
 				graphView(g, "label");
 			}
-
 		}
 	} 
 

@@ -60,9 +60,12 @@ import prefuse.action.EncoderAction;
 import prefuse.action.assignment.DataColorAction;
 import prefuse.action.assignment.DataShapeAction;
 import prefuse.action.assignment.DataSizeAction;
+import prefuse.action.filter.VisibilityFilter;
 import prefuse.data.Graph;
 import prefuse.data.Table;
 import prefuse.data.column.Column;
+import prefuse.data.expression.BooleanLiteral;
+import prefuse.data.expression.ColumnExpression;
 import prefuse.render.ImageFactory;
 import prefuse.render.LabelRenderer;
 import prefuse.render.PolygonRenderer;
@@ -113,6 +116,8 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 	private static final String[] SCALE_LABELS = {"Linear", "Log", "Square Root", "Quantile"};
 	private static final Integer[] SCALE_TYPES = {Constants.LINEAR_SCALE, Constants.LOG_SCALE,
 		Constants.SQRT_SCALE, Constants.QUANTILE_SCALE};
+
+	private Action filter = null;
 
 	public VisualizationSettingsDialog(final Frame f, Visualization vis, LabelRenderer lr, 
 					ShapeRenderer sr, SelfRefEdgeRenderer er, PolygonRenderer pr) {
@@ -311,6 +316,31 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				m_vis.repaint();
 			}
 		}); 
+		
+		final ActionList draw = (ActionList) m_vis.getAction("draw");
+		filter = null;
+		for (int i = 0; i < draw.size(); ++i) {
+			if (draw.get(i) instanceof VisibilityFilter) {
+				filter = draw.get(i);
+			}
+		}
+
+		final JToggleButton nodeFilterButton = new JToggleButton("Only TPT Visible", filter != null);
+		nodeFilterButton.addActionListener( new ActionListener() {
+			public void actionPerformed (ActionEvent ae) {
+				if (filter != null) {
+					draw.remove(filter);
+				}
+				VisibilityFilter vf = new VisibilityFilter(m_vis, GRAPH, new BooleanLiteral(true));
+				if (nodeFilterButton.isSelected()) {
+					 vf = new VisibilityFilter(m_vis, GRAPH, new ColumnExpression("inTPT"));
+				} 
+				draw.add(vf);
+				m_vis.run("draw");
+				m_vis.run("animate");
+				m_vis.repaint();
+			}
+		});
 
 		JPanel gen_node = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -362,6 +392,14 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		gen_nodeAction.add(endColorButton, c);
 		c.gridx = 3;
 		gen_nodeAction.add(presetPalettes, c);
+
+		if (((Graph)m_vis.getGroup(GRAPH)).getNodeTable().getColumnNumber("inTPT") >= 0) {
+			c.gridy = 4;
+			c.gridx = 1;
+			c.gridwidth = 2;
+			c.insets = new Insets(10,0,0,0);
+			gen_nodeAction.add(nodeFilterButton, c);
+		}
 
 		gen_node.setOpaque(false);
 		gen_nodeAction.setOpaque(false);
@@ -717,7 +755,6 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 
 
 			final JComboBox pr_presetPalettes = new JComboBox(PALETTE_LABELS);
-			ActionList draw = (ActionList)m_vis.getAction("draw");
 			final FlexDataColorAction aggrColorAction;
 			if (draw.get(draw.size() - 1) instanceof FlexDataColorAction) {
 				aggrColorAction = (FlexDataColorAction)draw.get(draw.size() - 1);
