@@ -174,7 +174,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 	private JFrame frame; //Graph view frame
 	
 	// where to look for images by default
-	private String imageLocation = "'./lib/images'";
+	private String imageLocation = "./lib/images";
 
 	// Hierarchy objects. We keep these as instance variables
 	// so that we can pass them to new MSMExplorer objects, because
