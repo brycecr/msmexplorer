@@ -328,7 +328,9 @@ public class MSMIOLib {
 	}
 
 	public static HierarchyBundle openMSMHierarchy(Component c) {
-		return openMSMHierarchy(c, DEFAULT_DIRECTORY);
+		String path = (jfc.getSelectedFile() != null) ? 
+			jfc.getSelectedFile().getAbsolutePath() : DEFAULT_DIRECTORY;
+		return openMSMHierarchy(c, path);
 	}
 
 	public static HierarchyBundle openMSMHierarchy(Component c, String path) {

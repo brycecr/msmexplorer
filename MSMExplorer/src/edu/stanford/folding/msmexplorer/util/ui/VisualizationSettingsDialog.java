@@ -412,7 +412,7 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		lr_Panel.setLayout(new GridLayout(0,2));
 		pane.addTab("Label", lr_Panel);
 
-		final JSpinner lr_Rounded = new JSpinner(new SpinnerNumberModel(8, 0, 1000, 1));
+		final JSpinner lr_Rounded = new JSpinner(new SpinnerNumberModel(8, 0, 1000000000, 1));
 		lr_Rounded.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent ce) {
 				m_lr.setRoundedCorner((Integer)lr_Rounded.getValue(), (Integer)lr_Rounded.getValue());
