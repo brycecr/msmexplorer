@@ -101,7 +101,7 @@ public class AggForceDirectedLayout extends ForceDirectedLayout {
      * @param multiplier
      * @return 
      */
-    private float multiplyIfSameMapping(EdgeItem e, int param, float multiplier) {
+    private synchronized float multiplyIfSameMapping(EdgeItem e, int param, float multiplier) {
 	    ForceSimulator fsim = this.getForceSimulator();
 	    float val = fsim.getForces()[2].getParameter(param);
 	    if (e.getSourceNode().getColumnIndex("mapping") >= 0) {

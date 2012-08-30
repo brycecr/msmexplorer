@@ -110,6 +110,7 @@ import prefuse.controls.PanControl;
 import prefuse.controls.WheelZoomControl;
 import prefuse.controls.ZoomControl;
 import prefuse.controls.ZoomToFitControl;
+import prefuse.data.CascadedTable;
 import prefuse.data.Graph;
 import prefuse.data.Node;
 import prefuse.data.Table;
@@ -273,6 +274,17 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		// boolean used to sacrifice fancy functionality for speed
 		// wheen dealing with big graphs.
 		boolean isBigGraph = (g.getNodeCount() > SIZE_THRESHOLD);
+		if (g.getNodeCount() > 2500) {
+			int ret = JOptionPane.showConfirmDialog(this, "Your graph is huge. MSMExplorer isn't designed to handle MSMs so large, "
+				+ "but it'll give it it's best shot. You can set memory parameters from the "
+				+ "command line with -Xmx and -Xms flags for java if you're trying to use an "
+				+ "unusual amount of memory. "
+				+ ""
+				+ "Do you want to continue?");
+			if (ret == JOptionPane.CANCEL_OPTION || ret == JOptionPane.NO_OPTION) {
+				System.exit(0);
+			}
+		}
 
 		// create a new, empty visualization for our data
 
@@ -1108,6 +1120,9 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					if (m_vis.getGroup(AGGR) != null) {
 						m_vis.getGroup(AGGR).clear();
 						m_vis.removeAction(AGGR);
+						for (int i = 0; i < nt.getRowCount(); ++i) {
+							g.getNodeTable().set(i, "mapping", i);
+						}
 					}
 					overSlider.setValue(overSlider.getMaximum());
 				} else if (top < hierarchy.graphs.length - 1) {
@@ -1683,11 +1698,12 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		}
 		
 		public void actionPerformed(ActionEvent ae) {
-			hierarchy = MSMIOLib.openMSMHierarchy(MSMExplorer.this);
-			if (hierarchy == null || hierarchy.graphs == null
-				|| hierarchy.mappings == null || hierarchy.graphs.length < 1) {
+			HierarchyBundle newHierarchy = MSMIOLib.openMSMHierarchy(MSMExplorer.this);
+			if (newHierarchy == null || newHierarchy.graphs == null
+				|| newHierarchy.mappings == null || newHierarchy.graphs.length < 1) {
 				return;
 			}
+			hierarchy = newHierarchy;
 			
 			//MSMExplorer.this.getImagePath();
 			MSMExplorer.this.frame.dispose();

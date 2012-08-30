@@ -145,7 +145,7 @@ public class TPTWindow extends JFrame {
 			gra.getNodeTable().addColumn("inTPT", boolean.class, false);
 			gra.getEdgeTable().addColumn("inTPT", boolean.class, false);
 			gra.addColumn("flux", double.class, 0.0d);
-			gra.getNodeTable().addColumn("TPT Distance", Integer.class);
+			gra.getNodeTable().addColumn("TPT Distance", int.class);
 		}
 
 		final TPTFactoryCM tptCalc = new TPTFactoryCM(gra, source, target);

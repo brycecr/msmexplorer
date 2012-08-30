@@ -58,6 +58,8 @@ public class HierarchyIOLib {
 	private static final String DEFAULT_DIRECTORY = "~/Documents";
 	private static final String MAPPING = "mapping";
 
+	protected static final JFileChooser jfc = new JFileChooser();
+
 	private HierarchyIOLib() {
 		//prevent instantiation
 	}
@@ -67,7 +69,6 @@ public class HierarchyIOLib {
 	}
 
 	public static HierarchyBundle openMSMHierarchy(Component c, String path) {
-		JFileChooser jfc = new JFileChooser(path);
 		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
 		jfc.setDialogTitle("Open Hierarchical MSM Directory");
 		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -87,7 +88,7 @@ public class HierarchyIOLib {
 				+ "properly formatted hierarchy", 
 				"Hierarchy Open Error", 
 				JOptionPane.ERROR_MESSAGE);
-			return new HierarchyBundle();
+			return null;
 		}
 
 		assert newNode.length > 0;

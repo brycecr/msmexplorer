@@ -41,7 +41,7 @@ import prefuse.Display;
  * 
  * Adapted from Luis Miguel Rodriguez's code 
  * on the Prefuse Sourceforge forums.
- * @author Luis Miguel Rodriguez with adaptations to MSMExplorer by brycecr
+ * @author Luis Miguel Rodriguez with adaptations to MSMExplorer from brycecr
  */
 public class SVGWriter {
 
