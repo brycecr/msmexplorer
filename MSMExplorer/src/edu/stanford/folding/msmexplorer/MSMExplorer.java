@@ -1120,13 +1120,9 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					if (m_vis.getGroup(AGGR) != null) {
 						m_vis.getGroup(AGGR).clear();
 						m_vis.removeAction(AGGR);
-						m_vis.removeGroup(AGGR);
-						m_vis.cancel("lll");
-						CascadedTable ct = (CascadedTable)m_vis.getVisualGroup(NODES);
-						ct.removeIndex("mapping");
-						g.getNodeTable().removeColumn("mapping");
-						axisFields.remove("mapping");
-						m_vis.run("lll");
+						for (int i = 0; i < nt.getRowCount(); ++i) {
+							g.getNodeTable().set(i, "mapping", i);
+						}
 					}
 					overSlider.setValue(overSlider.getMaximum());
 				} else if (top < hierarchy.graphs.length - 1) {
