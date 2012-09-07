@@ -668,6 +668,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 			public void actionPerformed(ActionEvent ae) {
 				JToggleButton tp = (JToggleButton) ae.getSource();
 				if (!tp.isSelected()) {
+					tr.setTextField(LABEL);
 					tr.setImageField(null);
 					((DataSizeAction) m_vis.getAction("nodeSize")).setMaximumSize(50.0);
 					m_vis.run("nodeSize");
