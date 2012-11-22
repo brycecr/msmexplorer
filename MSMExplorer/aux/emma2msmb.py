@@ -10,7 +10,7 @@ import sys
 args = sys.argv
 
 #NOTE: if your input is data.ascii
-#this will clobber data.converted.ascii
+#this will clobber data.converted.dat or data.converted.mtx
 if len(args) > 1:
 	args.pop(0)
 	for arg in args:
