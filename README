@@ -32,6 +32,8 @@ The branch acacia is the primary development branch for work in progress.
 If you want to mess around with writing Python for MSMExplorer via Jython, checkout out the kulkulkan branch (which should follow master in terms of Java code).
 Additionally, the indd file for the pdf REFERENCE_TUTORIAL is in another repository, github.com/brycecr/msmexplorer_doc
 
+It should be noted that while MSMExplorer is developed with MSMBuilder models in mind, a basic script is available in the "aux" folder for converting between EMMA and MSMBuilder files.
+
 NOTE: This program is currently an ALPHA release. Please forward all feature requests and bug reports to msmexplorer@gmail.com
 
 Requirements
