@@ -54,7 +54,7 @@ public class AxisRotateRenderer extends AxisRenderer {
 		if (item.getDOI() == 1.23456789) {
 			double width = item.getString(AxisLabelLabelLayout.LABEL).length()*item.getFont().getSize()/3.0;
 			AffineTransform at = AffineTransform.getQuadrantRotateInstance(-1, item.getX(), item.getY());
-			at.translate(width, -(2.0d*item.getFont().getSize() + 5));
+			at.translate(width, -(2.0d*item.getFont().getSize() + 15));
 			return at;
 		}		
 		return null;
