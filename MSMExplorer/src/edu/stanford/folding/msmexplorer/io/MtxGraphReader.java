@@ -45,7 +45,7 @@ public class MtxGraphReader extends AbstractMSMReader {
 		m_nodeTable.addColumn(LABEL, String.class, "0");
 		m_nodeTable.addColumn(EQPROB, double.class, 1);	
 
-		//initialize labels as row number, 1-indexed as per the .mtx convention.
+		//initialize labels as row number, 0-indexed as per gen usage convention
 		for (int i = 0; i < nodes;) {
 			m_nodeTable.setString(i, 0, Integer.toString(i++));
 		}
