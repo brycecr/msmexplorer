@@ -70,6 +70,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -567,16 +568,20 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 
 		// Button group to select which node Renderer to use
 		// (circle or rounded-rectangle label)
-		ButtonGroup nodeRenderers = new ButtonGroup();
+		final ButtonGroup nodeRenderers = new ButtonGroup();
 
 		m_vis.setValue(NODES, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
-		JRadioButton circleRB = new JRadioButton("Shape", false);
+		final JRadioButton circleRB = new JRadioButton("Shape", false);
 		circleRB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				JRadioButton circleRB = (JRadioButton) ae.getSource();
 				if (circleRB.isSelected()) {
-					DefaultRendererFactory drf = (DefaultRendererFactory)m_vis.getRendererFactory();
-					drf.setDefaultRenderer(sr);
+					if (tr.getImageField() != null) { //images showing
+						tr.setTextField(null);
+					} else {
+						DefaultRendererFactory drf = (DefaultRendererFactory)m_vis.getRendererFactory();
+						drf.setDefaultRenderer(sr);
+					}
 					m_vis.run("draw");
 				}
 			}
@@ -585,13 +590,14 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		circleRB.setOpaque(false);
 		nodeRenderers.add(circleRB);
 
-		JRadioButton labelRB = new JRadioButton("Label", false);
+		final JRadioButton labelRB = new JRadioButton("Label", false);
 		labelRB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				JRadioButton labelRB = (JRadioButton) ae.getSource();
 				if (labelRB.isSelected()) {
 					DefaultRendererFactory drf = (DefaultRendererFactory)m_vis.getRendererFactory();
 					drf.setDefaultRenderer(tr);
+					tr.setTextField(LABEL);
 					m_vis.run("draw");
 				}
 			}
@@ -667,12 +673,23 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 		togglePics.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
 				JToggleButton tp = (JToggleButton) ae.getSource();
+				ButtonModel selb = nodeRenderers.getSelection();
 				if (!tp.isSelected()) {
+					if (selb == circleRB.getModel()) { //Shape was selected, so go back to that.
+						DefaultRendererFactory drf = (DefaultRendererFactory)m_vis.getRendererFactory();
+						drf.setDefaultRenderer(sr);
+					} 
 					tr.setTextField(LABEL);
 					tr.setImageField(null);
 					((DataSizeAction) m_vis.getAction("nodeSize")).setMaximumSize(50.0);
 					m_vis.run("nodeSize");
 				} else {
+					if (selb == circleRB.getModel()) {
+						DefaultRendererFactory drf = (DefaultRendererFactory)m_vis.getRendererFactory();
+						drf.setDefaultRenderer(tr);
+						tr.setTextField(null);
+						nodeRenderers.setSelected(selb, false);
+					}
 					DataSizeAction nodeSize = (DataSizeAction)m_vis.getAction("nodeSize");
 					tr.setImageField("image");
 					nodeSize.setMaximumSize(1.0);
