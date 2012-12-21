@@ -47,7 +47,7 @@ public class MtxGraphReader extends AbstractMSMReader {
 
 		//initialize labels as row number, 1-indexed as per the .mtx convention.
 		for (int i = 0; i < nodes;) {
-			m_nodeTable.setString(i, 0, Integer.toString(++i));
+			m_nodeTable.setString(i, 0, Integer.toString(i++));
 		}
 
 		m_edgeTable = new Table(edges, 3);
