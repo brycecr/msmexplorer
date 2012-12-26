@@ -887,7 +887,7 @@ public class MSMExplorer extends JPanel implements MSMConstants {
 					((DefaultRendererFactory) m_vis.getRendererFactory()).add(
 						new OrPredicate(new InGroupPredicate("xlabels"),
 							new InGroupPredicate("ylabels")),
-						new AxisRotateRenderer(Constants.FAR_LEFT, Constants.FAR_BOTTOM));
+						new AxisRotateRenderer(Constants.LEFT, Constants.FAR_BOTTOM));
 					
 					Rectangle2D bounds = display.getItemBounds();
 					AxisLayout xaxis = new AxisLayout(NODES, (String)xAxisSelector.getSelectedItem(), Constants.X_AXIS, VisiblePredicate.TRUE);
