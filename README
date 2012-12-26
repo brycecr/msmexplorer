@@ -2,7 +2,7 @@
   |  \/  / __|  \/  | __|_ ___ __| |___ _ _ ___ _ _ 
   | |\/| \__ \ |\/| | _|\ \ / '_ \ / _ \ '_/ -_) '_|
   |_|  |_|___/_|  |_|___/_\_\ .__/_\___/_| \___|_|  
-                          |_|                     
+                            |_|                     
 
 *=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*
    *=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*=-*
@@ -17,7 +17,7 @@ A visualization module for MSMBuilder-generated Markov State Models for protein-
 
 Primary contact: msmexplorer@gmail.com
 
-Please report bugs, comments, and feature requests on MSMExplorer's smitk page, or email msmexplorer@gmail.com directly.
+Please report bugs, comments, and feature requests on MSMExplorer's SimTK page, or email msmexplorer@gmail.com directly.
 
 NOTE: The information contained herein is also explained in REFERENCE_TUTORIAL.pdf, which is recommended instead of this if you have the facility for opening it. A bit more detail is provided there.
 
