@@ -152,6 +152,9 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 		if (large < 1) {
 			large = 1;
 		}
+		if (small > large) {
+			small = large;
+		}
 		final JRangeSlider nodeSizeSlider = new JRangeSlider(1, 2000, 
 			small, large, JRangeSlider.HORIZONTAL);
 		nodeSizeSlider.addChangeListener( new ChangeListener() {
@@ -164,6 +167,9 @@ public class VisualizationSettingsDialog extends JDialog implements MSMConstants
 				if (highVal < 1) {
 					highVal = 1;
 
+				}
+				if (lowVal > highVal) {
+					highVal=lowVal;
 				}
 
 				if (m_lr.getImageField() == null) {
