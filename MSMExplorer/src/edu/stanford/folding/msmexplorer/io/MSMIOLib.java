@@ -118,8 +118,15 @@ public class MSMIOLib {
 		if (!checkApplyFileParams(c, g, name)) {
 			return null;
 		}
+
+		ArrayList<FileFilter> filters = new ArrayList<FileFilter>();
+		SimpleFileFilter ff1 = new SimpleFileFilter("dat",
+			"newline delim file (*.dat, *.txt)",
+			null);
+		ff1.addExtension("txt");
+		filters.add(ff1);
 		
-		File f = getFileFromUser(c, path, "Open newline delimited file...", new ArrayList<FileFilter>());
+		File f = getFileFromUser(c, path, "Open newline delimited file...", filters);
 		if (f == null) {
 			return null;
 		}
@@ -155,6 +162,7 @@ public class MSMIOLib {
 	}
 
 	public static String applyMatrixFile(Component c, String path, TupleSet g, String name, Class<?> cls) {
+
 
 		if (!checkApplyFileParams(c, g, name)) {
 			return null;
@@ -236,6 +244,8 @@ public class MSMIOLib {
 	}
 
 	private static File getFileFromUser(Component c, String path, String title, ArrayList<FileFilter> filters) {
+		jfc.resetChoosableFileFilters();
+
 		jfc.setDialogType(JFileChooser.OPEN_DIALOG);
 		jfc.setDialogTitle(title);
 		for (FileFilter ff : filters) {
