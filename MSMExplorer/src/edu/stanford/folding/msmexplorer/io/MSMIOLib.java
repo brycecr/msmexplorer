@@ -205,7 +205,11 @@ public class MSMIOLib {
 			return null;
 		}
 
-		g.addColumn(name, cls);
+		try {
+			g.addColumn(name, cls);
+		} catch (Exception ex) {
+			Logger.getLogger(MSMIOLib.class.getName()).log(Level.WARNING, null, ex);
+		}
 
 		int tRows = t.getRowCount();
 		int tCols = t.getColumnCount();
