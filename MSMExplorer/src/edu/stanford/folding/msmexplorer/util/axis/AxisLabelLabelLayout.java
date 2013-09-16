@@ -39,6 +39,7 @@ public class AxisLabelLabelLayout extends AxisLabelLayout {
 		protected JLabel label = new JLabel();
 		protected JLabel gridLab = new JLabel();
 		protected String str = "";
+		protected boolean showBorder = true;
 		
 		public AxisLabelLabelLayout(String group, int axis, ValuedRangeModel values) {
 				super(group, axis, values);
@@ -99,6 +100,33 @@ public class AxisLabelLabelLayout extends AxisLabelLayout {
 					width = 0;
 			}
 			setLabPos(item, length/2.0d + width, bounds);
+
+			if (this.showBorder) {
+				VisualItem border = labels.addItem();
+				border.setVisible(true);
+				border.set(LABEL, "");
+				setBorderBounds(border, bounds);
+			}
+		}
+
+		/**
+		 *	Set the layout values for a border
+		 */
+		protected void setBorderBounds(VisualItem item, Rectangle2D b) { 
+			switch (getAxis()) {
+				case Constants.Y_AXIS:
+					PrefuseLib.updateDouble(item, VisualItem.X, b.getMinX()); 
+					PrefuseLib.updateDouble(item, VisualItem.Y, b.getMaxY());
+					PrefuseLib.updateDouble(item, VisualItem.X2, b.getMinX());
+					PrefuseLib.updateDouble(item, VisualItem.Y2, b.getMinY());
+					break;
+				case Constants.X_AXIS:
+					PrefuseLib.updateDouble(item, VisualItem.X, b.getMinX()); 
+					PrefuseLib.updateDouble(item, VisualItem.Y, b.getMinY());
+					PrefuseLib.updateDouble(item, VisualItem.X2, b.getMaxX());
+					PrefuseLib.updateDouble(item, VisualItem.Y2, b.getMinY());
+					break;
+			}
 		}
 		
 		/**
