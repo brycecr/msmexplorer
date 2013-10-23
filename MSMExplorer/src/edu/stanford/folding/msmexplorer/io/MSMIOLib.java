@@ -34,6 +34,7 @@ import javax.swing.filechooser.FileFilter;
 import prefuse.data.Graph;
 import prefuse.data.Table;
 import prefuse.data.Tuple;
+import prefuse.data.io.CSVTableWriter;
 import prefuse.data.io.DataIOException;
 import prefuse.data.io.DelimitedTextTableReader;
 import prefuse.data.io.GraphMLReader;
@@ -419,6 +420,43 @@ public class MSMIOLib {
 
 		return loc;
 
+	}
+
+	public static String saveCSV(Table t) {
+		return saveCSV(null, DEFAULT_DIRECTORY, t);
+	}
+
+	/**
+	 * Saves the relevant table
+	 */
+	public static String saveCSV(Component c, String path, Table t) {
+		jfc.setDialogType(JFileChooser.SAVE_DIALOG);
+		jfc.setDialogTitle("Save Table as CSV");
+
+		SimpleFileFilter ff = new SimpleFileFilter("csv", "CSV File(*.csv)");
+
+		jfc.setFileFilter(ff);
+
+		int opt = jfc.showSaveDialog(c);
+		if (opt != JFileChooser.APPROVE_OPTION) {
+			return null;
+		}
+
+		String loc = jfc.getSelectedFile().getAbsolutePath();
+		int pos = -1;
+		//XXX what is this??
+		if (!loc.matches(".*\056csv")) {
+			loc += ".csv";
+		}
+
+		CSVTableWriter writer = new CSVTableWriter();
+		try {
+			writer.writeTable(t, loc);
+		} catch (DataIOException ex) {
+			Logger.getLogger(MSMIOLib.class.getName()).log(Level.SEVERE, null, ex);
+		}
+
+		return loc;
 	}
 
 	
