@@ -293,6 +293,7 @@ public class TPTFactoryCM {
 	private OpenMapRealMatrix getFluxes( double[] fCommittors, double[] bCommittors, double[] eqProbs ) {
 
 		OpenMapRealMatrix fFluxes = new OpenMapRealMatrix(kMatSize,kMatSize);
+		OpenMapRealMatrix nFluxes = new OpenMapRealMatrix(kMatSize,kMatSize);
 
 		for ( int i = 0; i < kMatSize; ++i)
 			for (int j = 0; j < kMatSize; ++j)
@@ -303,12 +304,12 @@ public class TPTFactoryCM {
 			for( int j = 0; j < kMatSize; ++j ) {
 				double netFlux = fFluxes.getEntry(i, j) - fFluxes.getEntry(j, i);
 				if (netFlux < 0.0)
-					fFluxes.setEntry(i,j,0.0d);
+					nFluxes.setEntry(i,j,0.0d);
 				else
-					fFluxes.setEntry(i, j, netFlux);
+					nFluxes.setEntry(i, j, netFlux);
 			}
 
-		return fFluxes;
+		return nFluxes;
 	}
 
 	/**
